@@ -1,0 +1,13 @@
+
+> riichi-frontend@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 D:/Riichi/frontend
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  10:08:35
+   Duration  242ms (transform 38ms, setup 0ms, import 52ms, tests 27ms, environment 0ms)
+

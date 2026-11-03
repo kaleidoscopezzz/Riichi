@@ -1,0 +1,13 @@
+Command: npm ci
+Working directory: D:\Riichi\frontend
+Recorded from the successful tool execution earlier in this task, before the dev server started.
+This is a transcript of that run, not a new npm ci invocation.
+The package manifest and lockfile have not changed since this run.
+Exit code: 0
+
+added 155 packages, and audited 162 packages in 10s
+
+24 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities

@@ -1,0 +1,7 @@
+PASS repository root D:/Riichi, main branch and expected origin. Remote main absent.
+PASS original 68 source/documentation SHA-256 matched before submission-only documentation updates.
+Initial credential URL scan flagged backend/.env.example:13; manual review confirmed exact USERNAME:PASSWORD@HOST placeholder, not a real credential. Only that exact example line was excluded on rescan.
+PASS final targeted private-key/token/password/credential-URL scan of all Git-visible text files.
+PASS no environment secrets, databases, runtimes, dependencies, caches or build outputs in candidate paths.
+PASS git check-ignore --no-index exclusion checks.
+Targeted checks do not guarantee exhaustive detection of every secret format.

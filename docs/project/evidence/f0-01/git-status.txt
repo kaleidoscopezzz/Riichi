@@ -1,0 +1,11 @@
+## No commits yet on main
+?? .editorconfig
+?? .gitattributes
+?? .gitignore
+?? AGENTS.md
+?? README.md
+?? backend/
+?? docs/
+?? frontend/
+origin	https://github.com/kaleidoscopezzz/Riichi.git (fetch)
+origin	https://github.com/kaleidoscopezzz/Riichi.git (push)

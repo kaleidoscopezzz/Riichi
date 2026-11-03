@@ -1,0 +1,112 @@
+- link "跳转到主要内容":
+  - /url: "#main-content"
+- complementary:
+  - link "Riichi 首页":
+    - /url: /dashboard
+    - generic: R
+    - text: riichi
+    - generic: TOURNAMENT SYSTEM
+  - generic: 工作空间
+  - navigation "主导航":
+    - link "仪表盘":
+      - /url: /dashboard
+      - generic: 仪表盘
+    - link "赛事管理":
+      - /url: /tournaments
+      - generic: 赛事管理
+    - link "选手管理":
+      - /url: /players
+      - generic: 选手管理
+    - link "麻将机管理":
+      - /url: /machines
+      - generic: 麻将机管理
+    - link "系统设置":
+      - /url: /settings
+      - generic: 系统设置
+  - paragraph: 从容组织，专注对局
+  - text: 为立直麻将赛事而设计
+  - text: RIICHI PREMIUM
+  - generic: V1.0
+- banner:
+  - navigation "breadcrumb":
+    - list:
+      - link "工作空间":
+        - /url: /dashboard
+      - link "仪表盘" [disabled]
+  - generic: 服务已连接
+  - button "切换为亮色主题":
+  - generic "Riichi 工作空间": 立
+- main:
+  - generic: YOUR TOURNAMENT WORKSPACE
+  - heading "仪表盘" [level=1]
+  - paragraph: 工作台概览
+  - generic: 个人赛 · V1.0
+  - text: RIICHI PREMIUM
+  - heading "让每一场对局， 井然有序。" [level=2]:
+    - text: 让每一场对局，
+    - text: 井然有序。
+  - paragraph:
+    - text: 从第一轮落座，到最终冠军揭晓。
+    - text: 一个专注个人赛事的立直麻将管理工作空间。
+  - link "进入赛事管理":
+    - /url: /tournaments
+    - text: 进入赛事管理
+  - link "查看系统信息":
+    - /url: /settings
+    - text: 查看系统信息
+  - generic: 基础工作空间已就绪，赛事功能将逐步开放
+  - generic: 立直
+  - generic: RIICHI
+  - generic: FOUR PLAYERS. ONE CHAMPION.
+  - generic: +
+  - generic: +
+  - region "一切，从这里开始":
+    - generic: QUICK ACCESS
+    - heading "一切，从这里开始" [level=2]
+    - generic: 赛事管理的每个环节，都有条不紊
+    - link "赛事管理 组织个人赛事，串联每一轮对局 功能准备中":
+      - /url: /tournaments
+      - heading "赛事管理" [level=3]
+      - paragraph: 组织个人赛事，串联每一轮对局
+      - generic: 功能准备中
+    - link "选手管理 管理参赛选手，汇聚同场竞技者 功能准备中":
+      - /url: /players
+      - heading "选手管理" [level=3]
+      - paragraph: 管理参赛选手，汇聚同场竞技者
+      - generic: 功能准备中
+    - link "麻将机管理 统一设备编号，让每张牌桌各就其位 功能准备中":
+      - /url: /machines
+      - heading "麻将机管理" [level=3]
+      - paragraph: 统一设备编号，让每张牌桌各就其位
+      - generic: 功能准备中
+  - region "后端连接状态":
+    - generic: SYSTEM STATUS
+    - heading "系统运行状态" [level=2]
+    - button "重新检查":
+      - text: 重新检查
+    - status:
+      - heading "后端连接正常" [level=3]
+      - paragraph: 后端服务运行正常
+      - generic: 正常
+    - term: API 服务
+    - definition: Django REST Framework
+    - term: 接口版本
+    - definition: v1
+    - term: 最近检查
+    - definition: 09:48:38
+    - generic: 仅验证服务存活，不检查数据库就绪。
+  - generic: BUILT FOR RIICHI
+  - heading "专注赛事，稳步前行" [level=2]
+  - paragraph: 当前为工程基础阶段。我们先把体验与连接准备好，再逐步构建完整的赛事流程。
+  - heading "基础工作空间" [level=3]
+  - paragraph: 统一界面 · 页面导航 · 服务连接
+  - generic: 当前阶段
+  - heading "个人赛事管理" [level=3]
+  - paragraph: 账号与选手 · 分桌 · 计分与排名
+  - generic: 后续规划
+  - generic: 四人立直麻将 · 仅个人赛
+  - link "查看系统设置":
+    - /url: /settings
+- contentinfo:
+  - generic: RIICHI·让对局回归精彩
+  - generic: Foundation 01/工程基础阶段

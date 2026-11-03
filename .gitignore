@@ -1,0 +1,52 @@
+# Project-local runtimes and dependency caches
+.tools/
+.cache/
+.venv/
+venv/
+.python/
+node_modules/
+.npm-cache/
+
+# Python generated files
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.verification/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local configuration and secrets; examples remain versioned
+.env
+.env.*
+!.env.example
+
+# Development databases and sidecar files
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.sqlite3-journal
+*.sqlite-wal
+*.sqlite3-wal
+*.sqlite-shm
+*.sqlite3-shm
+
+# Frontend generated output and test artifacts
+dist/
+build/
+coverage/
+*.tsbuildinfo
+playwright-report/
+test-results/
+backend/staticfiles/
+
+# Tooling and local logs (intentional evidence under docs remains visible)
+*.log
+!docs/**/*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

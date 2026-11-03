@@ -1,0 +1,22 @@
+PASS ignored: backend/.venv/pyvenv.cfg
+PASS ignored: frontend/node_modules/react/package.json
+PASS ignored: frontend/dist/index.html
+PASS ignored: backend/.env
+PASS ignored: backend/.env.local
+PASS ignored: frontend/.env.production
+PASS ignored: backend/db.sqlite3
+PASS ignored: backend/db.sqlite3-journal
+PASS ignored: backend/db.sqlite3-wal
+PASS ignored: backend/db.sqlite3-shm
+PASS ignored: .tools/python/python.exe
+PASS ignored: backend/__pycache__/settings.pyc
+PASS ignored: frontend/coverage/index.html
+PASS ignored: backend/staticfiles/test.css
+PASS ignored: frontend/.verification/frontend-tests.log
+PASS retained: backend/.env.example
+PASS retained: frontend/.env.example
+PASS retained: frontend/package-lock.json
+PASS retained: backend/requirements.txt
+PASS retained: docs/project/F0-01-verification.md
+PASS retained: docs/project/evidence/f0-01/check.log
+PASS main; no HEAD commit, no tags, no staged files.

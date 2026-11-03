@@ -1,0 +1,35 @@
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+Found 15 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: common, corsheaders, rest_framework, staticfiles
+  Apply all migrations: contenttypes
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+test_head_has_no_body (common.tests.HealthTests.test_head_has_no_body) ... ok
+test_health_contract_without_database_access (common.tests.HealthTests.test_health_contract_without_database_access) ... ok
+test_health_is_read_only (common.tests.HealthTests.test_health_is_read_only) ... ok
+test_local_frontend_cors (common.tests.HealthTests.test_local_frontend_cors) ... ok
+test_preflight (common.tests.HealthTests.test_preflight) ... ok
+test_untrusted_host_rejected (common.tests.HealthTests.test_untrusted_host_rejected) ... ok
+test_untrusted_origin_has_no_cors_access (common.tests.HealthTests.test_untrusted_origin_has_no_cors_access) ... ok
+test_debug_rejected (config.tests.ProductionConfigurationTests.test_debug_rejected) ... ok
+test_explicit_secure_configuration_imports (config.tests.ProductionConfigurationTests.test_explicit_secure_configuration_imports) ... ok
+test_missing_hosts_rejected (config.tests.ProductionConfigurationTests.test_missing_hosts_rejected) ... ok
+test_missing_or_weak_secret_rejected (config.tests.ProductionConfigurationTests.test_missing_or_weak_secret_rejected) ... ok
+test_plain_http_cors_rejected (config.tests.ProductionConfigurationTests.test_plain_http_cors_rejected) ... ok
+test_sqlite_rejected (config.tests.ProductionConfigurationTests.test_sqlite_rejected) ... ok
+test_wildcard_cors_rejected (config.tests.ProductionConfigurationTests.test_wildcard_cors_rejected) ... ok
+test_wildcard_hosts_rejected (config.tests.ProductionConfigurationTests.test_wildcard_hosts_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 1.508s
+
+OK
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+  Applying contenttypes.0002_remove_content_type_name... OK
+System check identified no issues (0 silenced).

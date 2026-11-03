@@ -1,0 +1,4 @@
+GET http://127.0.0.1:5173/ => 200
+GET http://127.0.0.1:5173/api/v1/health/ => 200
+Body: {"status":"ok","service":"riichi-api","api_version":"v1"}
+PASS Vite proxy forwards the real Django health response.
