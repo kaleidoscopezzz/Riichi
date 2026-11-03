@@ -1,0 +1,189 @@
+- link "跳转到主要内容":
+  - /url: "#main-content"
+- complementary:
+  - link "Riichi 首页":
+    - /url: /dashboard
+    - generic: R
+    - text: riichi
+    - generic: TOURNAMENT SYSTEM
+  - generic: 工作空间
+  - navigation "主导航":
+    - link "仪表盘":
+      - /url: /dashboard
+      - generic: 仪表盘
+    - link "赛事管理":
+      - /url: /tournaments
+      - generic: 赛事管理
+    - link "选手管理":
+      - /url: /players
+      - generic: 选手管理
+    - link "麻将机管理":
+      - /url: /machines
+      - generic: 麻将机管理
+    - link "系统设置":
+      - /url: /settings
+      - generic: 系统设置
+    - link "个人资料":
+      - /url: /profile
+      - generic: 个人资料
+  - paragraph: 从容组织，专注对局
+  - text: 为立直麻将赛事而设计
+  - text: RIICHI PREMIUM
+  - generic: V1.0
+- banner:
+  - navigation "breadcrumb":
+    - list:
+      - link "工作空间":
+        - /url: /dashboard
+      - link "麻将机管理" [disabled]
+  - generic: 服务已连接
+  - button "切换为亮色主题" [active]:
+  - link "我的个人资料":
+    - /url: /profile
+    - text: f003_admin_249a9a84
+  - button "退出"
+- main:
+  - generic: RIICHI WORKSPACE
+  - heading "麻将机管理" [level=1]
+  - paragraph: 有序安排比赛设备
+  - generic: 个人赛 · V1.0
+  - generic: PHYSICAL RESOURCES / 设备资源
+  - heading "每一台设备，都有清晰的归属。" [level=2]
+  - paragraph: 维护物理设备台账，为下一场对局做好准备。
+  - button "新建设备" [disabled]:
+    - text: 新建设备
+  - generic: 现役设备
+  - paragraph: 4 / 4 台
+  - generic: 维护中与停用设备同样占用容量
+  - generic: 当前可用
+  - paragraph: "2"
+  - generic: 设备可用，不代表当前未被占用
+  - generic: 维护中
+  - paragraph: "1"
+  - generic: 检修完成后可恢复为可用
+  - generic: 停用
+  - paragraph: "1"
+  - generic: 可随时通过编辑恢复为可用
+  - status:
+    - strong: 现役容量已满
+    - paragraph: 当前已管理 4 台现役设备。退役一台后，可新增替代设备。
+  - generic: MACHINE DIRECTORY
+  - heading "设备台账" [level=2]
+  - button "刷新列表":
+    - text: 刷新列表
+  - generic: 搜索设备编号或名称
+  - textbox "搜索设备编号或名称"
+  - button "搜索"
+  - text: 状态筛选
+  - combobox "状态筛选":
+    - option "全部状态" [selected]
+    - option "可用"
+    - option "维护中"
+    - option "停用"
+    - option "已退役"
+  - table "设备列表":
+    - row "编号 / 设备名称 位置 状态 更新时间 管理操作":
+      - columnheader "编号 / 设备名称"
+      - columnheader "位置"
+      - columnheader "状态"
+      - columnheader "更新时间"
+      - columnheader "管理操作"
+    - row "008 浏览器新增验证设备 物理设备 · ID 6 维护验证区 已退役 11/03 11:11 查看设备 008 详情":
+      - cell "008 浏览器新增验证设备 物理设备 · ID 6":
+        - generic: "008"
+        - strong: 浏览器新增验证设备
+        - generic: 物理设备 · ID 6
+      - cell "维护验证区"
+      - cell "已退役":
+        - generic: 已退役
+      - cell "11/03 11:11"
+      - cell "查看设备 008 详情":
+        - button "查看设备 008 详情":
+          - text: 详情
+    - row "009 补充物理设备验证 物理设备 · ID 7 独立验证区 维护中 11/03 11:11 查看设备 009 详情 编辑设备 009 退役设备 009":
+      - cell "009 补充物理设备验证 物理设备 · ID 7":
+        - generic: "009"
+        - strong: 补充物理设备验证
+        - generic: 物理设备 · ID 7
+      - cell "独立验证区"
+      - cell "维护中":
+        - generic: 维护中
+      - cell "11/03 11:11"
+      - cell "查看设备 009 详情 编辑设备 009 退役设备 009":
+        - button "查看设备 009 详情":
+          - text: 详情
+        - button "编辑设备 009": 编辑
+        - button "退役设备 009": 退役
+    - row "101 并发验证设备 1 物理设备 · ID 3 独立验证环境 已退役 11/03 11:09 查看设备 101 详情":
+      - cell "101 并发验证设备 1 物理设备 · ID 3":
+        - generic: "101"
+        - strong: 并发验证设备 1
+        - generic: 物理设备 · ID 3
+      - cell "独立验证环境"
+      - cell "已退役":
+        - generic: 已退役
+      - cell "11/03 11:09"
+      - cell "查看设备 101 详情":
+        - button "查看设备 101 详情":
+          - text: 详情
+    - row "101 替代物理设备验证 物理设备 · ID 5 未填写位置 已退役 11/03 11:09 查看设备 101 详情":
+      - cell "101 替代物理设备验证 物理设备 · ID 5":
+        - generic: "101"
+        - strong: 替代物理设备验证
+        - generic: 物理设备 · ID 5
+      - cell "未填写位置"
+      - cell "已退役":
+        - generic: 已退役
+      - cell "11/03 11:09"
+      - cell "查看设备 101 详情":
+        - button "查看设备 101 详情":
+          - text: 详情
+    - row "103 并发验证设备 3 物理设备 · ID 2 独立验证环境 停用 11/03 11:11 查看设备 103 详情 编辑设备 103 退役设备 103":
+      - cell "103 并发验证设备 3 物理设备 · ID 2":
+        - generic: "103"
+        - strong: 并发验证设备 3
+        - generic: 物理设备 · ID 2
+      - cell "独立验证环境"
+      - cell "停用":
+        - generic: 停用
+      - cell "11/03 11:11"
+      - cell "查看设备 103 详情 编辑设备 103 退役设备 103":
+        - button "查看设备 103 详情":
+          - text: 详情
+        - button "编辑设备 103": 编辑
+        - button "退役设备 103": 退役
+    - row "104 并发验证设备 4 物理设备 · ID 1 独立验证环境 可用 11/03 11:09 查看设备 104 详情 编辑设备 104 退役设备 104":
+      - cell "104 并发验证设备 4 物理设备 · ID 1":
+        - generic: "104"
+        - strong: 并发验证设备 4
+        - generic: 物理设备 · ID 1
+      - cell "独立验证环境"
+      - cell "可用":
+        - generic: 可用
+      - cell "11/03 11:09"
+      - cell "查看设备 104 详情 编辑设备 104 退役设备 104":
+        - button "查看设备 104 详情":
+          - text: 详情
+        - button "编辑设备 104": 编辑
+        - button "退役设备 104": 退役
+    - row "105 并发验证设备 5 物理设备 · ID 4 独立验证环境 可用 11/03 11:09 查看设备 105 详情 编辑设备 105 退役设备 105":
+      - cell "105 并发验证设备 5 物理设备 · ID 4":
+        - generic: "105"
+        - strong: 并发验证设备 5
+        - generic: 物理设备 · ID 4
+      - cell "独立验证环境"
+      - cell "可用":
+        - generic: 可用
+      - cell "11/03 11:09"
+      - cell "查看设备 105 详情 编辑设备 105 退役设备 105":
+        - button "查看设备 105 详情":
+          - text: 详情
+        - button "编辑设备 105": 编辑
+        - button "退役设备 105": 退役
+  - generic: 共 7 条记录 · 第 1 页
+  - button "上一页" [disabled]
+  - button "下一页" [disabled]
+  - paragraph: 已退役设备保留历史档案。设备编号用于识别，设备可用状态与赛事占用无关。
+- contentinfo:
+  - generic: RIICHI·让对局回归精彩
+  - generic: Foundation 03/麻将机资源管理

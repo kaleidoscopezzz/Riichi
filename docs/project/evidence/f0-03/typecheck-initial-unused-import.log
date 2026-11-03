@@ -1,0 +1,5 @@
+
+> riichi-frontend@0.1.0 typecheck
+> tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json
+
+src/pages/machines.test.tsx(3,19): error TS6133: 'fireEvent' is declared but its value is never read.

@@ -4,9 +4,9 @@
 
 Riichi 是前后端分离、模块化单体的 Web 四人立直麻将赛事管理系统。产品范围以 `docs/requirements.md` 为准；Developer 实现 Planner 明确下发的任务，测试和自检不能替代 Planner 的外部验收。
 
-当前任务为 **F0-02 用户账号与选手档案**。仅实现注册、Session 登录退出、个人昵称管理及管理员选手查询。账号身份与选手档案一对一分离，未来赛事通过档案引用；不得实现赛事、设备实体、分桌、计分、微信绑定、团队赛或预先实现 Tournament。
+当前任务为 **F0-03 麻将机资源管理**。仅建设管理员设备台账、状态维护及退役；不得实现 Tournament、分桌、计分、设备实时占用调度、微信或团队赛，不得无关重构账号与选手模块。
 
-F0-01 正式基线：`baseline/F0-01`，Commit `94a1fec747806682602dd24f7edbbcc4e27d07f0`。不得删除或移动该基线。自检不能替代 Planner 验收。
+F0-01 已验收，基线 baseline/F0-01；F0-02 已正式验收，当前基线 `baseline/F0-02`，Commit `59be947ca133dbe18a63dcdc99e55a3243daed51`，分支 main。不得修改、移动或删除已有基线 Tag。Developer 自检不能替代 Planner 验收。
 
 ## 技术与目录边界
 
@@ -39,10 +39,10 @@ F0-01 正式基线：`baseline/F0-01`，Commit `94a1fec747806682602dd24f7edbbcc4
 
 ## Git 与交付限制
 
-- F0-02 保持当前 `main`，只进行工程实现和验证。**不得自行执行 `git commit`、`git tag`、`git push`。**
+- F0-03 保持当前 `main`，只进行工程实现和验证。**不得自行执行 `git commit`、`git tag`、`git push`。**
 - 不修改远程仓库配置，不重写历史，不删除已有文件，不执行破坏性 Git 操作。
 - 可以执行 `git status`、`git diff`、`git check-ignore` 等只读检查。
-- 本阶段不执行 commit、tag、push，Git 由项目 Owner 手动操作，Planner 负责验收与双基线核验。F0-01 已建立正式基线，F0-02 尚待验收。详见 `docs/project/baselines.md`。
+- 本阶段不执行 commit、tag、push，Git 由项目 Owner 手动操作，Planner 负责验收与双基线核验。F0-01、F0-02 已建立正式基线，F0-03 尚待验收。详见 `docs/project/baselines.md`。
 - 最终报告须列出工程文件、API、界面、启动方法、实际验证、Git 状态、已知问题和自检结论。完成后停止本阶段开发，等待 Planner 验收。
 
 ## F0-02 账号安全与迁移
@@ -54,3 +54,13 @@ F0-01 正式基线：`baseline/F0-01`，Commit `94a1fec747806682602dd24f7edbbcc4
 - 改迁移前先查现有迁移图和数据库，禁止删除数据库、fake 或破坏性重置。兼容异常应停止报告。
 - 测试包括事务回滚、唯一约束、权限及真实 enforce_csrf_checks，前端表单/恢复/守卫/角色菜单；联调使用独立测试数据库，不把验证账号作为展示数据。
 - 公网上线前另行实现登录限流等加固；F0-02 不实现找回密码、外部认证或微信能力。
+
+## F0-03 设备约束
+
+- MahjongMachine.id 为稳定 machineId，machine_no 为三位数字业务编号；未来赛事以 FK 引用 id，不能按名称或编号关联历史实体。
+- available、maintenance、disabled 均占现役容量，最多4台；retired 释放容量但保留原始ID和资料，是普通API不能恢复或编辑的终态。没有物理删除API。
+- 数据库使用1～4唯一容量槽与状态/槽位CHECK约束兜底；现役编号使用条件唯一约束。不能仅使用count再insert或仅依赖SQLite不支持的行锁来承诺并发安全。
+- 非退役状态可相互调整，退役仅通过专用POST并经前端确认。available仅说明设备状态，不说明赛事空闲或占用。
+- 全部设备接口使用现有SessionAuthentication、IsAdminUser与CSRF规则，普通用户/匿名不得读写，内部容量槽不能由请求指定。
+- 必须测试数据库约束、并发容量、状态终态、权限、CSRF及原有回归；区分SQLite内存测试、文件测试和未验证的PostgreSQL。
+- 所有验证数据和凭据仅放项目内被忽略的独立QA数据库/目录，不把验证设备作为生产演示数据。

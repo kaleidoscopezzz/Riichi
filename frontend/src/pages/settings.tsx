@@ -63,7 +63,7 @@ export function SettingsPage() {
           </div>
           <div>
             <dt>当前阶段</dt>
-            <dd>F0-02 账号与选手档案</dd>
+            <dd>F0-03 麻将机资源管理</dd>
           </div>
           <div>
             <dt>服务接口</dt>

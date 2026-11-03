@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "common.apps.CommonConfig",
     "accounts.apps.AccountsConfig",
     "players.apps.PlayersConfig",
+    "machines.apps.MachinesConfig",
 ]
 MIDDLEWARE = [
     "common.middleware.ApiErrorMiddleware",

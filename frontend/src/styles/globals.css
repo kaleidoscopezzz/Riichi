@@ -2266,3 +2266,501 @@ a:focus-visible {
     font-size: 16px;
   }
 }
+
+/* F0-03 resource workspace */
+.machine-workspace {
+  display: grid;
+  gap: 24px;
+}
+.machine-overview {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+  padding: 26px 30px;
+  border: 1px solid var(--border);
+  background: var(--hero);
+  border-radius: 12px;
+}
+.machine-overview h2 {
+  font-size: 24px;
+  line-height: 1.6;
+  font-weight: 500;
+  margin: 12px 0 6px;
+}
+.machine-overview p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+.machine-overview button {
+  min-height: 44px;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.machine-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.machine-stat {
+  padding: 22px;
+  gap: 12px;
+  border-color: var(--border);
+  box-shadow: none;
+}
+.machine-stat > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--muted);
+}
+.machine-stat > p {
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.machine-stat small {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.machine-stat > span {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.stat-active svg {
+  color: var(--gold);
+}
+.stat-available svg {
+  color: var(--teal);
+}
+.capacity-notice {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 16px 20px;
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  background: var(--gold-wash);
+}
+.capacity-notice svg {
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.capacity-notice strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+.capacity-notice p {
+  font-size: 13px;
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.machine-list {
+  padding: 26px;
+  min-width: 0;
+}
+.machine-list h2 {
+  font-size: 21px;
+  margin-top: 8px;
+}
+.machine-list .section-heading button {
+  font-size: 13px;
+}
+.machine-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 22px 0;
+  flex-wrap: wrap;
+}
+.machine-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 12px;
+  flex: 1;
+  max-width: 400px;
+  min-width: 180px;
+  color: var(--muted);
+}
+.machine-search input {
+  background: transparent;
+  border: 0;
+  min-width: 0;
+  width: 100%;
+  padding: 12px 0;
+  color: var(--foreground);
+  font-size: 14px;
+  outline: none;
+}
+.machine-search:focus-within {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.machine-toolbar > button {
+  min-height: 44px;
+}
+.machine-filter {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+}
+.machine-filter select,
+.machine-form select {
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 14px;
+}
+.machine-row {
+  display: grid;
+  grid-template-columns: minmax(190px, 1.5fr) minmax(100px, 1fr) 90px 110px 195px;
+  align-items: center;
+  gap: 16px;
+  padding: 21px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.machine-row-heading {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 12px 0;
+}
+.machine-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.machine-identity strong {
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+  overflow-wrap: anywhere;
+}
+.machine-identity small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.machine-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--secondary);
+  font:
+    500 16px 'Consolas',
+    monospace;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.machine-location {
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.machine-row time {
+  font-size: 12px;
+  color: var(--muted);
+}
+.machine-status {
+  font-size: 12px;
+  font-weight: 400;
+  padding: 5px 9px;
+}
+.status-available {
+  color: var(--teal);
+  background: var(--teal-wash);
+  border-color: transparent;
+}
+.status-maintenance {
+  color: var(--gold);
+  background: var(--gold-wash);
+  border-color: transparent;
+}
+.status-disabled {
+  color: var(--muted);
+  background: var(--secondary);
+  border-color: transparent;
+}
+.status-retired {
+  color: var(--muted);
+  background: transparent;
+}
+.machine-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.machine-actions button {
+  font-size: 12px;
+  padding: 7px 9px;
+  min-height: 36px;
+}
+.machine-actions .retire-action {
+  color: var(--muted);
+}
+.machine-empty,
+.machine-loading {
+  padding: 60px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+.machine-empty svg {
+  color: var(--gold);
+  margin: 0 auto 16px;
+}
+.machine-empty h3 {
+  font-size: 19px;
+  color: var(--foreground);
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+.machine-empty p {
+  line-height: 1.8;
+}
+.machine-list-note {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-top: 24px;
+}
+.machine-sheet {
+  width: min(520px, 100%);
+  max-width: none;
+  padding: 24px;
+  overflow-y: auto;
+  gap: 0;
+}
+.machine-sheet [data-slot='sheet-header'] {
+  padding: 10px 32px 18px 0;
+}
+.machine-sheet [data-slot='sheet-title'] {
+  font-size: 23px;
+  font-weight: 500;
+}
+.machine-sheet [data-slot='sheet-description'] {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.machine-sheet-close {
+  position: absolute;
+  right: 18px;
+  top: 22px;
+}
+.machine-form {
+  margin: 8px 0 0;
+  gap: 8px;
+}
+.machine-form fieldset {
+  display: grid;
+  gap: 22px;
+  min-width: 0;
+}
+.machine-form fieldset:disabled {
+  opacity: 0.8;
+}
+.machine-form input,
+.machine-form select,
+.machine-form textarea {
+  width: 100%;
+}
+.machine-form input:disabled,
+.machine-form textarea:disabled {
+  cursor: text;
+  opacity: 1;
+}
+.machine-form textarea {
+  font: inherit;
+  min-height: 110px;
+  padding: 12px;
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  resize: vertical;
+}
+.machine-form .field-hint {
+  margin-top: -14px;
+  font-size: 12px;
+}
+.field-optional {
+  font-size: 12px;
+  color: var(--muted);
+}
+.machine-form label {
+  position: relative;
+}
+.machine-form label > .field-optional {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.machine-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+}
+.machine-form-footer button {
+  min-height: 44px;
+  font-size: 14px;
+}
+.machine-dates {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.machine-dates > div {
+  margin-top: 12px;
+}
+.retired-notice,
+.retirement-warning {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.9;
+}
+.retire-icon {
+  color: var(--gold);
+  margin-bottom: 24px;
+  width: 28px;
+  height: 28px;
+}
+.retirement-body {
+  padding-top: 16px;
+}
+.retirement-body h3 {
+  font-size: 22px;
+  margin: 16px 0 8px;
+  overflow-wrap: anywhere;
+}
+.retirement-body > p {
+  font-size: 14px;
+  color: var(--muted);
+}
+.retirement-warning {
+  margin-top: 28px;
+  border-color: var(--gold);
+  background: var(--gold-wash);
+  color: var(--foreground);
+}
+@media (max-width: 1200px) {
+  .machine-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .machine-row {
+    grid-template-columns: minmax(180px, 1fr) 100px 90px 195px;
+    gap: 12px;
+  }
+  .machine-row > time {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .machine-overview {
+    padding: 22px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .machine-overview h2 {
+    font-size: 21px;
+  }
+  .machine-stats {
+    gap: 12px;
+  }
+  .machine-stat {
+    padding: 16px;
+  }
+  .machine-stat > p {
+    font-size: 28px;
+  }
+  .machine-stat > div {
+    font-size: 13px;
+  }
+  .machine-stat > span {
+    font-size: 12px;
+  }
+  .machine-list {
+    padding: 20px 16px;
+  }
+  .machine-toolbar {
+    gap: 10px;
+  }
+  .machine-search {
+    min-width: 150px;
+  }
+  .machine-filter {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .machine-filter select {
+    flex: 1;
+    max-width: 220px;
+  }
+  .machine-row {
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    padding: 20px 0;
+  }
+  .machine-row-heading {
+    display: none;
+  }
+  .machine-row > .machine-location {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .machine-row > span[role='cell']:not(.machine-location) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .machine-row > time {
+    display: block;
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .machine-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+  .machine-actions button {
+    min-height: 42px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .machine-sheet {
+    padding: 22px;
+  }
+  .machine-form input,
+  .machine-form select,
+  .machine-form textarea {
+    font-size: 16px;
+  }
+}

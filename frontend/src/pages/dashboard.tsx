@@ -105,36 +105,36 @@ export function DashboardPage() {
           <span className="subtle-label">赛事管理的每个环节，都有条不紊</span>
         </div>
         <div className="quick-access-grid">
-          {[navigation[1], user?.is_staff ? navigation[2] : navigation[5], navigation[3]].map(
-            ({ path, title, icon: Icon }, index) => (
-              <Link to={path} className="quick-card-link" key={path}>
-                <Card className="quick-card">
-                  <div className="quick-card-top">
-                    <span className={`quick-icon quick-icon-${index}`}>
-                      <Icon size={21} />
-                    </span>
-                    <ArrowUpRight size={18} className="card-arrow" />
-                  </div>
-                  <h3>{title}</h3>
-                  <p>
-                    {
-                      [
-                        '组织个人赛事，串联每一轮对局',
-                        user?.is_staff ? '查询已注册选手与账号资料' : '维护你的选手昵称和账号资料',
-                        '统一设备编号，让每张牌桌各就其位',
-                      ][index]
-                    }
-                  </p>
-                  <div className="quick-card-bottom">
-                    <span>
-                      {path === '/players' || path === '/profile' ? '进入查看' : '功能准备中'}
-                    </span>
-                    <ArrowRight size={14} />
-                  </div>
-                </Card>
-              </Link>
-            ),
-          )}
+          {[
+            navigation[1],
+            user?.is_staff ? navigation[2] : navigation[5],
+            ...(user?.is_staff ? [navigation[3]] : []),
+          ].map(({ path, title, icon: Icon }, index) => (
+            <Link to={path} className="quick-card-link" key={path}>
+              <Card className="quick-card">
+                <div className="quick-card-top">
+                  <span className={`quick-icon quick-icon-${index}`}>
+                    <Icon size={21} />
+                  </span>
+                  <ArrowUpRight size={18} className="card-arrow" />
+                </div>
+                <h3>{title}</h3>
+                <p>
+                  {
+                    [
+                      '组织个人赛事，串联每一轮对局',
+                      user?.is_staff ? '查询已注册选手与账号资料' : '维护你的选手昵称和账号资料',
+                      '统一设备编号，让每张牌桌各就其位',
+                    ][index]
+                  }
+                </p>
+                <div className="quick-card-bottom">
+                  <span>{path !== '/tournaments' ? '进入查看' : '功能准备中'}</span>
+                  <ArrowRight size={14} />
+                </div>
+              </Card>
+            </Link>
+          ))}
         </div>
       </section>
       <div className="dashboard-bottom">

@@ -1,0 +1,1 @@
+PASS real HTTP via Vite proxy: health=200, anonymous machines list=403 with JSON error.

@@ -1,0 +1,3 @@
+PASS accounts_user row count unchanged: 0
+PASS players_playerprofile row count unchanged: 0
+PASS development MahjongMachine count=0; all machine QA data stayed in independent ignored database.

@@ -1,0 +1,3 @@
+PASS file SQLite, eight independent connections: ['machine_capacity_full', 'created', 'machine_capacity_full', 'created', 'created', 'created', 'machine_capacity_full', 'machine_capacity_full'] active= 4
+PASS fifth rejected, maintenance/disabled counted, retirement frees capacity, replacement has new ID; browser QA starts with three active devices.
+PostgreSQL concurrency UNVERIFIED. No development data or authentication secrets used.

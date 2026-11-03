@@ -1,0 +1,4 @@
+Operations to perform:
+  Apply all migrations: accounts, auth, contenttypes, machines, players, sessions
+Running migrations:
+  Applying machines.0002_mahjongmachine_machine_number_digits_only... OK

@@ -1,0 +1,10 @@
+{
+  "mobile390": {
+    "scrollWidth": 375,
+    "width": 390
+  },
+  "narrow320": {
+    "scrollWidth": 320,
+    "width": 320
+  }
+}

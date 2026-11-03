@@ -4,7 +4,9 @@
 
 根据 Owner 下发的 F0-02 任务，F0-01 已正式验收：Tag `baseline/F0-01`，Commit `94a1fec747806682602dd24f7edbbcc4e27d07f0`。本地已用 `git rev-parse baseline/F0-01^{commit}` 验证 Tag 解引用指向该 Commit（附注 Tag 对象 SHA 与 Commit SHA 不同是正常现象）。
 
-F0-02 当前仅工作区实现，未提交、未打标签、未推送。Owner 手动执行后续 Git 操作，Planner 进行最终验收及双基线核验；不得移动或删除 F0-01 Tag。
+F0-02 已正式验收：Tag `baseline/F0-02`，Commit `59be947ca133dbe18a63dcdc99e55a3243daed51`，分支main。Owner在F0-03任务中确认该正式基线；本地Tag解引用与HEAD已核实一致。历史F0-02报告中的“未提交、待验收”是当时快照，不表示当前状态。
+
+F0-03仅工作区开发与自检，尚未提交/打标签/推送，等待Planner验收。所有后续Git提交与标签由Owner手动执行；不得修改或删除已有基线。
 
 ## F0-01 候选提交历史
 

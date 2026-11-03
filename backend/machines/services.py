@@ -1,0 +1,57 @@
+from django.db import IntegrityError, OperationalError, connection, transaction
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from rest_framework.exceptions import APIException
+
+from .models import MahjongMachine
+
+
+class MachineConflict(APIException):
+    status_code = 409
+
+    def __init__(self, message, code):
+        self.default_code = code
+        super().__init__(message, code)
+
+
+def database_busy(exc):
+    if connection.vendor == "sqlite" and "locked" in str(exc).lower():
+        raise MachineConflict("设备正在被其他请求更新，请刷新列表后重试。", "machine_busy") from None
+    raise exc
+
+
+def create_machine(values):
+    # Insert first, without a read-then-write count race. Each failed candidate
+    # slot rolls back its own transaction. Constraints arbitrate concurrent writers.
+    for slot in range(1, 5):
+        try:
+            with transaction.atomic():
+                return MahjongMachine.objects.create(**values, capacity_slot=slot)
+        except IntegrityError:
+            continue
+        except OperationalError as exc:
+            database_busy(exc)
+    if MahjongMachine.objects.filter(machine_no=values["machine_no"]).exclude(status="retired").exists():
+        raise MachineConflict("现役设备编号已存在，请使用其他编号。", "duplicate_machine_no")
+    raise MachineConflict("现役设备容量已满（最多 4 台），请先退役设备。", "machine_capacity_full")
+
+
+def change_machine(machine_id, values=None, *, retire=False):
+    try:
+        with transaction.atomic():
+            machine = get_object_or_404(MahjongMachine.objects.select_for_update(), pk=machine_id)
+            if machine.status == MahjongMachine.Status.RETIRED:
+                raise MachineConflict("设备已经退役，不能重复退役。" if retire else "已退役设备仅供查看，不能编辑或重新启用。", "already_retired" if retire else "retired_readonly")
+            changes = {"status": "retired", "capacity_slot": None} if retire else dict(values)
+            changes["updated_at"] = timezone.now()
+            # SQLite does not implement SELECT FOR UPDATE. The conditional write
+            # also guards the terminal state if a retirement races with an edit.
+            updated = MahjongMachine.objects.filter(pk=machine_id).exclude(status="retired").update(**changes)
+            if not updated:
+                raise MachineConflict("设备状态已变化，请刷新列表。", "machine_changed")
+            machine.refresh_from_db()
+            return machine
+    except IntegrityError:
+        raise MachineConflict("现役设备编号已存在，请使用其他编号。", "duplicate_machine_no") from None
+    except OperationalError as exc:
+        database_busy(exc)

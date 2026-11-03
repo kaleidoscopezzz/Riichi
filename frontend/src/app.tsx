@@ -8,6 +8,7 @@ import { AuthPage } from '@/pages/auth'
 import { ProfilePage } from '@/pages/profile'
 import { PlayersPage } from '@/pages/players'
 import { RouteGuard } from '@/components/route-guard'
+import { MachinesPage } from '@/pages/machines'
 
 export function App() {
   return (
@@ -21,9 +22,9 @@ export function App() {
           <Route path="tournaments" element={<PlaceholderPage />} />
           <Route element={<RouteGuard admin />}>
             <Route path="players" element={<PlayersPage />} />
+            <Route path="machines" element={<MachinesPage />} />
           </Route>
           <Route path="profile" element={<ProfilePage />} />
-          <Route path="machines" element={<PlaceholderPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>

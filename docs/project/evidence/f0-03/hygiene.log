@@ -1,0 +1,6 @@
+PASS HEAD and baseline/F0-02 commit unchanged at 59be947ca133dbe18a63dcdc99e55a3243daed51.
+PASS accounts/players/common authentication implementation, API client and F0-01/F0-02 historical evidence unchanged.
+PASS sensitive/runtime/database/cache/build paths ignored; examples, source, migrations and formal evidence retained.
+PASS targeted Git-visible text scan for private keys, common tokens and literal long secrets; no hits. This is not exhaustive secret detection.
+PASS no dependency/lockfile change; no global installation, no staged files, no commit/tag/push.
+PASS device capacity field is internal and read/write serializers exclude it. Permission and CSRF behavior covered by automated tests and real browser session writes.

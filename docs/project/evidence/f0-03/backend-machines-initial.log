@@ -1,0 +1,49 @@
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+Found 13 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: common, corsheaders, rest_framework, staticfiles
+  Apply all migrations: accounts, auth, contenttypes, machines, players, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying machines.0001_initial... OK
+  Applying players.0001_initial... OK
+test_create_normalization_and_details (machines.tests.MachineApiTests.test_create_normalization_and_details) ... ok
+test_csrf_required_for_all_writes (machines.tests.MachineApiTests.test_csrf_required_for_all_writes) ... ok
+test_duplicate_normalized_number_and_edit_conflict (machines.tests.MachineApiTests.test_duplicate_normalized_number_and_edit_conflict) ... ok
+test_field_validation (machines.tests.MachineApiTests.test_field_validation) ... ok
+test_four_active_and_capacity_released_by_retirement (machines.tests.MachineApiTests.test_four_active_and_capacity_released_by_retirement) ... ok
+test_no_delete_or_put (machines.tests.MachineApiTests.test_no_delete_or_put) ... ok
+test_permission_matrix (machines.tests.MachineApiTests.test_permission_matrix) ... ok
+test_search_filter_order_pagination_and_global_summary (machines.tests.MachineApiTests.test_search_filter_order_pagination_and_global_summary) ... ok
+test_state_transitions_and_terminal_state (machines.tests.MachineApiTests.test_state_transitions_and_terminal_state) ... ok
+test_direct_fifth_active_cannot_bypass_capacity (machines.tests.MachineConstraintTests.test_direct_fifth_active_cannot_bypass_capacity) ... ok
+test_invalid_rows_rejected_without_serializer (machines.tests.MachineConstraintTests.test_invalid_rows_rejected_without_serializer) ... ok
+test_unique_slots_and_active_numbers (machines.tests.MachineConstraintTests.test_unique_slots_and_active_numbers) ... ok
+test_concurrent_creation_never_exceeds_capacity (machines.tests.ConcurrentMachineTests.test_concurrent_creation_never_exceeds_capacity) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.212s
+
+OK
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+  Applying sessions.0001_initial... OK
+System check identified no issues (0 silenced).

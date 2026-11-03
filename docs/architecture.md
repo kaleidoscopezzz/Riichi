@@ -11,7 +11,7 @@ Riichi 使用前后端分离、模块化单体。浏览器运行 React 应用，
 | API | Python 3.13、Django 5.2 LTS、DRF | 版本化接口、配置及公共服务 |
 | 存储 | SQLite / PostgreSQL | 本地开发 / 正式环境预留 |
 
-当前提供健康检查及 F0-02 账号/选手档案能力，不创建赛事模型、Tournament 类或计分算法。后续领域模块在任务明确后按责任加入，不提前堆积空目录。
+当前提供健康检查、F0-02 账号/选手档案及 F0-03 设备资源台账能力，不创建赛事模型、Tournament 类或计分算法。后续领域模块在任务明确后按责任加入，不提前堆积空目录。
 
 ## 顶层目录
 
@@ -96,7 +96,7 @@ frontend/
 | `/dashboard` | 仪表盘 |
 | `/tournaments` | 赛事管理占位 |
 | `/players` | 管理员分页查询、搜索已注册选手 |
-| `/machines` | 麻将机管理占位 |
+| `/machines` | 管理员设备资源台账、编辑与退役 |
 | `/settings` | 系统设置与基础信息 |
 | `/profile` | 本人选手档案与昵称修改 |
 | `/login` / `/register` | 公开登录与注册 |
@@ -127,3 +127,26 @@ Player post_save 创建默认档案（包含 createsuperuser）；注册在 tran
 开发通过同源 Vite /api 代理；本地 CSRF_TRUSTED_ORIGINS 显式为 localhost:5173 和 127.0.0.1:5173。生产采用同源静态站点与 API 反向代理、HTTPS/安全 Cookie，必须显式配置可信来源；不支持通过开放跨域凭据来替代部署配置。
 
 迁移前实查 SQLite 仅有 contenttypes 的两项迁移，未启用旧 auth.User；保存被忽略的备份后正常引入 auth/sessions/accounts/players，无 fake、无旧迁移修改、无数据库重建。开发数据库保留，联调验证账号仅写入独立 .verification 数据库副本。
+
+## F0-03 MahjongMachine 与容量不变量
+
+machines App 分为models（实体/约束）、serializers（输入校验/白名单）、services（事务状态变更）、views/urls（沿用DRF认证权限与JSON规范）。前端services/machines.ts定义契约，pages/machines.tsx负责列表与总览，components/machine-editor.tsx复用现有shadcn Sheet/Card/Badge/Button构建设备表单和退役确认；不新增认证或网络框架。
+
+MahjongMachine.id是自增稳定主键；machine_no是三位数字编号，name(100)、location(200，可空)、description(2000，可空)、status和两个时间戳构成台账。内部capacity_slot仅用于现役容量，不在API中暴露。
+
+| 数据库约束 | 含义 |
+| --- | --- |
+| capacity_slot唯一，可NULL | 同一现役槽位只能有一台设备，退役设备可有多条NULL |
+| 状态/槽位CHECK | 非retired必须拥有1～4非空槽位，retired必须为NULL，无法插入第五个合法现役槽 |
+| 条件唯一(machine_no，非retired) | 现役编号唯一，历史编号可复用 |
+| 状态/编号/名称CHECK | 状态属于四项枚举，编号三位且只含ASCII数字，名称不能全空白 |
+
+创建时依次尝试四个唯一槽，每次插入独立原子事务；唯一竞争由数据库裁决，不依赖count检查。SQLite忙锁返回可识别的409 machine_busy；不把未知写结果自动重放。编辑/退役在transaction.atomic中进行，PostgreSQL可使用select_for_update；同时使用WHERE status != retired条件更新，避免依赖SQLite无效的行锁来保护终态。退役同时释放槽位并保留原ID、资料。正常API禁止编辑已退役设备或物理DELETE。
+
+状态机：available、maintenance、disabled三者可互相PATCH切换；各非退役状态可经专用POST retire进入retired，retired没有普通出边。machine_no允许现役时规范化编辑，但稳定id不改变。
+
+列表每页20条，默认machine_no/id排序；data包含count/next/previous/results及summary（全库各状态与active计数），统计不受搜索筛选影响。所有端点IsAdminUser，写操作沿用SessionAuthentication CSRF校验。PATCH/POST拒绝id、capacity_slot及其他未知字段。
+
+新增迁移0001建立实体/主要约束；0002补充纯数字CHECK，防止正则末尾换行的数据库边界。两项均正常migrate，未修改F0-01/F0-02迁移。SQLite内存与文件并发已验证；PostgreSQL实连及并发未验证，须在正式环境单独验证。[Django约束参考](https://docs.djangoproject.com/en/5.2/ref/models/constraints/)。
+
+未来Tournament每轮逻辑桌次应以ForeignKey引用machineId，并为历史追溯选择保护策略（例如PROTECT）；界面显示编号，可按编号顺序选择available设备。防止时间冲突、跨赛事占用、MachineAllocation、RoundTable等均留给后续任务，本次没有建立这些表或锁。capacity_slot不是赛事占用锁。

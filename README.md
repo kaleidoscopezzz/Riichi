@@ -1,6 +1,6 @@
 # Riichi
 
-Web 四人立直麻将赛事管理系统。V1.0 仅支持个人赛，当前 **F0-02** 提供账号注册登录、个人选手档案及管理员选手查询；赛事、设备实体、分桌及计分尚未实现。
+Web 四人立直麻将赛事管理系统。V1.0 仅支持个人赛，当前 **F0-03** 提供账号与选手档案，以及管理员麻将机资源台账；赛事、分桌、计分和设备占用调度尚未实现。
 
 Riichi Premium 界面以深海军蓝、石墨黑和中性色为基础，提供仪表盘、赛事管理、选手管理、麻将机管理和系统设置五个基础页面。仪表盘展示欢迎信息、功能入口与实际后端连接状态，不包含虚构赛事统计。
 
@@ -118,7 +118,7 @@ npm run build
 
 账号注册与选手档案已实现；赛事领域对象、配置、分桌、计分和冠军判定属于后续 V1.0 任务。微信赛事发布、报名、绑定和播报仅为未来候选。
 
-F0-01 正式基线为 baseline/F0-01，Commit 94a1fec747806682602dd24f7edbbcc4e27d07f0。本次 F0-02 不执行 commit、tag 或 push，等待 Planner 验收和 Owner 手动 Git 操作。
+F0-01 正式基线为 baseline/F0-01，Commit 94a1fec747806682602dd24f7edbbcc4e27d07f0。当前正式基线 baseline/F0-02（59be947ca133dbe18a63dcdc99e55a3243daed51），本次 F0-03 不执行 commit、tag 或 push，等待 Planner 验收和 Owner 手动 Git 操作。
 
 ## F0-02 账号系统使用
 
@@ -138,3 +138,21 @@ createsuperuser 交互输入自己的用户名和密码，自动创建选手档�
 登录状态由服务器 Session Cookie 恢复，密码、Session ID、认证 Token 均不写入 localStorage。注册/登录不会接受权限字段，普通用户没有管理员列表权限。公网开放前仍需独立完成登录限流等加固。本次不提供密码找回、邮箱验证或第三方登录。
 
 API 与请求示例、测试结果和限制见 [F0-02 交付报告](docs/project/F0-02-verification.md)。原 F0-01 报告和证据保留为历史快照。
+
+## F0-03 麻将机资源管理
+
+沿用上述虚拟环境、环境配置和启动命令，先检查并执行数据库迁移：
+
+```powershell
+Set-Location D:\Riichi\backend
+.\.venv\Scripts\python.exe manage.py showmigrations
+.\.venv\Scripts\python.exe manage.py migrate --noinput
+```
+
+管理员登录后打开 /machines，可新增、查询、编辑、切换可用/维护/停用状态并确认退役。普通账号不显示入口，直接访问页面或API也不获得权限。没有默认管理员账号；需要时交互执行createsuperuser。
+
+最多4台非退役设备，维护和停用也占容量；数据库唯一槽位与CHECK约束兜底，退役释放容量。编号输入1～3位数字，保存为三位，不限001～004；现役编号唯一，退役后复用编号会建立新的物理实体ID。已退役资料只读，没有删除或恢复操作。available不代表赛事空闲，本阶段不调度设备。
+
+API：GET/POST /api/v1/machines/，GET/PATCH /api/v1/machines/{id}/，POST /api/v1/machines/{id}/retire/。全部需要管理员Session，写请求必须携带CSRF；search按编号/名称搜索，status筛选，page分页。总览是未过滤的真实全局统计。
+
+[本阶段报告、调用示例与验证边界](docs/project/F0-03-verification.md)。没有新增依赖，F0-01/F0-02证据保留；SQLite并发已实测，PostgreSQL实际连接/并发与公网部署仍未验证。

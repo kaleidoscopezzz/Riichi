@@ -1,0 +1,8 @@
+Selected request lines transcribed from the actual first Django QA server tool output (the server ran without Tee-Object for this portion). This is an excerpt, not a freshly executed test.
+[03/Nov/2026 11:10:17] "POST /api/v1/machines/ HTTP/1.1" 201 301
+[03/Nov/2026 11:11:15] "PATCH /api/v1/machines/6/ HTTP/1.1" 200 294
+[03/Nov/2026 11:11:15] "PATCH /api/v1/machines/2/ HTTP/1.1" 200 231
+[03/Nov/2026 11:11:45] "POST /api/v1/machines/6/retire/ HTTP/1.1" 200 290
+[03/Nov/2026 11:11:46] "POST /api/v1/machines/ HTTP/1.1" 201 235
+[03/Nov/2026 11:11:46] "GET /api/v1/machines/6/ HTTP/1.1" 200 290
+[03/Nov/2026 11:13:09] "GET /api/v1/machines/?page=1&search=008&status=retired HTTP/1.1" 200 420

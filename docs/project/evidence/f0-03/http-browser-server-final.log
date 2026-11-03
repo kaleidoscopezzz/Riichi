@@ -1,0 +1,17 @@
+[03/Nov/2026 11:15:38] "GET /api/v1/machines/?page=1&search=&status= HTTP/1.1" 200 1748
+[03/Nov/2026 11:16:12] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 11:16:12] "POST /api/v1/auth/logout/ HTTP/1.1" 200 30
+[03/Nov/2026 11:16:39] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 11:16:39] "POST /api/v1/auth/register/ HTTP/1.1" 201 126
+[03/Nov/2026 11:16:51] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 11:16:51] "POST /api/v1/auth/login/ HTTP/1.1" 200 126
+[03/Nov/2026 11:16:53] "GET /api/v1/auth/me/ HTTP/1.1" 200 118
+[03/Nov/2026 11:16:53] "GET /api/v1/auth/me/ HTTP/1.1" 200 118
+[03/Nov/2026 11:16:53] "GET /api/v1/health/ HTTP/1.1" 200 57
+Forbidden: /api/v1/machines/
+[03/Nov/2026 11:16:54] "GET /api/v1/machines/ HTTP/1.1" 403 99
+[03/Nov/2026 11:17:52] "GET /api/v1/auth/me/ HTTP/1.1" 200 118
+[03/Nov/2026 11:17:52] "GET /api/v1/auth/me/ HTTP/1.1" 200 118
+[03/Nov/2026 11:17:52] "GET /api/v1/health/ HTTP/1.1" 200 57
+[03/Nov/2026 11:17:52] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 11:17:52] "POST /api/v1/auth/logout/ HTTP/1.1" 200 30

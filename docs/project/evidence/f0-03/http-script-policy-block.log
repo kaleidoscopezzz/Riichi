@@ -1,0 +1,4 @@
+An attempted combined credential/session + concurrent HTTP write harness was rejected before execution by automatic approval review.
+Returned reason: blocked by policy. No more specific reason was provided.
+The rejected command did not run; it is not reported as a passing HTTP concurrency test.
+Fallback: bounded ORM concurrency test on the dedicated file SQLite database; real API writes and session/CSRF integration through the browser; permission/CSRF matrices through Django automated tests.
