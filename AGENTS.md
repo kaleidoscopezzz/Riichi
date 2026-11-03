@@ -4,7 +4,9 @@
 
 Riichi 是前后端分离、模块化单体的 Web 四人立直麻将赛事管理系统。产品范围以 `docs/requirements.md` 为准；Developer 实现 Planner 明确下发的任务，测试和自检不能替代 Planner 的外部验收。
 
-当前任务为 **F0-01 工程骨架搭建**。仅交付可运行、可测试的工程、基础应用布局和健康检查联调。不得在此任务中实现赛事、用户、选手、设备业务模型，注册登录、分桌、计分、瑞士轮，或预先实现 Tournament 类。下一阶段需要新的 Planner 任务。
+当前任务为 **F0-02 用户账号与选手档案**。仅实现注册、Session 登录退出、个人昵称管理及管理员选手查询。账号身份与选手档案一对一分离，未来赛事通过档案引用；不得实现赛事、设备实体、分桌、计分、微信绑定、团队赛或预先实现 Tournament。
+
+F0-01 正式基线：`baseline/F0-01`，Commit `94a1fec747806682602dd24f7edbbcc4e27d07f0`。不得删除或移动该基线。自检不能替代 Planner 验收。
 
 ## 技术与目录边界
 
@@ -37,8 +39,18 @@ Riichi 是前后端分离、模块化单体的 Web 四人立直麻将赛事管�
 
 ## Git 与交付限制
 
-- F0-01 保持当前 `main`，只进行工程实现和验证。**不得自行执行 `git commit`、`git tag`、`git push`。**
+- F0-02 保持当前 `main`，只进行工程实现和验证。**不得自行执行 `git commit`、`git tag`、`git push`。**
 - 不修改远程仓库配置，不重写历史，不删除已有文件，不执行破坏性 Git 操作。
 - 可以执行 `git status`、`git diff`、`git check-ignore` 等只读检查。
-- 首次本地及 GitHub 基线须在 Planner 验收通过后，由单独任务明确授权；当前基线状态为“尚未建立”。详见 `docs/project/baselines.md`。
+- 本阶段不执行 commit、tag、push，Git 由项目 Owner 手动操作，Planner 负责验收与双基线核验。F0-01 已建立正式基线，F0-02 尚待验收。详见 `docs/project/baselines.md`。
 - 最终报告须列出工程文件、API、界面、启动方法、实际验证、Git 状态、已知问题和自检结论。完成后停止本阶段开发，等待 Planner 验收。
+
+## F0-02 账号安全与迁移
+
+- User 使用 AbstractUser，必须出现在 accounts/0001_initial；PlayerProfile 通过 OneToOne 关联 settings.AUTH_USER_MODEL。注册与档案创建必须原子提交。
+- 采用 Django SessionAuthentication；注册、登录、退出为显式 csrf_protect 的 Django JSON View，资料 PATCH 使用 SessionAuthentication 的 CSRF 校验。不得添加 csrf_exempt。
+- 前端凭据使用 HttpOnly Session Cookie；每次写请求从 csrf 初始化端点取得当前 Token，仅保留在请求内存，不将认证凭据写入 localStorage，不记录明文密码、Cookie 或 CSRF Token。
+- 管理员仅通过 createsuperuser 初始化，无默认管理员密码。权限在服务端检查；注册拒绝敏感字段，普通用户仅改本人昵称。
+- 改迁移前先查现有迁移图和数据库，禁止删除数据库、fake 或破坏性重置。兼容异常应停止报告。
+- 测试包括事务回滚、唯一约束、权限及真实 enforce_csrf_checks，前端表单/恢复/守卫/角色菜单；联调使用独立测试数据库，不把验证账号作为展示数据。
+- 公网上线前另行实现登录限流等加固；F0-02 不实现找回密码、外部认证或微信能力。

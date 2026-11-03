@@ -1,0 +1,274 @@
+
+> riichi-frontend@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 D:/Riichi/frontend
+
+(node:32140) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ src/pages/accounts.test.tsx (12 tests | 1 failed) 3603ms
+     × 管理员显示选手菜单并查询真实接口 50ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/accounts.test.tsx > 账号页面及权限 > 管理员显示选手菜单并查询真实接口
+TestingLibraryElementError: Found multiple elements with the role "link" and name "选手管理"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+<a
+  aria-current="page"
+  class="nav-item active"
+  data-discover="true"
+  href="/players"
+>
+  <svg
+    aria-hidden="true"
+    class="lucide lucide-users-round lucide-users-2"
+    fill="none"
+    height="19"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+    width="19"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M18 21a8 8 0 0 0-16 0"
+    />
+    <circle
+      cx="10"
+      cy="8"
+      r="5"
+    />
+    <path
+      d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"
+    />
+  </svg>
+  <span>
+    选手管理
+  </span>
+  <svg
+    aria-hidden="true"
+    class="lucide lucide-chevron-right nav-chevron"
+    fill="none"
+    height="14"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    viewBox="0 0 24 24"
+    width="14"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="m9 18 6-6-6-6"
+    />
+  </svg>
+</a>
+
+Ignored nodes: comments, script, style
+<span
+  aria-current="page"
+  aria-disabled="true"
+  class="font-normal text-foreground"
+  data-slot="breadcrumb-page"
+  role="link"
+>
+  选手管理
+</span>
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="app-shell"
+    >
+      <a
+        class="skip-link"
+        href="#main-content"
+      >
+        跳转到主要内容
+      </a>
+      <aside
+        class="desktop-sidebar"
+      >
+        <div
+          class="sidebar-inner"
+        >
+          <a
+            aria-label="Riichi 首页"
+            class="brand"
+            data-discover="true"
+            href="/dashboard"
+          >
+            <span
+              class="brand-mark"
+            >
+              R
+              <span />
+            </span>
+            <span
+              class="brand-word"
+            >
+              riichi
+              <span>
+                TOURNAMENT SYSTEM
+              </span>
+            </span>
+          </a>
+          <div
+            class="navigation-label"
+          >
+            工作空间
+          </div>
+          <nav
+            aria-label="主导航"
+            class="main-nav"
+          >
+            <a
+              class="nav-item"
+              data-discover="true"
+              href="/dashboard"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-layout-dashboard"
+                fill="none"
+                height="19"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="19"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  height="9"
+                  rx="1"
+                  width="7"
+                  x="3"
+                  y="3"
+                />
+                <rect
+                  height="5"
+                  rx="1"
+                  width="7"
+                  x="14"
+                  y="3"
+                />
+                <rect
+                  height="9"
+                  rx="1"
+                  width="7"
+                  x="14"
+                  y="12"
+                />
+                <rect
+                  height="5"
+                  rx="1"
+                  width="7"
+                  x="3"
+                  y="16"
+                />
+              </svg>
+              <span>
+                仪表盘
+              </span>
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-chevron-right nav-chevron"
+                fill="none"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m9 18 6-6-6-6"
+                />
+              </svg>
+            </a>
+            <a
+              class="nav-item"
+              data-discover="true"
+              href="/tournaments"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-trophy"
+                fill="none"
+                height="19"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="19"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"
+                />
+                <path
+                  d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"
+                />
+                <path
+                  d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"
+                />
+                <path
+                  d="M4 22h16"
+                />
+                <path
+                  d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"
+                />
+                <path
+                  d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"
+                />
+              </svg>
+              <span>
+                赛事管理
+              </span>
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-chevron-right nav-chevron"
+                fill="none"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+   ...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/pages/accounts.test.tsx:144:19
+    142|     show('/players')
+    143|     expect(await screen.findByText('没有匹配的选手')).toBeTruthy()
+    144|     expect(screen.getByRole('link', { name: '选手管理', exact: true })).to…
+       |                   ^
+    145|   })
+    146|   it('修改自己的昵称并显示保存结果', async () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 21 passed (22)
+   Start at  10:26:32
+   Duration  5.70s (transform 255ms, setup 0ms, import 849ms, tests 3.66s, environment 1.16s)
+

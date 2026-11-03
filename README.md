@@ -1,6 +1,6 @@
 # Riichi
 
-Web 四人立直麻将赛事管理系统。V1.0 仅支持个人赛，当前任务 **F0-01** 建设可运行、可测试的工程骨架；赛事创建、注册登录、选手业务、分桌及计分均未实现。
+Web 四人立直麻将赛事管理系统。V1.0 仅支持个人赛，当前 **F0-02** 提供账号注册登录、个人选手档案及管理员选手查询；赛事、设备实体、分桌及计分尚未实现。
 
 Riichi Premium 界面以深海军蓝、石墨黑和中性色为基础，提供仪表盘、赛事管理、选手管理、麻将机管理和系统设置五个基础页面。仪表盘展示欢迎信息、功能入口与实际后端连接状态，不包含虚构赛事统计。
 
@@ -116,6 +116,25 @@ npm run build
 - [基线管理](docs/project/baselines.md)
 - [开发约束](AGENTS.md)
 
-选手注册、赛事领域对象、配置、分桌、计分和冠军判定属于后续 V1.0 任务。微信赛事发布、报名、绑定和播报仅为未来候选。
+账号注册与选手档案已实现；赛事领域对象、配置、分桌、计分和冠军判定属于后续 V1.0 任务。微信赛事发布、报名、绑定和播报仅为未来候选。
 
-本地与 GitHub 基线当前均为“尚未建立”。F0-01 不执行 commit、tag 或 push；实现与验证完成后，等待 Planner 审查，由后续独立任务授权建立首次基线。
+F0-01 正式基线为 baseline/F0-01，Commit 94a1fec747806682602dd24f7edbbcc4e27d07f0。本次 F0-02 不执行 commit、tag 或 push，等待 Planner 验收和 Owner 手动 Git 操作。
+
+## F0-02 账号系统使用
+
+先查看迁移状态再迁移；不得删除已有数据库或使用 fake。当前原 F0-01 SQLite（仅 contenttypes 已迁移）已验证可以正常升级。User 必须由 accounts/0001_initial 创建。
+
+```powershell
+Set-Location D:\Riichi\backend
+.\.venv\Scripts\python.exe manage.py showmigrations
+.\.venv\Scripts\python.exe manage.py migrate --noinput
+.\.venv\Scripts\python.exe manage.py createsuperuser
+```
+
+createsuperuser 交互输入自己的用户名和密码，自动创建选手档案；没有默认管理员凭据。普通用户访问 /register，成功后到 /login 登录；/profile 修改本人昵称。只有管理员看到 /players 菜单并能搜索分页列表。昵称与用户名分别存储，当前只允许修改昵称。
+
+浏览器统一使用同一个主机名（推荐 http://127.0.0.1:5173），不要混用 localhost 与 127.0.0.1。前端开发仍按上文启动 npm run dev，依赖更新后执行 npm ci。生产必须同源部署 API 反向代理并启用 HTTPS；Session Cookie HttpOnly/SameSite=Lax，写请求带 CSRF。CSRF_TRUSTED_ORIGINS 示例为两个明确的本地前端来源，生产来源应由环境明确配置。
+
+登录状态由服务器 Session Cookie 恢复，密码、Session ID、认证 Token 均不写入 localStorage。注册/登录不会接受权限字段，普通用户没有管理员列表权限。公网开放前仍需独立完成登录限流等加固。本次不提供密码找回、邮箱验证或第三方登录。
+
+API 与请求示例、测试结果和限制见 [F0-02 交付报告](docs/project/F0-02-verification.md)。原 F0-01 报告和证据保留为历史快照。

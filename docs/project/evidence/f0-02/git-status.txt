@@ -1,0 +1,36 @@
+## main...origin/main
+ M AGENTS.md
+ M README.md
+ M backend/.env.example
+ M backend/config/settings/base.py
+ M backend/config/settings/local.py
+ M backend/config/urls.py
+ M docs/architecture.md
+ M docs/project/baselines.md
+ M docs/requirements.md
+ M docs/roadmap.md
+ M frontend/package-lock.json
+ M frontend/package.json
+ M frontend/src/app.tsx
+ M frontend/src/components/navigation.ts
+ M frontend/src/layouts/app-layout.tsx
+ M frontend/src/main.tsx
+ M frontend/src/pages/dashboard.tsx
+ M frontend/src/pages/settings.tsx
+ M frontend/src/styles/globals.css
+?? backend/accounts/
+?? backend/common/api.py
+?? backend/common/middleware.py
+?? backend/players/
+?? docs/project/F0-02-verification.md
+?? docs/project/evidence/f0-02/
+?? frontend/src/components/auth-context.ts
+?? frontend/src/components/auth-provider.tsx
+?? frontend/src/components/form-feedback.tsx
+?? frontend/src/components/route-guard.tsx
+?? frontend/src/pages/accounts.test.tsx
+?? frontend/src/pages/auth.tsx
+?? frontend/src/pages/players.tsx
+?? frontend/src/pages/profile.tsx
+?? frontend/src/services/api.test.ts
+?? frontend/src/services/api.ts

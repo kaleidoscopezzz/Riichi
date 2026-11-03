@@ -1,3 +1,7 @@
 from django.urls import include, path
 
-urlpatterns = [path("api/v1/", include("common.urls"))]
+urlpatterns = [
+    path("api/v1/", include("common.urls")),
+    path("api/v1/auth/", include("accounts.urls")),
+    path("api/v1/players/", include("players.urls")),
+]

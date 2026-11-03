@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { navigation } from '@/components/navigation'
 import { HealthStatus } from '@/components/health-status'
+import { useAuth } from '@/components/auth-context'
 
 function TableIllustration() {
   return (
@@ -57,6 +58,7 @@ function TableIllustration() {
 }
 
 export function DashboardPage() {
+  const { user } = useAuth()
   return (
     <div className="dashboard">
       <section className="welcome-panel">
@@ -103,32 +105,36 @@ export function DashboardPage() {
           <span className="subtle-label">赛事管理的每个环节，都有条不紊</span>
         </div>
         <div className="quick-access-grid">
-          {navigation.slice(1, 4).map(({ path, title, icon: Icon }, index) => (
-            <Link to={path} className="quick-card-link" key={path}>
-              <Card className="quick-card">
-                <div className="quick-card-top">
-                  <span className={`quick-icon quick-icon-${index}`}>
-                    <Icon size={21} />
-                  </span>
-                  <ArrowUpRight size={18} className="card-arrow" />
-                </div>
-                <h3>{title}</h3>
-                <p>
-                  {
-                    [
-                      '组织个人赛事，串联每一轮对局',
-                      '管理参赛选手，汇聚同场竞技者',
-                      '统一设备编号，让每张牌桌各就其位',
-                    ][index]
-                  }
-                </p>
-                <div className="quick-card-bottom">
-                  <span>功能准备中</span>
-                  <ArrowRight size={14} />
-                </div>
-              </Card>
-            </Link>
-          ))}
+          {[navigation[1], user?.is_staff ? navigation[2] : navigation[5], navigation[3]].map(
+            ({ path, title, icon: Icon }, index) => (
+              <Link to={path} className="quick-card-link" key={path}>
+                <Card className="quick-card">
+                  <div className="quick-card-top">
+                    <span className={`quick-icon quick-icon-${index}`}>
+                      <Icon size={21} />
+                    </span>
+                    <ArrowUpRight size={18} className="card-arrow" />
+                  </div>
+                  <h3>{title}</h3>
+                  <p>
+                    {
+                      [
+                        '组织个人赛事，串联每一轮对局',
+                        user?.is_staff ? '查询已注册选手与账号资料' : '维护你的选手昵称和账号资料',
+                        '统一设备编号，让每张牌桌各就其位',
+                      ][index]
+                    }
+                  </p>
+                  <div className="quick-card-bottom">
+                    <span>
+                      {path === '/players' || path === '/profile' ? '进入查看' : '功能准备中'}
+                    </span>
+                    <ArrowRight size={14} />
+                  </div>
+                </Card>
+              </Link>
+            ),
+          )}
         </div>
       </section>
       <div className="dashboard-bottom">
@@ -142,7 +148,7 @@ export function DashboardPage() {
             <Flag size={19} className="gold-text" />
           </div>
           <p className="foundation-description">
-            当前为工程基础阶段。我们先把体验与连接准备好，再逐步构建完整的赛事流程。
+            账号与选手档案已开放。赛事组织、分桌与计分将在后续阶段逐步实现。
           </p>
           <div className="phase-row">
             <span className="phase-icon complete">
@@ -162,7 +168,7 @@ export function DashboardPage() {
             </span>
             <div>
               <h3>个人赛事管理</h3>
-              <p>账号与选手 · 分桌 · 计分与排名</p>
+              <p>赛事组织 · 分桌 · 计分与排名</p>
             </div>
             <span className="upcoming-label">后续规划</span>
           </div>

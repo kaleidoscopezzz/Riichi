@@ -4,6 +4,7 @@ import { ArrowUpRight, ChevronRight, Menu, Moon, Sun, Layers3 } from 'lucide-rea
 import { navigation } from '@/components/navigation'
 import { HealthBadge } from '@/components/health-status'
 import { useTheme } from '@/components/theme-context'
+import { useAuth } from '@/components/auth-context'
 import { Button } from '@/components/ui/button'
 import {
   Breadcrumb,
@@ -36,23 +37,26 @@ function Brand() {
 }
 
 function Sidebar({ close }: { close?: () => void }) {
+  const { user } = useAuth()
   return (
     <div className="sidebar-inner">
       <Brand />
       <div className="navigation-label">工作空间</div>
       <nav aria-label="主导航" className="main-nav">
-        {navigation.map(({ path, title, icon: Icon }) => (
-          <NavLink
-            to={path}
-            key={path}
-            onClick={close}
-            className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
-          >
-            <Icon size={19} />
-            <span>{title}</span>
-            <ChevronRight size={14} className="nav-chevron" />
-          </NavLink>
-        ))}
+        {navigation
+          .filter((item) => item.path !== '/players' || user?.is_staff)
+          .map(({ path, title, icon: Icon }) => (
+            <NavLink
+              to={path}
+              key={path}
+              onClick={close}
+              className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+            >
+              <Icon size={19} />
+              <span>{title}</span>
+              <ChevronRight size={14} className="nav-chevron" />
+            </NavLink>
+          ))}
       </nav>
       <div className="sidebar-bottom">
         <div className="foundation-note">
@@ -73,6 +77,20 @@ function Sidebar({ close }: { close?: () => void }) {
 }
 
 export function AppLayout() {
+  const { user, signOut } = useAuth()
+  const [logoutError, setLogoutError] = useState('')
+  const [loggingOut, setLoggingOut] = useState(false)
+  async function exit() {
+    setLoggingOut(true)
+    setLogoutError('')
+    try {
+      await signOut()
+    } catch (error) {
+      setLogoutError(error instanceof Error ? error.message : '退出失败，请重试。')
+    } finally {
+      setLoggingOut(false)
+    }
+  }
   const { pathname } = useLocation()
   const page = navigation.find((item) => item.path === pathname)
   const { theme, setTheme } = useTheme()
@@ -135,9 +153,17 @@ export function AppLayout() {
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </Button>
-            <div className="workspace-avatar" aria-label="Riichi 工作空间">
-              立
-            </div>
+            <Link to="/profile" className="current-user" aria-label="我的个人资料">
+              {user?.username}
+            </Link>
+            <Button
+              variant="ghost"
+              className="logout-button"
+              onClick={() => void exit()}
+              disabled={loggingOut}
+            >
+              {loggingOut ? '退出中…' : '退出'}
+            </Button>
           </div>
         </header>
         <main id="main-content" className="main-content">
@@ -152,13 +178,18 @@ export function AppLayout() {
             <span className="edition-label">个人赛 · V1.0</span>
           </div>
           <Outlet />
+          {logoutError && (
+            <p role="alert" className="form-feedback error">
+              {logoutError}
+            </p>
+          )}
         </main>
         <footer className="app-footer">
           <span>
             RIICHI<span className="footer-dot">·</span>让对局回归精彩
           </span>
           <span>
-            Foundation 01<span className="footer-dot">/</span>工程基础阶段
+            Foundation 02<span className="footer-dot">/</span>账号与选手档案
           </span>
         </footer>
       </div>

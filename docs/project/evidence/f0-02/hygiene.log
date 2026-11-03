@@ -1,0 +1,8 @@
+PASS expected private/runtime/database/cache/build paths are ignored.
+PASS Git-visible text scan for private keys and common real token formats; no hits.
+Reviewed password literals are isolated unit-test fixtures or example placeholders; real configured SECRET_KEY and QA admin credentials remain ignored and were not copied to evidence.
+PASS F0-01 evidence, health implementation and health tests unchanged.
+PASS no csrf_exempt in application source; CSRF enforcement covered with enforce_csrf_checks=True.
+PASS original database migrated normally; development User count is 0.
+Baseline HEAD and baseline/F0-01 commit remain 94a1fec747806682602dd24f7edbbcc4e27d07f0.
+No commit/tag/push performed. Targeted scan is not exhaustive secret detection.

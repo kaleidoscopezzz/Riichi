@@ -1,8 +1,14 @@
 # 本地与 GitHub 双基线制度
 
-## 当前候选状态
+## 当前正式基线
 
-2026-11-03：Planner 已单独授权首次 Git 候选提交并推送至 `origin/main`，用于 GitHub 源码审查。本次不创建 Tag；正式本地/GitHub 双基线仍为“尚未建立”，等待最终验收。见 [候选提交记录](F0-01-candidate-submission.md)。
+根据 Owner 下发的 F0-02 任务，F0-01 已正式验收：Tag `baseline/F0-01`，Commit `94a1fec747806682602dd24f7edbbcc4e27d07f0`。本地已用 `git rev-parse baseline/F0-01^{commit}` 验证 Tag 解引用指向该 Commit（附注 Tag 对象 SHA 与 Commit SHA 不同是正常现象）。
+
+F0-02 当前仅工作区实现，未提交、未打标签、未推送。Owner 手动执行后续 Git 操作，Planner 进行最终验收及双基线核验；不得移动或删除 F0-01 Tag。
+
+## F0-01 候选提交历史
+
+2026-11-03：Planner 已单独授权首次 Git 候选提交并推送至 `origin/main`，用于 GitHub 源码审查。本次不创建 Tag；此处为候选提交时状态；后续 Owner/Planner 已建立下述正式基线。见 [候选提交记录](F0-01-candidate-submission.md)。
 
 ## 骨架实现结束时记录（历史快照）
 

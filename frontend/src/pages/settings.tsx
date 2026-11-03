@@ -63,14 +63,14 @@ export function SettingsPage() {
           </div>
           <div>
             <dt>当前阶段</dt>
-            <dd>F0-01 工程骨架</dd>
+            <dd>F0-02 账号与选手档案</dd>
           </div>
           <div>
             <dt>服务接口</dt>
             <dd className="mono">GET /api/v1/health/</dd>
           </div>
         </dl>
-        <p className="settings-note">赛事、注册认证与计分功能将在后续阶段实现。</p>
+        <p className="settings-note">账号与选手档案已开放；赛事与计分功能仍在后续规划中。</p>
       </section>
       <HealthStatus />
       <section className="settings-panel settings-about">

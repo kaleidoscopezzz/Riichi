@@ -1,0 +1,3 @@
+PASS real HTTP via Vite proxy: public health, CSRF initialization/rejection, registration, login, me, own profile PATCH, ordinary-user list denial, logout invalidation, createsuperuser admin search and safe list fields.
+QA data only in ignored .verification/f0-02-browser.sqlite3; credentials generated in memory and never logged.
+PASS final backend restart: Vite -> health 200; unknown API route 404 with JSON not_found error.
