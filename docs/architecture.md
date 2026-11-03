@@ -11,7 +11,7 @@ Riichi 使用前后端分离、模块化单体。浏览器运行 React 应用，
 | API | Python 3.13、Django 5.2 LTS、DRF | 版本化接口、配置及公共服务 |
 | 存储 | SQLite / PostgreSQL | 本地开发 / 正式环境预留 |
 
-当前提供健康检查、F0-02 账号/选手档案及 F0-03 设备资源台账能力，不创建赛事模型、Tournament 类或计分算法。后续领域模块在任务明确后按责任加入，不提前堆积空目录。
+当前提供健康检查、账号/选手档案、设备资源台账及 F0-04 Tournament 领域基础。赛事草稿、配置与名单、启动冻结独立组织；实际分桌、半庄计分和冠军判定尚未实现。
 
 ## 顶层目录
 
@@ -94,7 +94,7 @@ frontend/
 | --- | --- |
 | `/` | 跳转 `/dashboard` |
 | `/dashboard` | 仪表盘 |
-| `/tournaments` | 赛事管理占位 |
+| `/tournaments` | 管理员赛事列表、创建/编辑草稿、详情与启动确认 |
 | `/players` | 管理员分页查询、搜索已注册选手 |
 | `/machines` | 管理员设备资源台账、编辑与退役 |
 | `/settings` | 系统设置与基础信息 |
@@ -112,7 +112,25 @@ frontend/
 
 ## 后续扩展原则
 
-账号、选手、设备、赛事、分桌和成绩能力按后续任务逐步落地；业务规则不进入页面组件或公共 health 服务。Tournament 未来作为独立赛事实例的领域对象设计，数据库持久化与 API 应遵从领域边界。微信能力留在未来版本规划，不在当前引入依赖或空模块。
+账号、选手、设备、赛事、分桌和成绩能力按任务逐步落地；领域规则放在各App服务内，不进入公共health。Tournament独立持久化，微信仍属未来规划，不引入空模块。
+
+## F0-04 Tournament 与冻结事务
+
+`tournaments/` 按 models、rules、serializers、services、views、urls、tests 和 migrations 分工。Tournament以FK PROTECT引用创建者User；TournamentParticipant以FK PROTECT引用Tournament和PlayerProfile，(tournament,player)唯一。玩家昵称和用户名仍各自属于原有身份/档案模块，不新建身份体系。
+
+Tournament保存每场独立配置、draft/started状态和创建/更新/启动时间。数据库CHECK约束轮数1～6、正整数点数、非空名称及状态/started_at一致性；参赛关系唯一约束防重复。Uma为JSON十进制字符串数组，API及启动时的模型校验保证四项有限精确数；JSON内容和跨行人数规则由服务校验，不宣称数据库直接约束全部规则。
+
+点数使用PositiveIntegerField（1～2147483647，跨数据库存储边界），Uma输入仅整数/普通十进制字符串（每项最多64字符）；不接受JSON小数，避免解析产生二进制浮点。`rules.canonical_uma`与`derive_oka`可复用，后者用Decimal计算`4*(return-start)/1000`并输出字符串。前端预览使用BigInt整数千分位，最终以后端只读oka为准。不实现实际半庄得分。
+
+每个公开写入口进入transaction.atomic，**第一条数据库语句**执行`UPDATE Tournament SET revision=revision+1 WHERE id=? AND status='draft'`。成功写入先取得共同父行写锁，再读配置和名单；规则PATCH、名单PUT、启动POST均走此入口，不能绕过。PostgreSQL对该UPDATE持有行锁；SQLite在读取前已取得写预留，串行处理写者，不依赖SQLite无效的select_for_update。忙锁返回409 tournament_busy，由用户刷新确认后重试，写请求不自动重放。[Django行锁限制](https://docs.djangoproject.com/en/5.2/ref/models/querysets/#select-for-update)。
+
+启动重新验证配置和有效人数，锁定账号/昵称来源，bulk_update昵称快照，再写started/started_at，整体提交；任何异常整体回滚含revision。启动后所有外部写入口返回409，昵称显示快照，不随个人资料修改变化。冻结保护是API/服务约束，数据库管理员直接SQL写入不在普通API权限边界内，不宣称不可绕过的数据库历史审计。
+
+全部API使用IsAdminUser、SessionAuthentication、原有CSRF/JSON格式。POST及PATCH支持participant_ids；PATCH可原子修改规则与名单，也保留专门PUT名单接口。选手API增加可选eligible=true筛选有效账号，保持旧响应字段和默认查询行为；前端选择器正确分页和搜索，启动时再次验证有效性。
+
+前端services/tournaments.ts、pages/tournaments.tsx、components/tournament-editor.tsx复用既有API层及shadcn Sheet/Button/Badge，规则/选手分区编辑、摘要、独立启动确认、只读详情；真实接口提供全部业务数据。没有Round、RoundTable、MachineAllocation、赛事设备FK或占用锁。预计桌数是人数/4的展示推导，设备分配和跨赛事调度留给后续轮次管理。
+
+迁移0001仅新建两张赛事表及约束，无历史迁移改动；在独立QA副本正常migrate。SQLite共享内存及文件事务并发已测试，PostgreSQL实际连接、行锁和并发仍UNVERIFIED。
 
 ## F0-02 身份、档案与会话
 

@@ -1,0 +1,51 @@
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+Found 13 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: common, corsheaders, rest_framework, staticfiles
+  Apply all migrations: accounts, auth, contenttypes, machines, players, sessions, tournaments
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying machines.0001_initial... OK
+  Applying machines.0002_mahjongmachine_machine_number_digits_only... OK
+  Applying players.0001_initial... OK
+  Applying sessions.0001_initial... OK
+test_all_legal_sizes_start_and_snapshot_freeze (tournaments.tests.TournamentTests.test_all_legal_sizes_start_and_snapshot_freeze) ... ok
+test_database_constraints_and_unique_participants (tournaments.tests.TournamentTests.test_database_constraints_and_unique_participants) ... ok
+test_defaults_independent_config_and_exact_oka (tournaments.tests.TournamentTests.test_defaults_independent_config_and_exact_oka) ... ok
+test_draft_edit_and_roster_replacement (tournaments.tests.TournamentTests.test_draft_edit_and_roster_replacement) ... ok
+test_invalid_config_unknown_and_internal_fields (tournaments.tests.TournamentTests.test_invalid_config_unknown_and_internal_fields) ... ok
+test_invalid_rosters_are_atomic (tournaments.tests.TournamentTests.test_invalid_rosters_are_atomic) ... ok
+test_invalid_start_count_and_deactivated_player (tournaments.tests.TournamentTests.test_invalid_start_count_and_deactivated_player) ... ok
+test_list_search_status_pagination_no_delete_or_state_injection (tournaments.tests.TournamentTests.test_list_search_status_pagination_no_delete_or_state_injection) ... ok
+test_permissions_all_endpoints_and_csrf (tournaments.tests.TournamentTests.test_permissions_all_endpoints_and_csrf) ... ok
+test_snapshot_failure_rolls_back_everything (tournaments.tests.TournamentTests.test_snapshot_failure_rolls_back_everything) ... ok
+test_start_revalidates_persisted_uma (tournaments.tests.TournamentTests.test_start_revalidates_persisted_uma) ... ok
+test_parallel_start_only_one_commits (tournaments.tests.ConcurrentTournamentTests.test_parallel_start_only_one_commits) ... ok
+test_start_vs_roster_and_config_edits_are_serial (tournaments.tests.ConcurrentTournamentTests.test_start_vs_roster_and_config_edits_are_serial) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.605s
+
+OK
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+  Applying tournaments.0001_initial... OK
+System check identified no issues (0 silenced).

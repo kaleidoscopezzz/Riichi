@@ -1,0 +1,9 @@
+Migrations for 'tournaments':
+  backend\tournaments\migrations\0001_initial.py
+    + Create model Tournament
+    + Create model TournamentParticipant
+    + Create constraint tournament_round_range on model tournament
+    + Create constraint tournament_positive_points on model tournament
+    + Create constraint tournament_lifecycle on model tournament
+    + Create constraint tournament_name_nonblank on model tournament
+    + Create constraint unique_tournament_player on model tournamentparticipant

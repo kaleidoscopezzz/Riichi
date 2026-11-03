@@ -1,6 +1,6 @@
 # Riichi
 
-Web 四人立直麻将赛事管理系统。V1.0 仅支持个人赛，当前 **F0-03** 提供账号与选手档案，以及管理员麻将机资源台账；赛事、分桌、计分和设备占用调度尚未实现。
+Web 四人立直麻将赛事管理系统。V1.0 仅支持个人赛，当前 **F0-04** 提供账号、选手档案、设备资源和赛事领域基础。管理员可以创建赛事草稿、选择真实选手、配置规则并启动冻结；分桌、计分、冠军和设备占用调度尚未实现。
 
 Riichi Premium 界面以深海军蓝、石墨黑和中性色为基础，提供仪表盘、赛事管理、选手管理、麻将机管理和系统设置五个基础页面。仪表盘展示欢迎信息、功能入口与实际后端连接状态，不包含虚构赛事统计。
 
@@ -116,9 +116,9 @@ npm run build
 - [基线管理](docs/project/baselines.md)
 - [开发约束](AGENTS.md)
 
-账号注册与选手档案已实现；赛事领域对象、配置、分桌、计分和冠军判定属于后续 V1.0 任务。微信赛事发布、报名、绑定和播报仅为未来候选。
+账号注册、选手档案、设备和赛事配置/启动已实现；分桌、计分和冠军判定属于后续 V1.0 任务。微信赛事发布、报名、绑定和播报仅为未来候选。
 
-F0-01 正式基线为 baseline/F0-01，Commit 94a1fec747806682602dd24f7edbbcc4e27d07f0。当前正式基线 baseline/F0-02（59be947ca133dbe18a63dcdc99e55a3243daed51），本次 F0-03 不执行 commit、tag 或 push，等待 Planner 验收和 Owner 手动 Git 操作。
+当前正式基线 baseline/F0-03（0d7e96b0b920e490abbf7acd1d4aba38493025f9），Planner PASS。F0-01/F0-02历史基线保留；本次 F0-04 不执行 commit、tag 或 push，等待 Planner 验收和 Owner 手动 Git 操作。
 
 ## F0-02 账号系统使用
 
@@ -156,3 +156,13 @@ Set-Location D:\Riichi\backend
 API：GET/POST /api/v1/machines/，GET/PATCH /api/v1/machines/{id}/，POST /api/v1/machines/{id}/retire/。全部需要管理员Session，写请求必须携带CSRF；search按编号/名称搜索，status筛选，page分页。总览是未过滤的真实全局统计。
 
 [本阶段报告、调用示例与验证边界](docs/project/F0-03-verification.md)。没有新增依赖，F0-01/F0-02证据保留；SQLite并发已实测，PostgreSQL实际连接/并发与公网部署仍未验证。
+
+## F0-04 赛事领域基础
+
+使用上方PowerShell启动命令，先showmigrations、migrate，再按需交互执行createsuperuser。管理员访问 `/tournaments`，创建/编辑草稿、搜索分页选择真实有效选手，检查规则和名单后明确确认启动。普通用户没有管理菜单或API权限。启动不分桌、不分配设备、不产生比赛成绩。
+
+规则默认25000开局、30000返还、Uma [30,10,-10,-30]，轮数1～6；草稿允许名单未完整，启动需要4/8/12/16名有效选手。启动事务冻结规则和昵称快照，已启动只读，不支持删除或取消。
+
+API（均需管理员Session，所有写请求带CSRF）：GET/POST `/api/v1/tournaments/`；GET/PATCH `/api/v1/tournaments/{id}/`；PUT `/api/v1/tournaments/{id}/participants/`；POST `/api/v1/tournaments/{id}/start/`。列表支持search/status/page。点数为整数、Uma用精确十进制字符串传递，oka只读。
+
+本阶段未增加依赖或改动锁文件。实际执行的迁移、测试、HTTP和浏览器检查、请求示例及工程限制见 [F0-04交付报告](docs/project/F0-04-verification.md)。全部旧证据保留。验证只迁移独立QA库；开发库尚未应用F0-04，正式本地使用前请正常执行migrate。PostgreSQL与公网部署仍未验证。

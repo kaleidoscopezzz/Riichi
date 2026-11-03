@@ -63,14 +63,16 @@ export function SettingsPage() {
           </div>
           <div>
             <dt>当前阶段</dt>
-            <dd>F0-03 麻将机资源管理</dd>
+            <dd>F0-04 赛事领域基础</dd>
           </div>
           <div>
             <dt>服务接口</dt>
             <dd className="mono">GET /api/v1/health/</dd>
           </div>
         </dl>
-        <p className="settings-note">账号与选手档案已开放；赛事与计分功能仍在后续规划中。</p>
+        <p className="settings-note">
+          账号、设备与赛事配置已开放；分桌、计分和冠军判定仍在后续规划中。
+        </p>
       </section>
       <HealthStatus />
       <section className="settings-panel settings-about">

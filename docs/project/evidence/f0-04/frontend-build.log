@@ -1,0 +1,18 @@
+
+> riichi-frontend@0.1.0 build
+> npm run typecheck && vite build
+
+
+> riichi-frontend@0.1.0 typecheck
+> tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 2188 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.65 kB │ gzip:   0.43 kB
+dist/assets/index-eM5IPKPp.css   68.21 kB │ gzip:  13.74 kB
+dist/assets/index-DeX9QE_B.js   404.23 kB │ gzip: 126.18 kB
+
+✓ built in 617ms

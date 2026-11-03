@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from '@/layouts/app-layout'
 import { DashboardPage } from '@/pages/dashboard'
-import { PlaceholderPage } from '@/pages/placeholder'
+import { TournamentsPage } from '@/pages/tournaments'
 import { SettingsPage } from '@/pages/settings'
 import { NotFoundPage } from '@/pages/not-found'
 import { AuthPage } from '@/pages/auth'
@@ -19,8 +19,8 @@ export function App() {
         <Route element={<AppLayout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="tournaments" element={<PlaceholderPage />} />
           <Route element={<RouteGuard admin />}>
+            <Route path="tournaments" element={<TournamentsPage />} />
             <Route path="players" element={<PlayersPage />} />
             <Route path="machines" element={<MachinesPage />} />
           </Route>

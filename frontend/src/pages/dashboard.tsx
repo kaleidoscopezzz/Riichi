@@ -79,8 +79,8 @@ export function DashboardPage() {
           </p>
           <div className="hero-actions">
             <Button asChild className="gold-button">
-              <Link to="/tournaments">
-                进入赛事管理
+              <Link to={user?.is_staff ? '/tournaments' : '/profile'}>
+                {user?.is_staff ? '进入赛事管理' : '查看个人资料'}
                 <ArrowRight size={16} />
               </Link>
             </Button>
@@ -106,7 +106,7 @@ export function DashboardPage() {
         </div>
         <div className="quick-access-grid">
           {[
-            navigation[1],
+            ...(user?.is_staff ? [navigation[1]] : []),
             user?.is_staff ? navigation[2] : navigation[5],
             ...(user?.is_staff ? [navigation[3]] : []),
           ].map(({ path, title, icon: Icon }, index) => (
@@ -121,15 +121,18 @@ export function DashboardPage() {
                 <h3>{title}</h3>
                 <p>
                   {
-                    [
-                      '组织个人赛事，串联每一轮对局',
-                      user?.is_staff ? '查询已注册选手与账号资料' : '维护你的选手昵称和账号资料',
-                      '统一设备编号，让每张牌桌各就其位',
-                    ][index]
+                    (
+                      {
+                        '/tournaments': '配置个人赛事，确认名单与规则',
+                        '/players': '查询已注册选手与账号资料',
+                        '/profile': '维护你的选手昵称和账号资料',
+                        '/machines': '统一设备编号，维护物理设备台账',
+                      } as Record<string, string>
+                    )[path]
                   }
                 </p>
                 <div className="quick-card-bottom">
-                  <span>{path !== '/tournaments' ? '进入查看' : '功能准备中'}</span>
+                  <span>进入查看</span>
                   <ArrowRight size={14} />
                 </div>
               </Card>
@@ -148,7 +151,7 @@ export function DashboardPage() {
             <Flag size={19} className="gold-text" />
           </div>
           <p className="foundation-description">
-            账号与选手档案已开放。赛事组织、分桌与计分将在后续阶段逐步实现。
+            账号、选手、设备台账与赛事配置已开放。分桌、计分与排名将在后续阶段逐步实现。
           </p>
           <div className="phase-row">
             <span className="phase-icon complete">
@@ -167,8 +170,8 @@ export function DashboardPage() {
               <CircleDashed size={18} />
             </span>
             <div>
-              <h3>个人赛事管理</h3>
-              <p>赛事组织 · 分桌 · 计分与排名</p>
+              <h3>轮次与比赛管理</h3>
+              <p>分桌 · 计分与排名</p>
             </div>
             <span className="upcoming-label">后续规划</span>
           </div>

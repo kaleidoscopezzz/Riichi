@@ -1,0 +1,76 @@
+from django.core.exceptions import ValidationError as ModelValidationError
+from rest_framework import serializers
+
+from common.api import StrictFieldsMixin
+from .models import Tournament
+from .rules import canonical_uma
+
+
+class ExactInteger(serializers.IntegerField):
+    def to_internal_value(self, data):
+        if isinstance(data, bool) or not isinstance(data, int):
+            self.fail("invalid")
+        return super().to_internal_value(data)
+
+
+class UmaField(serializers.Field):
+    def to_internal_value(self, data):
+        try:
+            return canonical_uma(data)
+        except ModelValidationError as exc:
+            raise serializers.ValidationError(exc.messages) from None
+
+
+class TournamentWriteSerializer(StrictFieldsMixin, serializers.Serializer):
+    name = serializers.CharField(max_length=120)
+    description = serializers.CharField(max_length=3000, allow_blank=True, required=False)
+    round_count = ExactInteger(min_value=1, max_value=6)
+    starting_points = ExactInteger(min_value=1, max_value=2147483647, required=False)
+    return_points = ExactInteger(min_value=1, max_value=2147483647, required=False)
+    uma = UmaField(required=False)
+
+
+class ParticipantWriteSerializer(StrictFieldsMixin, serializers.Serializer):
+    participant_ids = serializers.ListField(child=ExactInteger(min_value=1), max_length=16)
+
+    def validate_participant_ids(self, value):
+        if len(value) != len(set(value)):
+            raise serializers.ValidationError("同一选手不能重复参赛。")
+        return value
+
+
+class TournamentCreateSerializer(TournamentWriteSerializer):
+    participant_ids = serializers.ListField(child=ExactInteger(min_value=1), max_length=16, required=False)
+
+    def validate_participant_ids(self, value):
+        return ParticipantWriteSerializer().validate_participant_ids(value)
+
+
+class EmptySerializer(StrictFieldsMixin, serializers.Serializer):
+    pass
+
+
+class TournamentSerializer(serializers.ModelSerializer):
+    oka = serializers.CharField(read_only=True)
+    participant_count = serializers.SerializerMethodField()
+    expected_table_count = serializers.SerializerMethodField()
+    participants = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Tournament
+        fields = ["id", "name", "description", "round_count", "starting_points", "return_points", "uma", "oka", "status", "created_by", "created_at", "updated_at", "started_at", "participant_count", "expected_table_count", "participants"]
+
+    def get_participant_count(self, obj):
+        return len(obj.participants.all())
+
+    def get_expected_table_count(self, obj):
+        count = self.get_participant_count(obj)
+        return count // 4 if count in (4, 8, 12, 16) else None
+
+    def get_participants(self, obj):
+        return [{"id": entry.id, "player_id": entry.player_id,
+                 "display_name": entry.display_name_snapshot if obj.status == "started" else entry.player.nickname,
+                 "username": entry.player.user.username,
+                 "is_active": entry.player.user.is_active,
+                 "display_name_snapshot": entry.display_name_snapshot}
+                for entry in obj.participants.all()]

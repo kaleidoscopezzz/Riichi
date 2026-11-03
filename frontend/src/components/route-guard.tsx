@@ -23,7 +23,7 @@ export function RouteGuard({ admin = false }: { admin?: boolean }) {
     return (
       <div className="session-state" role="alert">
         <h1>无权访问</h1>
-        <p>选手列表仅向管理员开放。</p>
+        <p>此管理页面仅向管理员开放。</p>
         <a href="/dashboard">返回仪表盘</a>
       </div>
     )

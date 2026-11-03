@@ -1,0 +1,24 @@
+
+> riichi-frontend@0.1.0 dev
+> vite --host 127.0.0.1
+
+
+  VITE v8.3.5  ready in 623 ms
+
+  ➜  Local:   http://127.0.0.1:5173/
+15:11:24 [vite] (client) hmr update /src/styles/globals.css, /src/pages/tournaments.tsx, /src/components/tournament-editor.tsx
+15:11:25 [vite] (client) hmr update /src/styles/globals.css, /src/layouts/app-layout.tsx
+15:11:26 [vite] (client) hmr update /src/styles/globals.css, /src/layouts/app-layout.tsx
+15:11:26 [vite] (client) hmr update /src/styles/globals.css, /src/pages/settings.tsx
+15:11:27 [vite] (client) hmr update /src/styles/globals.css, /src/pages/tournaments.tsx, /src/components/tournament-editor.tsx
+15:11:27 [vite] (client) hmr update /src/styles/globals.css
+15:18:26 [vite] (client) hmr update /src/styles/globals.css, /src/components/tournament-editor.tsx
+15:18:27 [vite] (client) hmr update /src/styles/globals.css
+15:19:17 [vite] (client) hmr update /src/styles/globals.css
+15:19:33 [vite] http proxy error: /api/v1/tournaments/?page=1&search=%E6%B5%8F%E8%A7%88%E5%99%A8%E9%AA%8C%E8%AF%81&status=
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+15:21:39 [vite] (client) hmr update /src/pages/dashboard.tsx, /src/styles/globals.css
+15:21:39 [vite] (client) hmr update /src/styles/globals.css, /src/pages/settings.tsx
+15:22:28 [vite] (client) hmr update /src/pages/dashboard.tsx, /src/styles/globals.css
+15:22:28 [vite] (client) hmr update /src/styles/globals.css, /src/pages/settings.tsx

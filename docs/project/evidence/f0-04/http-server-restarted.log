@@ -1,0 +1,116 @@
+[03/Nov/2026 15:12:20] "GET /api/v1/health/ HTTP/1.1" 200 57
+Forbidden: /api/v1/tournaments/
+[03/Nov/2026 15:12:20] "GET /api/v1/tournaments/ HTTP/1.1" 403 93
+Forbidden (CSRF cookie not set.): /api/v1/auth/login/
+[03/Nov/2026 15:12:20] "POST /api/v1/auth/login/ HTTP/1.1" 403 159
+[03/Nov/2026 15:12:20] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:20] "POST /api/v1/auth/login/ HTTP/1.1" 200 117
+[03/Nov/2026 15:12:20] "GET /api/v1/players/?eligible=true HTTP/1.1" 200 4412
+[03/Nov/2026 15:12:20] "GET /api/v1/players/?eligible=true&page=2 HTTP/1.1" 200 960
+[03/Nov/2026 15:12:20] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:20] "POST /api/v1/tournaments/ HTTP/1.1" 201 906
+[03/Nov/2026 15:12:20] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Bad Request: /api/v1/tournaments/7/
+[03/Nov/2026 15:12:20] "PATCH /api/v1/tournaments/7/ HTTP/1.1" 400 183
+[03/Nov/2026 15:12:20] "GET /api/v1/tournaments/7/ HTTP/1.1" 200 906
+[03/Nov/2026 15:12:20] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:20] "PUT /api/v1/tournaments/7/participants/ HTTP/1.1" 200 776
+[03/Nov/2026 15:12:20] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Bad Request: /api/v1/tournaments/7/start/
+[03/Nov/2026 15:12:20] "POST /api/v1/tournaments/7/start/ HTTP/1.1" 400 153
+[03/Nov/2026 15:12:20] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Bad Request: /api/v1/tournaments/7/participants/
+[03/Nov/2026 15:12:20] "PUT /api/v1/tournaments/7/participants/ HTTP/1.1" 400 147
+Forbidden: /api/v1/tournaments/
+[03/Nov/2026 15:12:20] "POST /api/v1/tournaments/ HTTP/1.1" 403 95
+Forbidden: /api/v1/tournaments/7/
+[03/Nov/2026 15:12:20] "PATCH /api/v1/tournaments/7/ HTTP/1.1" 403 95
+Forbidden: /api/v1/tournaments/7/participants/
+[03/Nov/2026 15:12:20] "PUT /api/v1/tournaments/7/participants/ HTTP/1.1" 403 95
+Forbidden: /api/v1/tournaments/7/start/
+[03/Nov/2026 15:12:20] "POST /api/v1/tournaments/7/start/ HTTP/1.1" 403 95
+[03/Nov/2026 15:12:20] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:20] "PATCH /api/v1/tournaments/7/ HTTP/1.1" 200 917
+[03/Nov/2026 15:12:20] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:21] "POST /api/v1/tournaments/7/start/ HTTP/1.1" 200 1009
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Conflict: /api/v1/tournaments/7/
+[03/Nov/2026 15:12:21] "PATCH /api/v1/tournaments/7/ HTTP/1.1" 409 108
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Conflict: /api/v1/tournaments/7/participants/
+[03/Nov/2026 15:12:21] "PUT /api/v1/tournaments/7/participants/ HTTP/1.1" 409 108
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Conflict: /api/v1/tournaments/7/start/
+[03/Nov/2026 15:12:21] "POST /api/v1/tournaments/7/start/ HTTP/1.1" 409 103
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:21] "POST /api/v1/tournaments/ HTTP/1.1" 201 1436
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:21] "POST /api/v1/tournaments/8/start/ HTTP/1.1" 200 1588
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:21] "POST /api/v1/tournaments/ HTTP/1.1" 201 1970
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:21] "POST /api/v1/tournaments/9/start/ HTTP/1.1" 200 2182
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:21] "POST /api/v1/tournaments/ HTTP/1.1" 201 2502
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:21] "POST /api/v1/tournaments/10/start/ HTTP/1.1" 200 2774
+[03/Nov/2026 15:12:21] "GET /api/v1/tournaments/?search=HTTP&status=started HTTP/1.1" 200 7581
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:21] "POST /api/v1/auth/logout/ HTTP/1.1" 200 30
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:21] "POST /api/v1/auth/login/ HTTP/1.1" 200 122
+Forbidden: /api/v1/tournaments/
+[03/Nov/2026 15:12:21] "GET /api/v1/tournaments/ HTTP/1.1" 403 99
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Forbidden: /api/v1/tournaments/
+[03/Nov/2026 15:12:21] "POST /api/v1/tournaments/ HTTP/1.1" 403 99
+[03/Nov/2026 15:12:21] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:12:21] "POST /api/v1/auth/logout/ HTTP/1.1" 200 30
+[03/Nov/2026 15:12:34] "GET /api/v1/players/?page=1&search=&eligible=true HTTP/1.1" 200 4420
+[03/Nov/2026 15:12:34] "GET /api/v1/players/?page=1&search=&eligible=true HTTP/1.1" 200 4420
+[03/Nov/2026 15:12:58] "GET /api/v1/players/?page=2&search=&eligible=true HTTP/1.1" 200 968
+[03/Nov/2026 15:13:54] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:13:54] "POST /api/v1/tournaments/ HTTP/1.1" 201 966
+[03/Nov/2026 15:13:54] "GET /api/v1/tournaments/?page=1&search=&status= HTTP/1.1" 200 14465
+[03/Nov/2026 15:13:54] "GET /api/v1/tournaments/11/ HTTP/1.1" 200 966
+[03/Nov/2026 15:13:55] "GET /api/v1/tournaments/11/ HTTP/1.1" 200 966
+[03/Nov/2026 15:14:05] "GET /api/v1/tournaments/11/ HTTP/1.1" 200 966
+[03/Nov/2026 15:14:06] "GET /api/v1/players/?page=1&search=&eligible=true HTTP/1.1" 200 4420
+[03/Nov/2026 15:14:06] "GET /api/v1/players/?page=1&search=&eligible=true HTTP/1.1" 200 4420
+[03/Nov/2026 15:14:07] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:14:07] "PATCH /api/v1/tournaments/11/ HTTP/1.1" 200 843
+[03/Nov/2026 15:14:07] "GET /api/v1/tournaments/?page=1&search=&status= HTTP/1.1" 200 14342
+[03/Nov/2026 15:14:07] "GET /api/v1/tournaments/11/ HTTP/1.1" 200 843
+[03/Nov/2026 15:14:17] "GET /api/v1/players/?page=1&search=&eligible=true HTTP/1.1" 200 4420
+[03/Nov/2026 15:14:17] "GET /api/v1/players/?page=1&search=&eligible=true HTTP/1.1" 200 4420
+[03/Nov/2026 15:14:17] "GET /api/v1/players/?page=1&search=f004_qa_admin&eligible=true HTTP/1.1" 200 268
+[03/Nov/2026 15:14:18] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:14:18] "PATCH /api/v1/tournaments/11/ HTTP/1.1" 200 966
+[03/Nov/2026 15:14:18] "GET /api/v1/tournaments/?page=1&search=&status= HTTP/1.1" 200 14465
+[03/Nov/2026 15:14:18] "GET /api/v1/tournaments/11/ HTTP/1.1" 200 966
+[03/Nov/2026 15:14:18] "GET /api/v1/tournaments/11/ HTTP/1.1" 200 966
+[03/Nov/2026 15:14:19] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:14:19] "POST /api/v1/tournaments/11/start/ HTTP/1.1" 200 1056
+[03/Nov/2026 15:14:19] "GET /api/v1/tournaments/?page=1&search=&status= HTTP/1.1" 200 14555
+[03/Nov/2026 15:14:19] "GET /api/v1/tournaments/11/ HTTP/1.1" 200 1056
+Forbidden: /api/v1/auth/me/
+Forbidden: /api/v1/auth/me/
+[03/Nov/2026 15:15:51] "GET /api/v1/auth/me/ HTTP/1.1" 403 93
+[03/Nov/2026 15:15:51] "GET /api/v1/auth/me/ HTTP/1.1" 403 93
+[03/Nov/2026 15:15:51] "GET /api/v1/health/ HTTP/1.1" 200 57
+[03/Nov/2026 15:15:56] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Bad Request: /api/v1/auth/login/
+[03/Nov/2026 15:15:57] "POST /api/v1/auth/login/ HTTP/1.1" 400 167
+Forbidden: /api/v1/auth/me/
+[03/Nov/2026 15:16:04] "GET /api/v1/auth/me/ HTTP/1.1" 403 93
+Forbidden: /api/v1/auth/me/
+[03/Nov/2026 15:16:04] "GET /api/v1/auth/me/ HTTP/1.1" 403 93
+[03/Nov/2026 15:16:04] "GET /api/v1/health/ HTTP/1.1" 200 57
+[03/Nov/2026 15:16:30] "GET /api/v1/tournaments/?page=1&search=%E6%B5%8F%E8%A7%88%E5%99%A8%E9%AA%8C%E8%AF%81&status= HTTP/1.1" 200 1108
+[03/Nov/2026 15:16:33] "GET /api/v1/players/?page=1&search=&eligible=true HTTP/1.1" 200 4420
+[03/Nov/2026 15:16:33] "GET /api/v1/players/?page=1&search=&eligible=true HTTP/1.1" 200 4420
+[03/Nov/2026 15:17:07] "GET /api/v1/tournaments/11/ HTTP/1.1" 200 1056
+[03/Nov/2026 15:17:41] "GET /api/v1/players/?page=1&search=&eligible=true HTTP/1.1" 200 4420
+[03/Nov/2026 15:17:41] "GET /api/v1/players/?page=1&search=&eligible=true HTTP/1.1" 200 4420
+[03/Nov/2026 15:18:59] "GET /api/v1/players/?page=1&search=&eligible=true HTTP/1.1" 200 4420
+[03/Nov/2026 15:18:59] "GET /api/v1/players/?page=1&search=&eligible=true HTTP/1.1" 200 4420

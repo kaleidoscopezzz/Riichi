@@ -1,0 +1,38 @@
+PASS baseline/F0-01 94a1fec747806682602dd24f7edbbcc4e27d07f0
+PASS baseline/F0-02 59be947ca133dbe18a63dcdc99e55a3243daed51
+PASS baseline/F0-03 0d7e96b0b920e490abbf7acd1d4aba38493025f9
+PASS ignored backend/.env
+PASS ignored backend/.venv/
+PASS ignored backend/db.sqlite3
+PASS ignored backend/.verification/f0-04-qa.sqlite3
+PASS ignored backend/.verification/f0-04-credentials.json
+PASS ignored frontend/node_modules/
+PASS ignored frontend/dist/
+PASS ignored .tools/
+PASS ignored frontend/.cache/
+PASS development database SHA256 unchanged; no F0-04 migration or QA seed written there
+PASS targeted secret scan, artifacts, historical source/evidence and dependency locks unchanged
+Git status:
+## main...origin/main
+ M AGENTS.md
+ M README.md
+ M backend/config/settings/base.py
+ M backend/config/urls.py
+ M backend/players/views.py
+ M docs/architecture.md
+ M docs/project/baselines.md
+ M docs/requirements.md
+ M docs/roadmap.md
+ M frontend/src/app.tsx
+ M frontend/src/components/form-feedback.tsx
+ M frontend/src/components/route-guard.tsx
+ M frontend/src/layouts/app-layout.tsx
+ M frontend/src/pages/dashboard.tsx
+ M frontend/src/pages/settings.tsx
+ M frontend/src/styles/globals.css
+?? backend/tournaments/
+?? docs/project/evidence/f0-04/
+?? frontend/src/components/tournament-editor.tsx
+?? frontend/src/pages/tournaments.test.tsx
+?? frontend/src/pages/tournaments.tsx
+?? frontend/src/services/tournaments.ts

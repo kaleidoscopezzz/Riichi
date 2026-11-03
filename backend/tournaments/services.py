@@ -1,0 +1,91 @@
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError as ModelValidationError
+from django.db import OperationalError, connection, transaction
+from django.db.models import F
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from rest_framework.exceptions import APIException, ValidationError
+
+from players.models import PlayerProfile
+from .models import Tournament, TournamentParticipant
+from .rules import canonical_uma
+
+
+class TournamentConflict(APIException):
+    status_code = 409
+
+    def __init__(self, message, code="tournament_frozen"):
+        self.default_code = code
+        super().__init__(message, code)
+
+
+def player_rows(ids):
+    if len(ids) > 16 or len(ids) != len(set(ids)):
+        raise ValidationError({"participant_ids": ["最多16名选手，不能重复选择。"]})
+    # Lock account validity and nickname sources on PostgreSQL. SQLite's parent
+    # write already holds the database write reservation before these reads.
+    users = list(get_user_model().objects.select_for_update().filter(player_profile__id__in=ids).order_by("pk"))
+    profiles = list(PlayerProfile.objects.select_for_update().filter(pk__in=ids).order_by("pk"))
+    if len(profiles) != len(ids) or any(not user.is_active for user in users):
+        raise ValidationError({"participant_ids": ["名单包含不存在或账号已停用的选手，请重新选择。"]})
+    return profiles
+
+
+def replace_entries(tournament, ids):
+    player_rows(ids)
+    tournament.participants.all().delete()
+    TournamentParticipant.objects.bulk_create([TournamentParticipant(tournament=tournament, player_id=pk) for pk in ids])
+
+
+def create_tournament(user, values):
+    values = dict(values)
+    ids = values.pop("participant_ids", [])
+    try:
+        with transaction.atomic():
+            tournament = Tournament.objects.create(created_by=user, **values)
+            replace_entries(tournament, ids)
+            return tournament
+    except OperationalError as exc:
+        database_busy(exc)
+
+
+def database_busy(exc):
+    if connection.vendor == "sqlite" and "locked" in str(exc).lower():
+        raise TournamentConflict("赛事正在被其他请求更新，请刷新后重试。", "tournament_busy") from None
+    raise exc
+
+
+def mutate_tournament(pk, *, values=None, participant_ids=None, start=False):
+    try:
+        with transaction.atomic():
+            # FIRST database statement is a conditional write, not a read. All
+            # public mutations acquire the same parent lock, including list edits.
+            # SQLite serializes writers; PostgreSQL locks this row until commit.
+            changed = Tournament.objects.filter(pk=pk, status="draft").update(revision=F("revision") + 1)
+            tournament = get_object_or_404(Tournament, pk=pk)
+            if not changed:
+                raise TournamentConflict("赛事已经启动，不能重复启动。" if start else "赛事已启动，配置和名单已冻结。", "already_started" if start else "tournament_frozen")
+            if values is not None:
+                for key, value in values.items():
+                    setattr(tournament, key, value)
+            if participant_ids is not None:
+                replace_entries(tournament, participant_ids)
+            if start:
+                try:
+                    tournament.uma = canonical_uma(tournament.uma)
+                    tournament.full_clean()
+                except ModelValidationError as exc:
+                    raise ValidationError(getattr(exc, "message_dict", {"uma": exc.messages})) from None
+                entries = list(tournament.participants.all())
+                if len(entries) not in (4, 8, 12, 16):
+                    raise ValidationError({"participant_ids": ["启动需要4、8、12或16名选手。"]})
+                profiles = {row.pk: row for row in player_rows([entry.player_id for entry in entries])}
+                for entry in entries:
+                    entry.display_name_snapshot = profiles[entry.player_id].nickname
+                TournamentParticipant.objects.bulk_update(entries, ["display_name_snapshot"])
+                tournament.status = "started"
+                tournament.started_at = timezone.now()
+            tournament.save()
+            return tournament
+    except OperationalError as exc:
+        database_busy(exc)

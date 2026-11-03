@@ -1,0 +1,91 @@
+- link "跳转到主要内容":
+  - /url: "#main-content"
+- complementary:
+  - link "Riichi 首页":
+    - /url: /dashboard
+    - generic: R
+    - text: riichi
+    - generic: TOURNAMENT SYSTEM
+  - generic: 工作空间
+  - navigation "主导航":
+    - link "仪表盘":
+      - /url: /dashboard
+      - generic: 仪表盘
+    - link "赛事管理":
+      - /url: /tournaments
+      - generic: 赛事管理
+    - link "选手管理":
+      - /url: /players
+      - generic: 选手管理
+    - link "麻将机管理":
+      - /url: /machines
+      - generic: 麻将机管理
+    - link "系统设置":
+      - /url: /settings
+      - generic: 系统设置
+    - link "个人资料":
+      - /url: /profile
+      - generic: 个人资料
+  - paragraph: 从容组织，专注对局
+  - text: 为立直麻将赛事而设计
+  - text: RIICHI PREMIUM
+  - generic: V1.0
+- banner:
+  - navigation "breadcrumb":
+    - list:
+      - link "工作空间":
+        - /url: /dashboard
+      - link "赛事管理" [disabled]
+  - generic: 服务已连接
+  - button "切换为亮色主题":
+  - link "我的个人资料":
+    - /url: /profile
+    - text: f004_qa_admin
+  - button "退出"
+- main:
+  - generic: RIICHI WORKSPACE
+  - heading "赛事管理" [level=1]
+  - paragraph: 管理每一场精彩对局
+  - generic: 个人赛 · V1.0
+  - generic: INDIVIDUAL TOURNAMENTS
+  - heading "从一份规则，开启一场赛事。" [level=2]
+  - paragraph: 独立配置每场个人赛，确认选手与规则后启动。
+  - button "创建赛事":
+    - text: 创建赛事
+  - paragraph: 赛事启动会冻结配置与名单。轮次分桌、设备分配和计分将在后续阶段开放。
+  - generic: TOURNAMENT DIRECTORY
+  - heading "赛事档案" [level=2]
+  - button "刷新列表":
+    - text: 刷新列表
+  - textbox "搜索赛事名称": 浏览器验证
+  - button "搜索" [active]
+  - text: 状态筛选
+  - combobox "状态筛选":
+    - option "全部状态" [selected]
+    - option "草稿"
+    - option "已启动"
+  - table "赛事列表":
+    - row "赛事名称 状态 参赛人数 总轮数 创建时间 操作":
+      - columnheader "赛事名称"
+      - columnheader "状态"
+      - columnheader "参赛人数"
+      - columnheader "总轮数"
+      - columnheader "创建时间"
+      - columnheader "操作"
+    - row "浏览器验证个人赛 个人赛 · ID 11 已启动 4 人 3 轮 2026/11/3 查看赛事 浏览器验证个人赛":
+      - cell "浏览器验证个人赛 个人赛 · ID 11":
+        - strong: 浏览器验证个人赛
+        - generic: 个人赛 · ID 11
+      - cell "已启动":
+        - generic: 已启动
+      - cell "4 人"
+      - cell "3 轮"
+      - cell "2026/11/3"
+      - cell "查看赛事 浏览器验证个人赛":
+        - button "查看赛事 浏览器验证个人赛": 查看详情
+  - generic: 共 1 场 · 第 1 页
+  - button "上一页" [disabled]
+  - button "下一页" [disabled]
+- contentinfo:
+  - generic: RIICHI·让对局回归精彩
+  - generic: Foundation 04/赛事领域基础

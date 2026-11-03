@@ -39,4 +39,8 @@ class PlayerListView(generics.ListAPIView):
         search = self.request.query_params.get("search", "").strip()
         if len(search) > 150:
             raise ValidationError({"search": ["搜索内容最多 150 字符。"]})
-        return PlayerProfile.objects.select_related("user").filter(Q(nickname__icontains=search) | Q(user__username__icontains=search))
+        eligible = self.request.query_params.get("eligible", "")
+        if eligible not in ("", "true"):
+            raise ValidationError({"eligible": ["仅支持 eligible=true 查询有效参赛选手。"]})
+        rows = PlayerProfile.objects.select_related("user").filter(Q(nickname__icontains=search) | Q(user__username__icontains=search))
+        return rows.filter(user__is_active=True) if eligible else rows

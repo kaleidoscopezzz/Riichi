@@ -4,9 +4,9 @@
 
 Riichi 是前后端分离、模块化单体的 Web 四人立直麻将赛事管理系统。产品范围以 `docs/requirements.md` 为准；Developer 实现 Planner 明确下发的任务，测试和自检不能替代 Planner 的外部验收。
 
-当前任务为 **F0-03 麻将机资源管理**。仅建设管理员设备台账、状态维护及退役；不得实现 Tournament、分桌、计分、设备实时占用调度、微信或团队赛，不得无关重构账号与选手模块。
+当前任务为 **F0-04 Tournament 赛事领域基础**。仅建设个人赛草稿、独立规则配置、真实选手名单、启动校验及事务冻结；不得实现轮次、分桌、计分、冠军、设备分配或占用调度、取消/删除/完赛、微信或团队赛，不得无关重构账号与选手模块。
 
-F0-01 已验收，基线 baseline/F0-01；F0-02 已正式验收，当前基线 `baseline/F0-02`，Commit `59be947ca133dbe18a63dcdc99e55a3243daed51`，分支 main。不得修改、移动或删除已有基线 Tag。Developer 自检不能替代 Planner 验收。
+F0-01、F0-02、F0-03 已正式验收；当前基线 `baseline/F0-03`，Commit `0d7e96b0b920e490abbf7acd1d4aba38493025f9`，分支 main。不得修改、移动或删除已有基线 Tag。Developer 自检不能替代 Planner 验收。
 
 ## 技术与目录边界
 
@@ -39,10 +39,10 @@ F0-01 已验收，基线 baseline/F0-01；F0-02 已正式验收，当前基线 `
 
 ## Git 与交付限制
 
-- F0-03 保持当前 `main`，只进行工程实现和验证。**不得自行执行 `git commit`、`git tag`、`git push`。**
+- F0-04 保持当前 `main`，只进行工程实现和验证。**不得自行执行 `git commit`、`git tag`、`git push`。**
 - 不修改远程仓库配置，不重写历史，不删除已有文件，不执行破坏性 Git 操作。
 - 可以执行 `git status`、`git diff`、`git check-ignore` 等只读检查。
-- 本阶段不执行 commit、tag、push，Git 由项目 Owner 手动操作，Planner 负责验收与双基线核验。F0-01、F0-02 已建立正式基线，F0-03 尚待验收。详见 `docs/project/baselines.md`。
+- 本阶段不执行 commit、tag、push，Git 由项目 Owner 手动操作，Planner 负责验收与双基线核验。F0-01、F0-02、F0-03 已建立正式基线，F0-04 尚待验收。详见 `docs/project/baselines.md`。
 - 最终报告须列出工程文件、API、界面、启动方法、实际验证、Git 状态、已知问题和自检结论。完成后停止本阶段开发，等待 Planner 验收。
 
 ## F0-02 账号安全与迁移
@@ -64,3 +64,12 @@ F0-01 已验收，基线 baseline/F0-01；F0-02 已正式验收，当前基线 `
 - 全部设备接口使用现有SessionAuthentication、IsAdminUser与CSRF规则，普通用户/匿名不得读写，内部容量槽不能由请求指定。
 - 必须测试数据库约束、并发容量、状态终态、权限、CSRF及原有回归；区分SQLite内存测试、文件测试和未验证的PostgreSQL。
 - 所有验证数据和凭据仅放项目内被忽略的独立QA数据库/目录，不把验证设备作为生产演示数据。
+
+## F0-04 赛事约束
+
+- Tournament 独立保存规则；PlayerProfile FK 参赛，(tournament, player) 数据库唯一。昵称在启动事务中保存快照。
+- 仅 draft → started；全部外部修改通过 tournaments/services.py，在事务的第一条数据库语句对 draft 父行条件写入，再读取/修改规则、名单或启动。不得绕过此共享写入入口；SQLite 不依赖无效的 select_for_update，忙锁返回409。
+- 启动须再次检查配置、4/8/12/16人和有效账号；规则、名单、快照、状态、时间整体提交或回滚。started 无编辑、恢复或删除 API。
+- 点数为正整数，Uma 使用整数或十进制字符串输入并保存字符串，Oka 用 Decimal 推导。不得使用浮点计分，不自行要求 Uma 总和或顺序大小，不解决 TBD-001/002。
+- 复用管理员 Session/CSRF 与 JSON 错误结构。内部 status、started_at、created_by、revision 和 Oka 只读；选手选择必须查询真实分页API。
+- 必测权限/CSRF、配置独立性、四种人数、无效名单、快照、回滚、并发启动及启动/编辑竞态、旧功能回归。独立QA库验证迁移和HTTP；生产 PostgreSQL 未验证不得声称通过。

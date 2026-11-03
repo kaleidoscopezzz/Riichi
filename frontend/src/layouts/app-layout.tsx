@@ -44,7 +44,10 @@ function Sidebar({ close }: { close?: () => void }) {
       <div className="navigation-label">工作空间</div>
       <nav aria-label="主导航" className="main-nav">
         {navigation
-          .filter((item) => !['/players', '/machines'].includes(item.path) || user?.is_staff)
+          .filter(
+            (item) =>
+              !['/players', '/machines', '/tournaments'].includes(item.path) || user?.is_staff,
+          )
           .map(({ path, title, icon: Icon }) => (
             <NavLink
               to={path}
@@ -189,7 +192,7 @@ export function AppLayout() {
             RIICHI<span className="footer-dot">·</span>让对局回归精彩
           </span>
           <span>
-            Foundation 03<span className="footer-dot">/</span>麻将机资源管理
+            Foundation 04<span className="footer-dot">/</span>赛事领域基础
           </span>
         </footer>
       </div>

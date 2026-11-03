@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
     "players.apps.PlayersConfig",
     "machines.apps.MachinesConfig",
+    "tournaments.apps.TournamentsConfig",
 ]
 MIDDLEWARE = [
     "common.middleware.ApiErrorMiddleware",

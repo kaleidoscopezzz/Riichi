@@ -1,0 +1,12 @@
+D:\Riichi\docs\project\evidence\f0-04\qa-setup.py:3: SyntaxWarning: invalid escape sequence '\R'
+  Run from D:\Riichi\backend with .venv\Scripts\python.exe.
+Development DB unchanged before QA: c4738a1eada032c19a2f9e33f2dcb555a961f1457321b5bd2ebccd92ffa3a2c9
+accounts_user 0
+players_playerprofile 0
+machines_mahjongmachine 0
+Operations to perform:
+  Apply all migrations: accounts, auth, contenttypes, machines, players, sessions, tournaments
+Running migrations:
+  Applying tournaments.0001_initial... OK
+Superuser created successfully.
+PASS: isolated migrated QA DB; official superuser initialization; 24 QA players; development DB unchanged

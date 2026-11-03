@@ -1,0 +1,8 @@
+[03/Nov/2026 15:10:27] "GET /api/v1/health/ HTTP/1.1" 200 57
+Forbidden: /api/v1/auth/me/
+Forbidden: /api/v1/auth/me/
+[03/Nov/2026 15:10:27] "GET /api/v1/auth/me/ HTTP/1.1" 403 93
+[03/Nov/2026 15:10:27] "GET /api/v1/auth/me/ HTTP/1.1" 403 93
+[03/Nov/2026 15:10:35] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 15:10:35] "POST /api/v1/auth/login/ HTTP/1.1" 200 117
+[03/Nov/2026 15:11:09] "GET /api/v1/tournaments/?page=1&search=&status= HTTP/1.1" 200 5985

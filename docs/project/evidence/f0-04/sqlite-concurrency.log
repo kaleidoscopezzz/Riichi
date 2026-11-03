@@ -1,0 +1,7 @@
+race 1 ['already_started', 'already_started', 'already_started', 'ok'] PASS: complete frozen roster 4 rounds 3
+race 2 ['ok', 'already_started', 'already_started', 'already_started'] PASS: complete frozen roster 4 rounds 3
+race 3 ['ok', 'already_started', 'already_started', 'already_started'] PASS: complete frozen roster 4 rounds 3
+race 4 ['ok', 'ok', 'ok'] PASS: complete frozen roster 4 rounds 6
+race 5 ['ok', 'tournament_frozen', 'tournament_frozen'] PASS: complete frozen roster 4 rounds 3
+race 6 ['ok', 'tournament_frozen', 'tournament_frozen'] PASS: complete frozen roster 4 rounds 3
+PASS: six file SQLite races; no HTTP concurrency or PostgreSQL claim
