@@ -1,0 +1,45 @@
+Using existing test database for alias 'default' ('D:\Riichi\backend\.verification\f0-05-concurrency.sqlite3')...
+
+File SQLite concurrency database: D:\Riichi\backend\.verification\f0-05-concurrency.sqlite3
+Found 4 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: common, corsheaders, rest_framework, staticfiles
+  Apply all migrations: accounts, auth, contenttypes, machines, players, sessions, tournaments
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying machines.0001_initial... OK
+  Applying machines.0002_mahjongmachine_machine_number_digits_only... OK
+  Applying players.0001_initial... OK
+  Applying sessions.0001_initial... OK
+  Applying tournaments.0001_initial... OK
+test_different_tournaments_compete_for_same_pool (tournaments.tests_rounds.ConcurrentRoundTests.test_different_tournaments_compete_for_same_pool) ... ok
+test_generation_vs_state_changes (tournaments.tests_rounds.ConcurrentRoundTests.test_generation_vs_state_changes) ... ok
+test_reassign_vs_generation_and_release (tournaments.tests_rounds.ConcurrentRoundTests.test_reassign_vs_generation_and_release) ... ok
+test_same_tournament_concurrent_generation (tournaments.tests_rounds.ConcurrentRoundTests.test_same_tournament_concurrent_generation) ... ok
+
+  Applying tournaments.0002_tournamentround_roundtable_roundseat_and_more... OK
+System check identified no issues (0 silenced).
+PASS actual file SQLite: same event, cross-event allocation, machine state/retirement, reassignment/release competitions
+----------------------------------------------------------------------
+Ran 4 tests in 2.218s
+
+OK
+Preserving test database for alias 'default' ('D:\Riichi\backend\.verification\f0-05-concurrency.sqlite3')...
+

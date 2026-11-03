@@ -1,0 +1,298 @@
+
+> riichi-frontend@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 D:/Riichi/frontend
+
+(node:22644) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:51208) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ src/pages/rounds.test.tsx (14 tests | 1 failed) 2289ms
+     × 占用历史读取API，保留稳定machineId和分配快照 121ms
+(node:49764) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+stderr | src/pages/tournaments.test.tsx > 赛事工作台 > 已启动详情只读及昵称快照
+An error occurred in the <Link> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+(node:49384) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ src/pages/tournaments.test.tsx (12 tests | 1 failed) 4564ms
+     × 已启动详情只读及昵称快照 1133ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 占用历史读取API，保留稳定machineId和分配快照
+TestingLibraryElementError: Found multiple elements with the text: /稳定 machineId #1/
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+<small>
+  稳定 machineId #
+  1
+</small>
+
+Ignored nodes: comments, script, style
+<p>
+  稳定 machineId #
+  1
+   · 当前编号 008
+</p>
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+<body
+  data-scroll-locked="1"
+  style="pointer-events: none;"
+>
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
+  <div
+    aria-hidden="true"
+    data-aria-hidden="true"
+  >
+    <div
+      class="round-workspace"
+      tabindex="-1"
+    >
+      <a
+        class="round-back"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="15"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="15"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+        返回赛事档案
+      </a>
+      <section
+        class="round-hero"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            ROUND & RESOURCE CONTROL
+          </span>
+          <h2>
+            轮次测试赛事
+          </h2>
+          <p>
+            逻辑桌承载选手与座次，物理设备记录实际占用。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+          刷新工作台
+        </button>
+      </section>
+      <div
+        class="round-metrics"
+      >
+        <div>
+          <span>
+            冻结参赛人数
+          </span>
+          <strong>
+            4
+          </strong>
+        </div>
+        <div>
+          <span>
+            配置总轮数
+          </span>
+          <strong>
+            3
+          </strong>
+        </div>
+        <div>
+          <span>
+            预计每轮桌数
+          </span>
+          <strong>
+            1
+          </strong>
+        </div>
+        <div>
+          <span>
+            本赛事设备占用
+          </span>
+          <strong>
+            1 / 1
+          </strong>
+        </div>
+      </div>
+      <section
+        class="settings-panel round-resource-panel"
+      >
+        <div
+          class="section-heading"
+        >
+          <div>
+            <span
+              class="eyebrow"
+            >
+              LIVE PHYSICAL RESOURCES
+            </span>
+            <h3>
+              设备资源池
+            </h3>
+          </div>
+          <span
+            class="inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3 border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground"
+            data-slot="badge"
+            data-variant="outline"
+          >
+            可分配 
+            1
+             台
+          </span>
+        </div>
+        <div
+          class="round-resources"
+        >
+          <article
+            class="occupied"
+          >
+            <div>
+              <span
+                class="machine-number"
+              >
+                007
+              </span>
+              <span
+         ...
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/pages/rounds.test.tsx:279:19
+    277|     await screen.findByText('历史释放')
+    278|     expect(fetchAllocationHistory).toHaveBeenCalledWith(20)
+    279|     expect(screen.getByText(/稳定 machineId #1/)).toBeTruthy()
+       |                   ^
+    280|     expect(screen.getByText('设备 007')).toBeTruthy()
+    281|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/pages/tournaments.test.tsx > 赛事工作台 > 已启动详情只读及昵称快照
+TestingLibraryElementError: Unable to find role="dialog"
+
+Ignored nodes: comments, script, style
+<body
+  style=""
+>
+  <div />
+</body>
+
+Ignored nodes: comments, script, style
+<body
+  style=""
+>
+  <div />
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ openDetail src/pages/tournaments.test.tsx:92:16
+     90|   const user = userEvent.setup()
+     91|   await user.click(await screen.findByRole('button', { name: '查看赛事 验证个…
+     92|   await screen.findByRole('dialog')
+       |                ^
+     93|   return user
+     94| }
+ ❯ src/pages/tournaments.test.tsx:251:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+TypeError: Cannot destructure property 'basename' of 'React10.useContext(...)' as it is null.
+ ❯ LinkWithRef node_modules/react-router/dist/development/chunk-6KYCQHYJ.mjs:10644:11
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:28571:20
+ ❯ renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:8030:22
+ ❯ updateForwardRef node_modules/react-dom/cjs/react-dom-client.development.js:10123:19
+ ❯ beginWork node_modules/react-dom/cjs/react-dom-client.development.js:12536:18
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:1048:13
+ ❯ performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:19176:22
+ ❯ workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:19004:41
+ ❯ renderRootSync node_modules/react-dom/cjs/react-dom-client.development.js:18985:11
+ ❯ performWorkOnRoot node_modules/react-dom/cjs/react-dom-client.development.js:18094:35
+
+This error originated in "src/pages/tournaments.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "已启动详情只读及昵称快照". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  2 failed | 4 passed (6)
+      Tests  2 failed | 61 passed (63)
+     Errors  1 error
+   Start at  16:23:58
+   Duration  7.08s (transform 818ms, setup 0ms, import 4.07s, tests 14.75s, environment 5.28s)
+

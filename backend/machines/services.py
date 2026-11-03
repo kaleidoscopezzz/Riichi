@@ -4,6 +4,7 @@ from django.utils import timezone
 from rest_framework.exceptions import APIException
 
 from .models import MahjongMachine
+from .locking import lock_machine_pool
 
 
 class MachineConflict(APIException):
@@ -39,10 +40,15 @@ def create_machine(values):
 def change_machine(machine_id, values=None, *, retire=False):
     try:
         with transaction.atomic():
-            machine = get_object_or_404(MahjongMachine.objects.select_for_update(), pk=machine_id)
+            lock_machine_pool()
+            machine = get_object_or_404(MahjongMachine, pk=machine_id)
             if machine.status == MahjongMachine.Status.RETIRED:
                 raise MachineConflict("设备已经退役，不能重复退役。" if retire else "已退役设备仅供查看，不能编辑或重新启用。", "already_retired" if retire else "retired_readonly")
             changes = {"status": "retired", "capacity_slot": None} if retire else dict(values)
+            if changes.get("status", machine.status) != "available":
+                from tournaments.models import MachineAllocation
+                if MachineAllocation.objects.filter(machine=machine, status="active").exists():
+                    raise MachineConflict("设备正被逻辑桌占用，请先确认释放后再维护、停用或退役。", "machine_in_use")
             changes["updated_at"] = timezone.now()
             # SQLite does not implement SELECT FOR UPDATE. The conditional write
             # also guards the terminal state if a retirement races with an edit.

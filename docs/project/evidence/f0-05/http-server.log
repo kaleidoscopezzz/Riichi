@@ -1,0 +1,188 @@
+[03/Nov/2026 16:27:49] "GET /api/v1/health/ HTTP/1.1" 200 57
+Forbidden: /api/v1/machine-resources/
+[03/Nov/2026 16:27:49] "GET /api/v1/machine-resources/ HTTP/1.1" 403 93
+[03/Nov/2026 16:27:49] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:27:49] "POST /api/v1/auth/login/ HTTP/1.1" 200 117
+[03/Nov/2026 16:27:49] "GET /api/v1/players/?eligible=true HTTP/1.1" 200 3701
+[03/Nov/2026 16:27:49] "GET /api/v1/machine-resources/ HTTP/1.1" 200 538
+[03/Nov/2026 16:27:49] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:27:49] "POST /api/v1/tournaments/ HTTP/1.1" 201 1444
+[03/Nov/2026 16:27:49] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Conflict: /api/v1/tournaments/6/rounds/
+[03/Nov/2026 16:27:49] "POST /api/v1/tournaments/6/rounds/ HTTP/1.1" 409 113
+[03/Nov/2026 16:27:49] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:27:50] "POST /api/v1/tournaments/6/start/ HTTP/1.1" 200 1596
+[03/Nov/2026 16:27:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:27:50] "POST /api/v1/tournaments/6/rounds/ HTTP/1.1" 201 2324
+[03/Nov/2026 16:27:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Conflict: /api/v1/tournaments/6/rounds/
+[03/Nov/2026 16:27:50] "POST /api/v1/tournaments/6/rounds/ HTTP/1.1" 409 120
+[03/Nov/2026 16:27:50] "GET /api/v1/tournaments/6/rounds/1/ HTTP/1.1" 200 2324
+[03/Nov/2026 16:27:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Conflict: /api/v1/tournaments/6/rounds/
+[03/Nov/2026 16:27:50] "POST /api/v1/tournaments/6/rounds/ HTTP/1.1" 409 156
+Forbidden: /api/v1/tournaments/6/rounds/
+[03/Nov/2026 16:27:50] "POST /api/v1/tournaments/6/rounds/ HTTP/1.1" 403 95
+Forbidden: /api/v1/round-tables/1/machine/reassign/
+[03/Nov/2026 16:27:50] "POST /api/v1/round-tables/1/machine/reassign/ HTTP/1.1" 403 95
+Forbidden: /api/v1/round-tables/1/machine/release/
+[03/Nov/2026 16:27:50] "POST /api/v1/round-tables/1/machine/release/ HTTP/1.1" 403 95
+[03/Nov/2026 16:27:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Conflict: /api/v1/machines/1/
+[03/Nov/2026 16:27:50] "PATCH /api/v1/machines/1/ HTTP/1.1" 409 141
+[03/Nov/2026 16:27:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Conflict: /api/v1/machines/1/retire/
+[03/Nov/2026 16:27:50] "POST /api/v1/machines/1/retire/ HTTP/1.1" 409 141
+[03/Nov/2026 16:27:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:27:50] "POST /api/v1/round-tables/1/machine/reassign/ HTTP/1.1" 200 1384
+[03/Nov/2026 16:27:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:27:50] "POST /api/v1/round-tables/1/machine/release/ HTTP/1.1" 200 1196
+[03/Nov/2026 16:27:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Conflict: /api/v1/round-tables/1/machine/release/
+[03/Nov/2026 16:27:50] "POST /api/v1/round-tables/1/machine/release/ HTTP/1.1" 409 128
+[03/Nov/2026 16:27:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Conflict: /api/v1/round-tables/1/machine/reassign/
+[03/Nov/2026 16:27:50] "POST /api/v1/round-tables/1/machine/reassign/ HTTP/1.1" 409 128
+[03/Nov/2026 16:27:50] "GET /api/v1/round-tables/1/machine/history/ HTTP/1.1" 200 644
+[03/Nov/2026 16:27:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:27:50] "POST /api/v1/round-tables/2/machine/release/ HTTP/1.1" 200 881
+[03/Nov/2026 16:27:50] "GET /api/v1/machine-resources/ HTTP/1.1" 200 538
+[03/Nov/2026 16:27:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:27:50] "POST /api/v1/auth/logout/ HTTP/1.1" 200 30
+[03/Nov/2026 16:27:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:27:50] "POST /api/v1/auth/login/ HTTP/1.1" 200 122
+Forbidden: /api/v1/tournaments/6/rounds/
+[03/Nov/2026 16:27:50] "GET /api/v1/tournaments/6/rounds/ HTTP/1.1" 403 99
+Forbidden: /api/v1/tournaments/6/rounds/1/
+[03/Nov/2026 16:27:50] "GET /api/v1/tournaments/6/rounds/1/ HTTP/1.1" 403 99
+Forbidden: /api/v1/round-tables/1/
+[03/Nov/2026 16:27:50] "GET /api/v1/round-tables/1/ HTTP/1.1" 403 99
+Forbidden: /api/v1/round-tables/1/machine/history/
+[03/Nov/2026 16:27:51] "GET /api/v1/round-tables/1/machine/history/ HTTP/1.1" 403 99
+Forbidden: /api/v1/machine-resources/
+[03/Nov/2026 16:27:51] "GET /api/v1/machine-resources/ HTTP/1.1" 403 99
+[03/Nov/2026 16:27:51] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+Forbidden: /api/v1/round-tables/1/machine/release/
+[03/Nov/2026 16:27:51] "POST /api/v1/round-tables/1/machine/release/ HTTP/1.1" 403 99
+[03/Nov/2026 16:27:51] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:27:51] "POST /api/v1/auth/logout/ HTTP/1.1" 200 30
+Forbidden: /api/v1/auth/me/
+Forbidden: /api/v1/auth/me/
+[03/Nov/2026 16:28:04] "GET /api/v1/auth/me/ HTTP/1.1" 403 93
+[03/Nov/2026 16:28:04] "GET /api/v1/auth/me/ HTTP/1.1" 403 93
+[03/Nov/2026 16:28:04] "GET /api/v1/health/ HTTP/1.1" 200 57
+[03/Nov/2026 16:28:24] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:28:24] "POST /api/v1/auth/login/ HTTP/1.1" 200 117
+[03/Nov/2026 16:28:24] "GET /api/v1/tournaments/?page=1&search=&status= HTTP/1.1" 200 10219
+[03/Nov/2026 16:28:25] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:28:53] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:28:53] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:28:53] "GET /api/v1/health/ HTTP/1.1" 200 57
+[03/Nov/2026 16:28:53] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:28:53] "GET /api/v1/tournaments/2/rounds/ HTTP/1.1" 200 23
+[03/Nov/2026 16:28:53] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:28:53] "GET /api/v1/machine-resources/ HTTP/1.1" 200 538
+[03/Nov/2026 16:28:53] "GET /api/v1/tournaments/2/rounds/ HTTP/1.1" 200 23
+[03/Nov/2026 16:28:53] "GET /api/v1/machine-resources/ HTTP/1.1" 200 538
+[03/Nov/2026 16:28:53] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:29:15] "GET /api/v1/tournaments/2/rounds/ HTTP/1.1" 200 23
+[03/Nov/2026 16:29:15] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:29:15] "GET /api/v1/machine-resources/ HTTP/1.1" 200 538
+[03/Nov/2026 16:29:16] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:29:16] "POST /api/v1/tournaments/2/rounds/ HTTP/1.1" 201 2318
+[03/Nov/2026 16:29:16] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:29:16] "GET /api/v1/machine-resources/ HTTP/1.1" 200 758
+[03/Nov/2026 16:29:16] "GET /api/v1/tournaments/2/rounds/ HTTP/1.1" 200 2332
+[03/Nov/2026 16:29:16] "GET /api/v1/health/ HTTP/1.1" 200 57
+[03/Nov/2026 16:29:16] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:29:16] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:29:16] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:29:16] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:29:16] "GET /api/v1/machine-resources/ HTTP/1.1" 200 758
+[03/Nov/2026 16:29:16] "GET /api/v1/tournaments/2/rounds/ HTTP/1.1" 200 2332
+[03/Nov/2026 16:29:16] "GET /api/v1/round-tables/3/ HTTP/1.1" 200 1077
+[03/Nov/2026 16:29:16] "GET /api/v1/machine-resources/ HTTP/1.1" 200 758
+[03/Nov/2026 16:29:54] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:29:54] "POST /api/v1/round-tables/3/machine/reassign/ HTTP/1.1" 200 1380
+[03/Nov/2026 16:29:55] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:29:55] "GET /api/v1/machine-resources/ HTTP/1.1" 200 758
+[03/Nov/2026 16:29:55] "GET /api/v1/tournaments/2/rounds/ HTTP/1.1" 200 2635
+[03/Nov/2026 16:29:55] "GET /api/v1/round-tables/3/ HTTP/1.1" 200 1380
+[03/Nov/2026 16:29:55] "GET /api/v1/round-tables/3/machine/history/ HTTP/1.1" 200 581
+[03/Nov/2026 16:29:56] "GET /api/v1/tournaments/?page=1&search=&status= HTTP/1.1" 200 10219
+[03/Nov/2026 16:29:56] "GET /api/v1/tournaments/3/ HTTP/1.1" 200 2226
+[03/Nov/2026 16:29:56] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:29:56] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:29:56] "GET /api/v1/health/ HTTP/1.1" 200 57
+[03/Nov/2026 16:29:56] "GET /api/v1/tournaments/3/rounds/ HTTP/1.1" 200 23
+[03/Nov/2026 16:29:56] "GET /api/v1/tournaments/3/ HTTP/1.1" 200 2226
+[03/Nov/2026 16:29:56] "GET /api/v1/tournaments/3/ HTTP/1.1" 200 2226
+[03/Nov/2026 16:29:56] "GET /api/v1/machine-resources/ HTTP/1.1" 200 758
+[03/Nov/2026 16:29:56] "GET /api/v1/tournaments/3/rounds/ HTTP/1.1" 200 23
+[03/Nov/2026 16:29:56] "GET /api/v1/machine-resources/ HTTP/1.1" 200 758
+[03/Nov/2026 16:29:56] "GET /api/v1/tournaments/3/ HTTP/1.1" 200 2226
+[03/Nov/2026 16:34:26] "GET /api/v1/tournaments/?page=1&search=&status= HTTP/1.1" 200 10219
+[03/Nov/2026 16:34:26] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:34:27] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:34:27] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:34:27] "GET /api/v1/health/ HTTP/1.1" 200 57
+[03/Nov/2026 16:34:27] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:34:27] "GET /api/v1/machine-resources/ HTTP/1.1" 200 758
+[03/Nov/2026 16:34:27] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:34:27] "GET /api/v1/tournaments/2/rounds/ HTTP/1.1" 200 2635
+[03/Nov/2026 16:34:28] "GET /api/v1/round-tables/3/ HTTP/1.1" 200 1380
+[03/Nov/2026 16:34:28] "GET /api/v1/machine-resources/ HTTP/1.1" 200 758
+[03/Nov/2026 16:35:47] "GET /api/v1/round-tables/3/ HTTP/1.1" 200 1380
+[03/Nov/2026 16:35:47] "GET /api/v1/machine-resources/ HTTP/1.1" 200 758
+[03/Nov/2026 16:35:47] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:35:48] "POST /api/v1/round-tables/3/machine/release/ HTTP/1.1" 200 1203
+[03/Nov/2026 16:35:48] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:35:48] "GET /api/v1/machine-resources/ HTTP/1.1" 200 648
+[03/Nov/2026 16:35:48] "GET /api/v1/tournaments/2/rounds/ HTTP/1.1" 200 2458
+[03/Nov/2026 16:35:48] "GET /api/v1/round-tables/4/ HTTP/1.1" 200 1079
+[03/Nov/2026 16:35:48] "GET /api/v1/machine-resources/ HTTP/1.1" 200 648
+[03/Nov/2026 16:35:48] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:35:48] "POST /api/v1/round-tables/4/machine/release/ HTTP/1.1" 200 857
+[03/Nov/2026 16:35:48] "GET /api/v1/tournaments/2/ HTTP/1.1" 200 1627
+[03/Nov/2026 16:35:48] "GET /api/v1/machine-resources/ HTTP/1.1" 200 538
+[03/Nov/2026 16:35:48] "GET /api/v1/tournaments/2/rounds/ HTTP/1.1" 200 2236
+[03/Nov/2026 16:35:49] "GET /api/v1/tournaments/?page=1&search=&status= HTTP/1.1" 200 10219
+[03/Nov/2026 16:35:49] "GET /api/v1/tournaments/4/ HTTP/1.1" 200 2818
+[03/Nov/2026 16:35:49] "GET /api/v1/health/ HTTP/1.1" 200 57
+[03/Nov/2026 16:35:49] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:35:49] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:35:49] "GET /api/v1/tournaments/4/rounds/ HTTP/1.1" 200 23
+[03/Nov/2026 16:35:49] "GET /api/v1/machine-resources/ HTTP/1.1" 200 538
+[03/Nov/2026 16:35:49] "GET /api/v1/tournaments/4/ HTTP/1.1" 200 2818
+[03/Nov/2026 16:35:49] "GET /api/v1/tournaments/4/ HTTP/1.1" 200 2818
+[03/Nov/2026 16:35:50] "GET /api/v1/tournaments/4/rounds/ HTTP/1.1" 200 23
+[03/Nov/2026 16:35:50] "GET /api/v1/machine-resources/ HTTP/1.1" 200 538
+[03/Nov/2026 16:35:50] "GET /api/v1/tournaments/4/ HTTP/1.1" 200 2818
+[03/Nov/2026 16:35:50] "GET /api/v1/auth/csrf/ HTTP/1.1" 200 92
+[03/Nov/2026 16:35:50] "POST /api/v1/tournaments/4/rounds/ HTTP/1.1" 201 4480
+[03/Nov/2026 16:35:50] "GET /api/v1/tournaments/4/ HTTP/1.1" 200 2818
+[03/Nov/2026 16:35:50] "GET /api/v1/machine-resources/ HTTP/1.1" 200 983
+[03/Nov/2026 16:35:50] "GET /api/v1/tournaments/4/rounds/ HTTP/1.1" 200 4494
+[03/Nov/2026 16:36:08] "GET /api/v1/round-tables/5/ HTTP/1.1" 200 1083
+[03/Nov/2026 16:36:08] "GET /api/v1/machine-resources/ HTTP/1.1" 200 983
+[03/Nov/2026 16:40:05] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:40:05] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:40:05] "GET /api/v1/health/ HTTP/1.1" 200 57
+[03/Nov/2026 16:40:05] "GET /api/v1/machine-resources/ HTTP/1.1" 200 983
+[03/Nov/2026 16:40:05] "GET /api/v1/tournaments/4/ HTTP/1.1" 200 2818
+[03/Nov/2026 16:40:05] "GET /api/v1/machine-resources/ HTTP/1.1" 200 983
+[03/Nov/2026 16:40:05] "GET /api/v1/tournaments/4/ HTTP/1.1" 200 2818
+[03/Nov/2026 16:40:05] "GET /api/v1/tournaments/4/rounds/ HTTP/1.1" 200 4494
+[03/Nov/2026 16:40:05] "GET /api/v1/tournaments/4/rounds/ HTTP/1.1" 200 4494
+[03/Nov/2026 16:40:24] "GET /api/v1/tournaments/?page=1&search=&status= HTTP/1.1" 200 10219
+[03/Nov/2026 16:40:24] "GET /api/v1/tournaments/?page=1&search=&status= HTTP/1.1" 200 10219
+[03/Nov/2026 16:40:24] "GET /api/v1/tournaments/4/ HTTP/1.1" 200 2818
+[03/Nov/2026 16:40:24] "GET /api/v1/tournaments/4/rounds/ HTTP/1.1" 200 4494
+[03/Nov/2026 16:40:24] "GET /api/v1/tournaments/4/rounds/ HTTP/1.1" 200 4494
+[03/Nov/2026 16:40:25] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:40:25] "GET /api/v1/health/ HTTP/1.1" 200 57
+[03/Nov/2026 16:40:25] "GET /api/v1/auth/me/ HTTP/1.1" 200 109
+[03/Nov/2026 16:40:25] "GET /api/v1/machine-resources/ HTTP/1.1" 200 983
+[03/Nov/2026 16:40:25] "GET /api/v1/tournaments/4/ HTTP/1.1" 200 2818
+[03/Nov/2026 16:40:25] "GET /api/v1/tournaments/4/ HTTP/1.1" 200 2818
+[03/Nov/2026 16:40:25] "GET /api/v1/tournaments/4/rounds/ HTTP/1.1" 200 4494

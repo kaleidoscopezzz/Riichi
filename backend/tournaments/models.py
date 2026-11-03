@@ -47,3 +47,83 @@ class TournamentParticipant(models.Model):
     class Meta:
         ordering = ["id"]
         constraints = [models.UniqueConstraint(fields=["tournament", "player"], name="unique_tournament_player")]
+
+
+class TournamentRound(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.PROTECT, related_name="rounds")
+    round_number = models.PositiveSmallIntegerField()
+    generated_at = models.DateTimeField(auto_now_add=True)
+    generated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="generated_rounds")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["round_number"]
+        constraints = [
+            models.UniqueConstraint(fields=["tournament", "round_number"], name="unique_tournament_round"),
+            models.CheckConstraint(condition=Q(round_number__gte=1, round_number__lte=6), name="round_number_range"),
+        ]
+
+
+class RoundTable(models.Model):
+    round = models.ForeignKey(TournamentRound, on_delete=models.PROTECT, related_name="tables")
+    table_number = models.PositiveSmallIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["table_number"]
+        constraints = [
+            models.UniqueConstraint(fields=["round", "table_number"], name="unique_round_table"),
+            models.CheckConstraint(condition=Q(table_number__gte=1, table_number__lte=4), name="table_number_range"),
+        ]
+
+
+class RoundSeat(models.Model):
+    class Wind(models.TextChoices):
+        EAST = "east", "东"
+        SOUTH = "south", "南"
+        WEST = "west", "西"
+        NORTH = "north", "北"
+
+    round = models.ForeignKey(TournamentRound, on_delete=models.PROTECT, related_name="seats")
+    table = models.ForeignKey(RoundTable, on_delete=models.PROTECT, related_name="seats")
+    participant = models.ForeignKey(TournamentParticipant, on_delete=models.PROTECT, related_name="round_seats")
+    seat_wind = models.CharField(max_length=5, choices=Wind)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.table.round_id != self.round_id:
+            raise ValidationError({"table": "逻辑桌与座次必须属于同一轮。"})
+        if self.participant.tournament_id != self.round.tournament_id:
+            raise ValidationError({"participant": "不能安排其他赛事的参赛者。"})
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["table", "seat_wind"], name="unique_table_wind"),
+            models.UniqueConstraint(fields=["round", "participant"], name="unique_round_participant"),
+            models.CheckConstraint(condition=Q(seat_wind__in=["east", "south", "west", "north"]), name="seat_wind_valid"),
+        ]
+
+
+class MachineAllocation(models.Model):
+    class Status(models.TextChoices):
+        ACTIVE = "active", "占用中"
+        RELEASED = "released", "已释放"
+
+    table = models.ForeignKey(RoundTable, on_delete=models.PROTECT, related_name="allocations")
+    machine = models.ForeignKey("machines.MahjongMachine", on_delete=models.PROTECT, related_name="allocations")
+    status = models.CharField(max_length=8, choices=Status, default=Status.ACTIVE)
+    allocated_at = models.DateTimeField(auto_now_add=True)
+    allocated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="machine_allocations")
+    released_at = models.DateTimeField(null=True, blank=True)
+    released_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="machine_releases")
+    release_reason = models.CharField(max_length=500, blank=True)
+    machine_no_snapshot = models.CharField(max_length=3)
+
+    class Meta:
+        ordering = ["allocated_at", "id"]
+        constraints = [
+            models.UniqueConstraint(fields=["machine"], condition=Q(status="active"), name="unique_active_machine"),
+            models.UniqueConstraint(fields=["table"], condition=Q(status="active"), name="unique_active_table"),
+            models.CheckConstraint(condition=Q(status="active", released_at__isnull=True, released_by__isnull=True, release_reason="") | Q(status="released", released_at__isnull=False, released_by__isnull=False), name="allocation_release_state"),
+        ]

@@ -1,0 +1,26 @@
+[
+  {
+    "path": "players",
+    "title": "选手管理"
+  },
+  {
+    "path": "machines",
+    "title": "麻将机管理"
+  },
+  {
+    "path": "settings",
+    "title": "系统设置"
+  },
+  {
+    "path": "profile",
+    "title": "个人资料"
+  },
+  {
+    "path": "tournaments",
+    "title": "赛事管理"
+  },
+  {
+    "path": "dashboard",
+    "title": "仪表盘"
+  }
+]

@@ -1,0 +1,11 @@
+Development SHA256 c4738a1eada032c19a2f9e33f2dcb555a961f1457321b5bd2ebccd92ffa3a2c9
+accounts_user 0
+players_playerprofile 0
+machines_mahjongmachine 0
+Operations to perform:
+  Apply all migrations: accounts, auth, contenttypes, machines, players, sessions, tournaments
+Running migrations:
+  Applying tournaments.0001_initial... OK
+  Applying tournaments.0002_tournamentround_roundtable_roundseat_and_more... OK
+Superuser created successfully.
+PASS isolated QA migrated and seeded; development DB unchanged; no credentials printed

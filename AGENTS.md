@@ -4,9 +4,9 @@
 
 Riichi 是前后端分离、模块化单体的 Web 四人立直麻将赛事管理系统。产品范围以 `docs/requirements.md` 为准；Developer 实现 Planner 明确下发的任务，测试和自检不能替代 Planner 的外部验收。
 
-当前任务为 **F0-04 Tournament 赛事领域基础**。仅建设个人赛草稿、独立规则配置、真实选手名单、启动校验及事务冻结；不得实现轮次、分桌、计分、冠军、设备分配或占用调度、取消/删除/完赛、微信或团队赛，不得无关重构账号与选手模块。
+当前任务为 **F0-05 比赛轮次、首轮分桌与麻将机资源分配**。仅生成已启动赛事第一轮、随机四风座次、真实机器分配/调整/释放及历史；不得实现后续轮次积分分桌、成绩、计分、排名、冠军、取消/删除/完赛、强制中断、微信或团队赛，不得无关重构账号与选手模块。
 
-F0-01、F0-02、F0-03 已正式验收；当前基线 `baseline/F0-03`，Commit `0d7e96b0b920e490abbf7acd1d4aba38493025f9`，分支 main。不得修改、移动或删除已有基线 Tag。Developer 自检不能替代 Planner 验收。
+F0-01～F0-04 已正式验收；当前基线 `baseline/F0-04`，Commit `434a8aa9ae5bd075705322e0556688b7424db16a`，分支 main，Planner CLOSED / PASS。不得修改、移动或删除已有基线 Tag。Developer 自检不能替代 Planner 验收。
 
 ## 技术与目录边界
 
@@ -39,10 +39,10 @@ F0-01、F0-02、F0-03 已正式验收；当前基线 `baseline/F0-03`，Commit `
 
 ## Git 与交付限制
 
-- F0-04 保持当前 `main`，只进行工程实现和验证。**不得自行执行 `git commit`、`git tag`、`git push`。**
+- F0-05 保持当前 `main`，只进行工程实现和验证。**不得自行执行 `git commit`、`git tag`、`git push`。**
 - 不修改远程仓库配置，不重写历史，不删除已有文件，不执行破坏性 Git 操作。
 - 可以执行 `git status`、`git diff`、`git check-ignore` 等只读检查。
-- 本阶段不执行 commit、tag、push，Git 由项目 Owner 手动操作，Planner 负责验收与双基线核验。F0-01、F0-02、F0-03 已建立正式基线，F0-04 尚待验收。详见 `docs/project/baselines.md`。
+- 本阶段不执行 commit、tag、push，Git 由项目 Owner 手动操作，Planner 负责验收与双基线核验。F0-01～F0-04 已建立正式基线，F0-05 尚未正式验收、尚未建立基线。详见 `docs/project/baselines.md`。
 - 最终报告须列出工程文件、API、界面、启动方法、实际验证、Git 状态、已知问题和自检结论。完成后停止本阶段开发，等待 Planner 验收。
 
 ## F0-02 账号安全与迁移
@@ -73,3 +73,14 @@ F0-01、F0-02、F0-03 已正式验收；当前基线 `baseline/F0-03`，Commit `
 - 点数为正整数，Uma 使用整数或十进制字符串输入并保存字符串，Oka 用 Decimal 推导。不得使用浮点计分，不自行要求 Uma 总和或顺序大小，不解决 TBD-001/002。
 - 复用管理员 Session/CSRF 与 JSON 错误结构。内部 status、started_at、created_by、revision 和 Oka 只读；选手选择必须查询真实分页API。
 - 必测权限/CSRF、配置独立性、四种人数、无效名单、快照、回滚、并发启动及启动/编辑竞态、旧功能回归。独立QA库验证迁移和HTTP；生产 PostgreSQL 未验证不得声称通过。
+
+## F0-05 轮次与占用约束
+
+- 只通过round_services生成第一轮：SystemRandom无固定生产种子，测试可注入rng；4/8/12/16人对应1/2/3/4桌，各桌四风、全员恰好一次。生成后不重排，不提供座次编辑。
+- RoundSeat跨表一致性由clean及服务审计，数据库UNIQUE/CHECK仅保证可表达的单行与唯一规则；不得把跨表校验冒称数据库CHECK。
+- 分配稳定machineId并快照machine_no；available且无active分配才可用，按编号升序选择。active机器与active桌各自条件唯一，released保留历史及释放时间/管理员/说明。
+- 状态变更、生成、调整、释放共用machines.locking.lock_machine_pool。SQLite第一条语句为不改变值的UPDATE取得写预留；PostgreSQL按稳定PK顺序锁物理池，再锁赛事/写子记录，禁止反序取设备锁。新插入而未在本次锁定集合中的设备留到后续请求。
+- active设备禁止维护/停用/退役，可编辑普通资料；调整先校验目标，再原子释放旧分配并创建新分配。同机调整明确409，不增加历史。
+- 释放为占用终态，无恢复入口；释放不等于成绩确认或轮次结束，Tournament保持started。
+- 管理员Session、CSRF和严格字段继续适用。独立QA库运行真实文件SQLite并发与旧全量回归，PostgreSQL未实测须列UNVERIFIED。
+- 第二至第六轮等待未来已确认成绩及累计积分；当前明确拒绝，不生成假排名，不解决TBD-001/002。

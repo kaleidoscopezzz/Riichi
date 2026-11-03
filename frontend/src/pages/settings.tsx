@@ -63,7 +63,7 @@ export function SettingsPage() {
           </div>
           <div>
             <dt>当前阶段</dt>
-            <dd>F0-04 赛事领域基础</dd>
+            <dd>F0-05 首轮分桌与设备分配</dd>
           </div>
           <div>
             <dt>服务接口</dt>
@@ -71,7 +71,7 @@ export function SettingsPage() {
           </div>
         </dl>
         <p className="settings-note">
-          账号、设备与赛事配置已开放；分桌、计分和冠军判定仍在后续规划中。
+          账号、设备、赛事配置与首轮分桌已开放；成绩、后续轮次和冠军判定仍在后续规划中。
         </p>
       </section>
       <HealthStatus />

@@ -1,0 +1,13 @@
+Migrations for 'tournaments':
+  backend\tournaments\migrations\0002_tournamentround_roundtable_roundseat_and_more.py
+    + Create model TournamentRound
+    + Create model RoundTable
+    + Create model RoundSeat
+    + Create model MachineAllocation
+    + Create constraint unique_tournament_round on model tournamentround
+    + Create constraint round_number_range on model tournamentround
+    + Create constraint unique_round_table on model roundtable
+    + Create constraint table_number_range on model roundtable
+    + Create constraint unique_table_wind on model roundseat
+    + Create constraint unique_round_participant on model roundseat
+    + Create constraint seat_wind_valid on model roundseat

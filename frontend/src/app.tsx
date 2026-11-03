@@ -9,6 +9,7 @@ import { ProfilePage } from '@/pages/profile'
 import { PlayersPage } from '@/pages/players'
 import { RouteGuard } from '@/components/route-guard'
 import { MachinesPage } from '@/pages/machines'
+import { RoundsPage } from '@/pages/rounds'
 
 export function App() {
   return (
@@ -21,6 +22,7 @@ export function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route element={<RouteGuard admin />}>
             <Route path="tournaments" element={<TournamentsPage />} />
+            <Route path="tournaments/:id/rounds" element={<RoundsPage />} />
             <Route path="players" element={<PlayersPage />} />
             <Route path="machines" element={<MachinesPage />} />
           </Route>

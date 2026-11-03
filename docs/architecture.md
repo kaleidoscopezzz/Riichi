@@ -11,7 +11,7 @@ Riichi 使用前后端分离、模块化单体。浏览器运行 React 应用，
 | API | Python 3.13、Django 5.2 LTS、DRF | 版本化接口、配置及公共服务 |
 | 存储 | SQLite / PostgreSQL | 本地开发 / 正式环境预留 |
 
-当前提供健康检查、账号/选手档案、设备资源台账及 F0-04 Tournament 领域基础。赛事草稿、配置与名单、启动冻结独立组织；实际分桌、半庄计分和冠军判定尚未实现。
+当前提供健康检查、账号/选手档案、设备台账、Tournament配置/冻结，以及F0-05首轮随机分桌和物理设备分配/释放历史。成绩、后续轮次、计分与冠军判定未实现。
 
 ## 顶层目录
 
@@ -95,6 +95,7 @@ frontend/
 | `/` | 跳转 `/dashboard` |
 | `/dashboard` | 仪表盘 |
 | `/tournaments` | 管理员赛事列表、创建/编辑草稿、详情与启动确认 |
+| `/tournaments/:id/rounds` | 管理员首轮分桌工作台、资源池、调整/释放与历史 |
 | `/players` | 管理员分页查询、搜索已注册选手 |
 | `/machines` | 管理员设备资源台账、编辑与退役 |
 | `/settings` | 系统设置与基础信息 |
@@ -128,7 +129,7 @@ Tournament保存每场独立配置、draft/started状态和创建/更新/启动�
 
 全部API使用IsAdminUser、SessionAuthentication、原有CSRF/JSON格式。POST及PATCH支持participant_ids；PATCH可原子修改规则与名单，也保留专门PUT名单接口。选手API增加可选eligible=true筛选有效账号，保持旧响应字段和默认查询行为；前端选择器正确分页和搜索，启动时再次验证有效性。
 
-前端services/tournaments.ts、pages/tournaments.tsx、components/tournament-editor.tsx复用既有API层及shadcn Sheet/Button/Badge，规则/选手分区编辑、摘要、独立启动确认、只读详情；真实接口提供全部业务数据。没有Round、RoundTable、MachineAllocation、赛事设备FK或占用锁。预计桌数是人数/4的展示推导，设备分配和跨赛事调度留给后续轮次管理。
+前端services/tournaments.ts、pages/tournaments.tsx、components/tournament-editor.tsx复用既有API层及shadcn Sheet/Button/Badge，规则/选手分区编辑、摘要、独立启动确认、只读详情；真实接口提供全部业务数据。F0-04阶段仅推导预计桌数、不分配设备；F0-05扩展如下，保留赛事冻结边界。
 
 迁移0001仅新建两张赛事表及约束，无历史迁移改动；在独立QA副本正常migrate。SQLite共享内存及文件事务并发已测试，PostgreSQL实际连接、行锁和并发仍UNVERIFIED。
 
@@ -167,4 +168,33 @@ MahjongMachine.id是自增稳定主键；machine_no是三位数字编号，name(
 
 新增迁移0001建立实体/主要约束；0002补充纯数字CHECK，防止正则末尾换行的数据库边界。两项均正常migrate，未修改F0-01/F0-02迁移。SQLite内存与文件并发已验证；PostgreSQL实连及并发未验证，须在正式环境单独验证。[Django约束参考](https://docs.djangoproject.com/en/5.2/ref/models/constraints/)。
 
-未来Tournament每轮逻辑桌次应以ForeignKey引用machineId，并为历史追溯选择保护策略（例如PROTECT）；界面显示编号，可按编号顺序选择available设备。防止时间冲突、跨赛事占用、MachineAllocation、RoundTable等均留给后续任务，本次没有建立这些表或锁。capacity_slot不是赛事占用锁。
+F0-03阶段未建立赛事占用记录；F0-05采用下述MachineAllocation以FK PROTECT引用machineId。capacity_slot仍只表示现役容量，不是占用锁。
+
+## F0-05 轮次、座次与物理资源
+
+实体留在tournaments模块，新增round_services、round_serializers、round_views、table_urls及专门测试；设备共用锁在machines/locking.py。没有新微服务或依赖。
+
+| 实体 | 关系和约束 |
+| --- | --- |
+| TournamentRound | Tournament FK PROTECT，generated_by User；(tournament,round_number)唯一，编号CHECK 1～6；API仅生成1，服务校验不超过round_count及started |
+| RoundTable | TournamentRound FK PROTECT，(round,table_number)唯一，CHECK 1～4 |
+| RoundSeat | round、table、TournamentParticipant FK PROTECT；(table,seat_wind)与(round,participant)唯一，wind CHECK四风 |
+| MachineAllocation | RoundTable、稳定MahjongMachine FK PROTECT；active machine/table分别条件唯一；active无释放审计、released必须有released_at/released_by；保留编号快照和释放原因 |
+
+RoundSeat.clean与validate_round_structure检查table.round_id=round_id、participant所属赛事一致、每轮全员恰好一次、每桌四风及桌数/连续桌号完整。跨表一致性、精确四人和轮数不超过父赛事由服务保证，不能用普通数据库CHECK表达，不宣称数据库已覆盖；数据库唯一/CHECK兜底其可表达部分。无座次写入API和历史DELETE API。
+
+生成使用Python标准库SystemRandom.shuffle一次，不设置固定生产种子；rng可注入以确定性测试。按冻结名单随机排列，四人一组分别东南西北，原子创建轮/桌/座次及所有占用。available且无active分配的真实设备按machine_no升序选取，不足时整轮拒绝。[Python随机源说明](https://docs.python.org/3.13/library/random.html#random.SystemRandom)。
+
+共同锁顺序：**物理池稳定PK升序 → 赛事行（生成时）→ 子记录写入**。PostgreSQL用有序SELECT FOR UPDATE锁池中已有行；只能分配返回的已锁行，新插入设备在后续请求参与选择。SQLite在任何读取前执行不改值的UPDATE(updated_at=updated_at)，明确获得写预留，再读池；不依赖SQLite无效的行锁。整个池的状态、分配、调整、释放短事务串行协调，适合最多4台现役的当前规模；历史退役行也锁定，规模扩大后另行评估。忙锁返回可识别409，不自动重放。[Django行锁文档](https://docs.djangoproject.com/en/5.2/ref/models/querysets/#select-for-update)、[条件唯一约束](https://docs.djangoproject.com/en/5.2/ref/models/constraints/#uniqueconstraint)。
+
+machines.services.change_machine首先取同一池锁，再检查active分配；禁止占用设备maintenance/disabled/retired，可改普通资料。生成也先取池锁再检查状态与占用，因此分配与停用/退役竞争只有一种合法提交结果。活动分配唯一约束作为额外数据库兜底，不只依赖count检查或前端。
+
+调整在锁内验证目标存在、available且无占用，原分配写released和审计字段，再创建新active及编号快照；任何失败回滚恢复原占用。同机返回machine_unchanged，不增加历史。释放同样留记录、释放资源，已释放桌不能再调整或重开；释放不写赛事状态、不产生成绩/轮次完结。
+
+新增GET machine-resources返回真实现役状态与active占用、assignable，明确区分available与空闲；这是查询时快照，写入时仍重新检查。全部接口管理员Session/CSRF/字段白名单，旧machines响应字段保持不变。
+
+前端services/rounds.ts、pages/rounds.tsx、components/round-action.tsx复用既有API与shadcn组件。赛事详情提供工作台入口；先刷新真实数据再确认生成/调整/释放；显示四风、设备池、状态和历史，刷新恢复持久化结果。资源不足禁止确认；409保留错误和人工刷新入口，不重试写请求。
+
+第二至第六轮当前明确拒绝，未来仅在上一轮成绩全部确认后使用精确累计积分，每四人一桌、允许重复对手；不能用账号或昵称等替代。F0-06及后续任务另行实现，TBD-001/002保留。
+
+迁移tournaments/0002增四表及约束，保留0001等旧迁移；独立SQLite QA副本正常应用，开发库原样保留。内存和文件SQLite并发分开验证；PostgreSQL实连/并发仍UNVERIFIED，代码中的锁策略不能替代实测。

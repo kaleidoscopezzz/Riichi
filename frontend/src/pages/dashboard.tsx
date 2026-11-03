@@ -151,7 +151,7 @@ export function DashboardPage() {
             <Flag size={19} className="gold-text" />
           </div>
           <p className="foundation-description">
-            账号、选手、设备台账与赛事配置已开放。分桌、计分与排名将在后续阶段逐步实现。
+            账号、选手、赛事配置与首轮分桌已开放。设备分配可追溯，成绩、后续轮次与排名等待后续阶段。
           </p>
           <div className="phase-row">
             <span className="phase-icon complete">
@@ -170,8 +170,8 @@ export function DashboardPage() {
               <CircleDashed size={18} />
             </span>
             <div>
-              <h3>轮次与比赛管理</h3>
-              <p>分桌 · 计分与排名</p>
+              <h3>成绩与后续轮次</h3>
+              <p>成绩确认 · 累计计分 · 后续分桌</p>
             </div>
             <span className="upcoming-label">后续规划</span>
           </div>

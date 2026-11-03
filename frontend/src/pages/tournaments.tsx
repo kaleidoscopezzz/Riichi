@@ -103,7 +103,7 @@ export function TournamentsPage() {
       </section>
       <div className="tournament-boundary">
         <Flag size={20} />
-        <p>赛事启动会冻结配置与名单。轮次分桌、设备分配和计分将在后续阶段开放。</p>
+        <p>赛事启动后可生成第一轮随机分桌，并分配真实设备。成绩与后续轮次将在后续阶段开放。</p>
       </div>
       <FormFeedback success={success} />
       <section className="settings-panel tournament-list" ref={list} tabIndex={-1}>

@@ -1,6 +1,6 @@
 # Riichi
 
-Web 四人立直麻将赛事管理系统。V1.0 仅支持个人赛，当前 **F0-04** 提供账号、选手档案、设备资源和赛事领域基础。管理员可以创建赛事草稿、选择真实选手、配置规则并启动冻结；分桌、计分、冠军和设备占用调度尚未实现。
+Web 四人立直麻将赛事管理系统。V1.0 仅支持个人赛，当前 **F0-05** 支持账号、选手、设备、赛事草稿与启动、首轮随机分桌，以及真实设备分配/调整/释放历史。成绩、计分、后续轮次和冠军判定未实现。
 
 Riichi Premium 界面以深海军蓝、石墨黑和中性色为基础，提供仪表盘、赛事管理、选手管理、麻将机管理和系统设置五个基础页面。仪表盘展示欢迎信息、功能入口与实际后端连接状态，不包含虚构赛事统计。
 
@@ -116,9 +116,9 @@ npm run build
 - [基线管理](docs/project/baselines.md)
 - [开发约束](AGENTS.md)
 
-账号注册、选手档案、设备和赛事配置/启动已实现；分桌、计分和冠军判定属于后续 V1.0 任务。微信赛事发布、报名、绑定和播报仅为未来候选。
+账号、选手、设备、赛事配置/启动、首轮随机分桌与资源占用已实现；成绩、后续轮次、计分和冠军判定属于后续任务。微信仍为未来候选。
 
-当前正式基线 baseline/F0-03（0d7e96b0b920e490abbf7acd1d4aba38493025f9），Planner PASS。F0-01/F0-02历史基线保留；本次 F0-04 不执行 commit、tag 或 push，等待 Planner 验收和 Owner 手动 Git 操作。
+当前正式基线 baseline/F0-04（434a8aa9ae5bd075705322e0556688b7424db16a），Planner CLOSED/PASS。历史基线保留；F0-05未正式验收、未建立基线，不执行commit/tag/push，等待Planner审查和Owner手动Git操作。
 
 ## F0-02 账号系统使用
 
@@ -166,3 +166,15 @@ API：GET/POST /api/v1/machines/，GET/PATCH /api/v1/machines/{id}/，POST /api/
 API（均需管理员Session，所有写请求带CSRF）：GET/POST `/api/v1/tournaments/`；GET/PATCH `/api/v1/tournaments/{id}/`；PUT `/api/v1/tournaments/{id}/participants/`；POST `/api/v1/tournaments/{id}/start/`。列表支持search/status/page。点数为整数、Uma用精确十进制字符串传递，oka只读。
 
 本阶段未增加依赖或改动锁文件。实际执行的迁移、测试、HTTP和浏览器检查、请求示例及工程限制见 [F0-04交付报告](docs/project/F0-04-verification.md)。全部旧证据保留。验证只迁移独立QA库；开发库尚未应用F0-04，正式本地使用前请正常执行migrate。PostgreSQL与公网部署仍未验证。
+
+## F0-05 首轮分桌与物理设备
+
+仍使用上方PowerShell命令：在backend执行showmigrations、migrate（无fake/重置），按需createsuperuser；启动Django及Vite后访问http://127.0.0.1:5173。管理员从已启动赛事详情进入“分桌工作台”(`/tournaments/{id}/rounds`)。
+
+先在设备页登记真实可用设备，再确认生成第一轮。系统随机安排东南西北座次，按编号升序分配空闲available设备，资源不足整轮拒绝。刷新不重新随机，生成后无任意座次编辑。工作台可查看跨赛事占用，确认调整设备、释放或查看审计历史。
+
+active占用的设备不能维护/停用/退役；先确认实体使用已结束并释放。释放不等于成绩确认或轮次结束，不支持重新开启已释放桌。第二轮及以上当前明确拒绝，等待未来已确认成绩与累计积分。
+
+API：GET/POST `/api/v1/tournaments/{id}/rounds/`（生成体`{"round_number":1}`），GET `/api/v1/tournaments/{id}/rounds/1/`，GET `/api/v1/round-tables/{id}/`、`.../machine/history/`，POST `.../machine/reassign/`（`{"machine_id":3}`）、`.../machine/release/`（`{"reason":"实体使用结束"}`），GET `/api/v1/machine-resources/`。全部限管理员Session，写请求必须携带当前CSRF。
+
+没有新增依赖或修改依赖锁。迁移与QA只在被忽略的独立数据库执行，开发库保持原样；实际使用前须正常migrate至最新。详见 [F0-05交付、自检与验证边界](docs/project/F0-05-verification.md)。旧报告/失败证据保留，PostgreSQL及生产部署未验证。

@@ -1,0 +1,177 @@
+- link "跳转到主要内容":
+  - /url: "#main-content"
+- complementary:
+  - link "Riichi 首页":
+    - /url: /dashboard
+    - generic: R
+    - text: riichi
+    - generic: TOURNAMENT SYSTEM
+  - generic: 工作空间
+  - navigation "主导航":
+    - link "仪表盘":
+      - /url: /dashboard
+      - generic: 仪表盘
+    - link "赛事管理":
+      - /url: /tournaments
+      - generic: 赛事管理
+    - link "选手管理":
+      - /url: /players
+      - generic: 选手管理
+    - link "麻将机管理":
+      - /url: /machines
+      - generic: 麻将机管理
+    - link "系统设置":
+      - /url: /settings
+      - generic: 系统设置
+    - link "个人资料":
+      - /url: /profile
+      - generic: 个人资料
+  - paragraph: 从容组织，专注对局
+  - text: 为立直麻将赛事而设计
+  - text: RIICHI PREMIUM
+  - generic: V1.0
+- banner:
+  - navigation "breadcrumb":
+    - list:
+      - link "工作空间":
+        - /url: /dashboard
+      - link "分桌工作台" [disabled]
+  - generic: 服务已连接
+  - button "切换为亮色主题":
+  - link "我的个人资料":
+    - /url: /profile
+    - text: f005_qa_admin
+  - button "退出"
+- main:
+  - generic: RIICHI WORKSPACE
+  - heading "分桌工作台" [level=1]
+  - paragraph: 第一轮座次与真实设备占用
+  - generic: 个人赛 · V1.0
+  - link "返回赛事档案":
+    - /url: /tournaments
+    - text: 返回赛事档案
+  - generic: ROUND & RESOURCE CONTROL
+  - heading "QA 16人首轮联调" [level=2]
+  - paragraph: 逻辑桌承载选手与座次，物理设备记录实际占用。
+  - button "刷新工作台":
+    - text: 刷新工作台
+  - generic: 冻结参赛人数
+  - strong: "16"
+  - generic: 配置总轮数
+  - strong: "3"
+  - generic: 预计每轮桌数
+  - strong: "4"
+  - generic: 本赛事设备占用
+  - strong: 4 / 4
+  - generic: LIVE PHYSICAL RESOURCES
+  - heading "设备资源池" [level=3]
+  - generic: 可分配 0 台
+  - article:
+    - generic: "007"
+    - generic: 可用
+    - strong: 验证麻将机 007
+    - paragraph: 占用中 · QA 16人首轮联调 / 第1桌
+    - generic: "稳定 machineId #1"
+  - article:
+    - generic: "107"
+    - generic: 可用
+    - strong: 验证麻将机 107
+    - paragraph: 占用中 · QA 16人首轮联调 / 第2桌
+    - generic: "稳定 machineId #2"
+  - article:
+    - generic: "207"
+    - generic: 可用
+    - strong: 验证麻将机 207
+    - paragraph: 占用中 · QA 16人首轮联调 / 第3桌
+    - generic: "稳定 machineId #3"
+  - article:
+    - generic: "307"
+    - generic: 可用
+    - strong: 验证麻将机 307
+    - paragraph: 占用中 · QA 16人首轮联调 / 第4桌
+    - generic: "稳定 machineId #4"
+  - generic: PERSISTED SEATING
+  - heading "轮次与分桌" [level=3]
+  - generic: 已生成 1 轮
+  - heading "第 1 轮 已生成 · 座次固定" [level=3]
+  - time: 2026/11/3 16:35:50
+  - article:
+    - heading "逻辑桌 1" [level=4]
+    - generic: 设备占用中
+    - generic "第1桌四个座次":
+      - generic: 东
+      - strong: 验证选手 16
+      - generic: 南
+      - strong: 验证选手 14
+      - generic: 西
+      - strong: 验证选手 02
+      - generic: 北
+      - strong: 验证选手 08
+    - generic: 物理麻将机
+    - strong: "#007"
+    - generic: machineId 1
+    - button "查看第1桌设备历史":
+      - text: 历史
+    - button "调整第1桌设备": 调整设备
+    - button "释放第1桌设备": 释放设备
+  - article:
+    - heading "逻辑桌 2" [level=4]
+    - generic: 设备占用中
+    - generic "第2桌四个座次":
+      - generic: 东
+      - strong: 验证选手 10
+      - generic: 南
+      - strong: 验证选手 03
+      - generic: 西
+      - strong: 验证选手 11
+      - generic: 北
+      - strong: 验证选手 13
+    - generic: 物理麻将机
+    - strong: "#107"
+    - generic: machineId 2
+    - button "查看第2桌设备历史":
+      - text: 历史
+    - button "调整第2桌设备": 调整设备
+    - button "释放第2桌设备": 释放设备
+  - article:
+    - heading "逻辑桌 3" [level=4]
+    - generic: 设备占用中
+    - generic "第3桌四个座次":
+      - generic: 东
+      - strong: 验证选手 06
+      - generic: 南
+      - strong: 验证选手 01
+      - generic: 西
+      - strong: 验证选手 07
+      - generic: 北
+      - strong: 验证选手 09
+    - generic: 物理麻将机
+    - strong: "#207"
+    - generic: machineId 3
+    - button "查看第3桌设备历史":
+      - text: 历史
+    - button "调整第3桌设备": 调整设备
+    - button "释放第3桌设备": 释放设备
+  - article:
+    - heading "逻辑桌 4" [level=4]
+    - generic: 设备占用中
+    - generic "第4桌四个座次":
+      - generic: 东
+      - strong: 验证选手 05
+      - generic: 南
+      - strong: 验证选手 04
+      - generic: 西
+      - strong: 验证选手 12
+      - generic: 北
+      - strong: 验证选手 15
+    - generic: 物理麻将机
+    - strong: "#307"
+    - generic: machineId 4
+    - button "查看第4桌设备历史":
+      - text: 历史
+    - button "调整第4桌设备": 调整设备
+    - button "释放第4桌设备": 释放设备
+  - paragraph: 设备释放不等于成绩确认，也不等于轮次正式结束。本阶段仅生成第一轮，后续轮次依赖未来已确认的累计积分。
+- contentinfo:
+  - generic: RIICHI·让对局回归精彩
+  - generic: Foundation 05/首轮分桌与设备分配

@@ -1,0 +1,23 @@
+File SQLite concurrency database: D:\Riichi\backend\.verification\f0-05-concurrency.sqlite3
+Found 4 test(s).
+Traceback (most recent call last):
+  File "D:\Riichi\docs\project\evidence\f0-05\file-concurrency.py", line 23, in <module>
+    result = DiscoverRunner(verbosity=2, interactive=False, keepdb=True).run_tests(["tournaments.tests_rounds.ConcurrentRoundTests"])
+  File "D:\Riichi\backend\.venv\Lib\site-packages\django\test\runner.py", line 1080, in run_tests
+    old_config = self.setup_databases(
+        aliases=databases,
+        serialized_aliases=suite.serialized_aliases,
+    )
+  File "D:\Riichi\backend\.venv\Lib\site-packages\django\test\runner.py", line 978, in setup_databases
+    return _setup_databases(
+        self.verbosity,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "D:\Riichi\backend\.venv\Lib\site-packages\django\test\utils.py", line 189, in setup_databases
+    test_databases, mirrored_aliases = get_unique_databases_and_mirrors(aliases)
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "D:\Riichi\backend\.venv\Lib\site-packages\django\test\utils.py", line 335, in get_unique_databases_and_mirrors
+    if test_settings["MIRROR"]:
+       ~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'MIRROR'

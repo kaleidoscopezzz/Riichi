@@ -8,7 +8,9 @@ F0-02 已正式验收：Tag `baseline/F0-02`，Commit `59be947ca133dbe18a63dcdc9
 
 F0-03 已正式验收：Tag `baseline/F0-03`，Commit `0d7e96b0b920e490abbf7acd1d4aba38493025f9`，Branch `main`，Planner：**PASS**。本次 F0-04 开始时已用本地 Tag 解引用和 HEAD 核实；该验收状态由 Owner 本次任务确认，旧报告保留原历史快照。
 
-F0-04：当前实施中，正式基线尚未建立。开发及自检完成后等待 Planner 源码审查；本阶段不 commit、tag 或 push。所有后续 Git 提交与标签由 Owner 手动执行；不得修改或删除已有基线。未通过本次任务重新核验 GitHub 远程引用，不把本地核验冒称远端双基线核验。
+F0-04 已正式验收：Tag `baseline/F0-04`，Commit `434a8aa9ae5bd075705322e0556688b7424db16a`，Branch main，Planner **CLOSED / PASS**。Owner在F0-05任务中确认本地/GitHub双基线已建立，本地Tag解引用和HEAD已核实。旧F0-04报告保留当时快照。
+
+F0-05：当前开发阶段，未正式验收，尚未建立基线。开发自检后等待Planner审查；本阶段不commit/tag/push，Owner负责后续Git操作。所有历史Tag保持不变。本次仅核验本地引用，不把Owner提供的远端验收历史描述为本次重新查询GitHub的结果。
 
 ## F0-01 候选提交历史
 

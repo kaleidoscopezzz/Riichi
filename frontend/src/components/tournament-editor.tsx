@@ -15,6 +15,7 @@ import {
   type Tournament,
 } from '@/services/tournaments'
 import type { Player } from '@/services/api'
+import { TournamentRoundSummary } from './tournament-round-summary'
 
 export function PlayerPicker({
   selected,
@@ -460,6 +461,7 @@ export function TournamentDetail({
           <h2>{row.name}</h2>
           <p>{row.description || '未填写赛事说明'}</p>
           <TournamentRules row={row} />
+          {row.status === 'started' && <TournamentRoundSummary id={row.id} />}
           <section>
             <div className="tournament-section-heading">
               <h3>参赛名单</h3>
@@ -501,6 +503,11 @@ export function TournamentDetail({
             <Button variant="outline" disabled={busy} onClick={close}>
               {confirm ? '暂不启动' : '关闭'}
             </Button>
+            {row.status === 'started' && (
+              <Button asChild>
+                <a href={`/tournaments/${row.id}/rounds`}>进入分桌工作台</a>
+              </Button>
+            )}
             {row.status === 'draft' &&
               (confirm ? (
                 <Button disabled={busy || !valid} onClick={() => void start()}>

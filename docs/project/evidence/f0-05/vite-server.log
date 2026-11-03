@@ -1,0 +1,30 @@
+
+> riichi-frontend@0.1.0 dev
+> vite --host 127.0.0.1
+
+
+  VITE v8.3.5  ready in 913 ms
+
+  ➜  Local:   http://127.0.0.1:5173/
+16:30:37 [vite] (client) hmr update /src/pages/settings.tsx, /src/styles/globals.css
+16:30:37 [vite] (client) hmr update /src/layouts/app-layout.tsx, /src/styles/globals.css
+16:30:37 [vite] (client) hmr update /src/pages/dashboard.tsx, /src/styles/globals.css
+16:34:44 [vite] (client) hmr update /src/layouts/app-layout.tsx, /src/styles/globals.css
+16:38:03 [vite] (client) hmr update /src/styles/globals.css, /src/components/tournament-editor.tsx
+16:38:03 [vite] (client) hmr update /src/styles/globals.css
+16:38:03 [vite] (client) hmr update /src/styles/globals.css
+16:38:04 [vite] (client) hmr update /src/components/tournament-round-summary.tsx, /src/styles/globals.css
+16:38:04 [vite] (client) hmr update /src/styles/globals.css
+16:38:05 [vite] (client) hmr update /src/styles/globals.css
+16:39:23 [vite] (client) hmr update /src/styles/globals.css
+16:40:52 [vite] (client) hmr update /src/styles/globals.css
+16:41:09 [vite] http proxy error: /api/v1/tournaments/4/
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+16:41:09 [vite] http proxy error: /api/v1/tournaments/4/rounds/
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+16:41:09 [vite] http proxy error: /api/v1/machine-resources/
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1705:16)
+16:42:07 [vite] (client) hmr update /src/styles/globals.css

@@ -1,0 +1,50 @@
+PASS baseline/F0-01 94a1fec747806682602dd24f7edbbcc4e27d07f0
+PASS baseline/F0-02 59be947ca133dbe18a63dcdc99e55a3243daed51
+PASS baseline/F0-03 0d7e96b0b920e490abbf7acd1d4aba38493025f9
+PASS baseline/F0-04 434a8aa9ae5bd075705322e0556688b7424db16a
+PASS ignored backend/.env
+PASS ignored backend/.venv/
+PASS ignored backend/db.sqlite3
+PASS ignored backend/.verification/f0-05-qa.sqlite3
+PASS ignored backend/.verification/f0-05-concurrency.sqlite3
+PASS ignored backend/.verification/f0-05-concurrency-final.sqlite3
+PASS ignored backend/.verification/f0-05-credentials.json
+PASS ignored frontend/node_modules/
+PASS ignored frontend/dist/
+PASS ignored .tools/
+PASS ignored frontend/.cache/
+PASS development database SHA256 unchanged; no migration/QA data written there
+PASS targeted secret scan, artifacts, original tests/migrations/evidence and dependency locks unchanged
+## main...origin/main
+ M AGENTS.md
+ M README.md
+ M backend/config/urls.py
+ M backend/machines/services.py
+ M backend/tournaments/models.py
+ M backend/tournaments/urls.py
+ M docs/architecture.md
+ M docs/project/baselines.md
+ M docs/requirements.md
+ M docs/roadmap.md
+ M frontend/src/app.tsx
+ M frontend/src/components/form-feedback.tsx
+ M frontend/src/components/tournament-editor.tsx
+ M frontend/src/layouts/app-layout.tsx
+ M frontend/src/pages/dashboard.tsx
+ M frontend/src/pages/settings.tsx
+ M frontend/src/pages/tournaments.tsx
+ M frontend/src/styles/globals.css
+?? backend/machines/locking.py
+?? backend/tournaments/migrations/0002_tournamentround_roundtable_roundseat_and_more.py
+?? backend/tournaments/round_serializers.py
+?? backend/tournaments/round_services.py
+?? backend/tournaments/round_views.py
+?? backend/tournaments/table_urls.py
+?? backend/tournaments/tests_rounds.py
+?? docs/project/F0-05-verification.md
+?? docs/project/evidence/f0-05/
+?? frontend/src/components/round-action.tsx
+?? frontend/src/components/tournament-round-summary.tsx
+?? frontend/src/pages/rounds.test.tsx
+?? frontend/src/pages/rounds.tsx
+?? frontend/src/services/rounds.ts

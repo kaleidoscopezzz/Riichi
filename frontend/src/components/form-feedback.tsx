@@ -24,6 +24,9 @@ export function FormFeedback({ error, success }: { error?: Error | null; success
                   return_points: '返还原点',
                   uma: 'Uma',
                   participant_ids: '参赛名单',
+                  round_number: '轮次',
+                  machine_id: '物理设备',
+                  reason: '释放说明',
                 } as Record<string, string>
               )[field] || field}
               ：{Array.isArray(messages) ? messages.join(' ') : String(messages)}

@@ -1,0 +1,97 @@
+## main...origin/main
+ M AGENTS.md
+ M README.md
+ M backend/config/urls.py
+ M backend/machines/services.py
+ M backend/tournaments/models.py
+ M backend/tournaments/urls.py
+ M docs/architecture.md
+ M docs/project/baselines.md
+ M docs/requirements.md
+ M docs/roadmap.md
+ M frontend/src/app.tsx
+ M frontend/src/components/form-feedback.tsx
+ M frontend/src/components/tournament-editor.tsx
+ M frontend/src/layouts/app-layout.tsx
+ M frontend/src/pages/dashboard.tsx
+ M frontend/src/pages/settings.tsx
+ M frontend/src/pages/tournaments.tsx
+ M frontend/src/styles/globals.css
+?? backend/machines/locking.py
+?? backend/tournaments/migrations/0002_tournamentround_roundtable_roundseat_and_more.py
+?? backend/tournaments/round_serializers.py
+?? backend/tournaments/round_services.py
+?? backend/tournaments/round_views.py
+?? backend/tournaments/table_urls.py
+?? backend/tournaments/tests_rounds.py
+?? docs/project/F0-05-verification.md
+?? docs/project/evidence/f0-05/allocation-history.png
+?? docs/project/evidence/f0-05/backend-check.log
+?? docs/project/evidence/f0-05/backend-rounds-initial.log
+?? docs/project/evidence/f0-05/backend-tests-delivery.log
+?? docs/project/evidence/f0-05/backend-tests-final.log
+?? docs/project/evidence/f0-05/backend-tests-initial.log
+?? docs/project/evidence/f0-05/backend-tests.log
+?? docs/project/evidence/f0-05/browser-final-dom.txt
+?? docs/project/evidence/f0-05/browser-logs.json
+?? docs/project/evidence/f0-05/browser-routes.json
+?? docs/project/evidence/f0-05/browser-seats.txt
+?? docs/project/evidence/f0-05/changed-files.txt
+?? docs/project/evidence/f0-05/file-concurrency-final.log
+?? docs/project/evidence/f0-05/file-concurrency-initial.log
+?? docs/project/evidence/f0-05/file-concurrency.log
+?? docs/project/evidence/f0-05/file-concurrency.py
+?? docs/project/evidence/f0-05/file-manifest.py
+?? docs/project/evidence/f0-05/format-delivery.log
+?? docs/project/evidence/f0-05/format-final.log
+?? docs/project/evidence/f0-05/format-summary.log
+?? docs/project/evidence/f0-05/format-tests.log
+?? docs/project/evidence/f0-05/format.log
+?? docs/project/evidence/f0-05/four-tables-dark.png
+?? docs/project/evidence/f0-05/frontend-build-delivery.log
+?? docs/project/evidence/f0-05/frontend-build-final.log
+?? docs/project/evidence/f0-05/frontend-build.log
+?? docs/project/evidence/f0-05/frontend-tests-delivery-2.log
+?? docs/project/evidence/f0-05/frontend-tests-delivery.log
+?? docs/project/evidence/f0-05/frontend-tests-final.log
+?? docs/project/evidence/f0-05/frontend-tests-initial.log
+?? docs/project/evidence/f0-05/frontend-tests-summary.log
+?? docs/project/evidence/f0-05/frontend-tests.log
+?? docs/project/evidence/f0-05/git-status.txt
+?? docs/project/evidence/f0-05/http-check.log
+?? docs/project/evidence/f0-05/http-check.py
+?? docs/project/evidence/f0-05/http-server-final.log
+?? docs/project/evidence/f0-05/http-server.log
+?? docs/project/evidence/f0-05/hygiene-check.py
+?? docs/project/evidence/f0-05/hygiene-final.log
+?? docs/project/evidence/f0-05/hygiene-initial.log
+?? docs/project/evidence/f0-05/keyboard-focus.json
+?? docs/project/evidence/f0-05/makemigrations.log
+?? docs/project/evidence/f0-05/manifest.log
+?? docs/project/evidence/f0-05/migrate-final.log
+?? docs/project/evidence/f0-05/migration-check.log
+?? docs/project/evidence/f0-05/migrations-before.log
+?? docs/project/evidence/f0-05/network-error.png
+?? docs/project/evidence/f0-05/npm-audit.json
+?? docs/project/evidence/f0-05/ordinary-denied.png
+?? docs/project/evidence/f0-05/qa-setup.log
+?? docs/project/evidence/f0-05/qa-setup.py
+?? docs/project/evidence/f0-05/release-confirmation.png
+?? docs/project/evidence/f0-05/release-mobile-light.png
+?? docs/project/evidence/f0-05/resource-shortage.png
+?? docs/project/evidence/f0-05/responsive-metrics.json
+?? docs/project/evidence/f0-05/rounds-desktop-dark.png
+?? docs/project/evidence/f0-05/rounds-desktop-light.png
+?? docs/project/evidence/f0-05/rounds-mobile-320.png
+?? docs/project/evidence/f0-05/rounds-mobile-390.png
+?? docs/project/evidence/f0-05/source-sha256.txt
+?? docs/project/evidence/f0-05/typecheck-delivery.log
+?? docs/project/evidence/f0-05/typecheck-final.log
+?? docs/project/evidence/f0-05/typecheck-initial.log
+?? docs/project/evidence/f0-05/typecheck.log
+?? docs/project/evidence/f0-05/vite-server.log
+?? frontend/src/components/round-action.tsx
+?? frontend/src/components/tournament-round-summary.tsx
+?? frontend/src/pages/rounds.test.tsx
+?? frontend/src/pages/rounds.tsx
+?? frontend/src/services/rounds.ts
