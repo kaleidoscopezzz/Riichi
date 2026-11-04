@@ -1,0 +1,31 @@
+{
+  "before": {
+    "close": {
+      "width": 62,
+      "height": 44
+    },
+    "workspace": {
+      "width": 130,
+      "height": 36
+    }
+  },
+  "after": {
+    "close": {
+      "width": 314,
+      "height": 44
+    },
+    "workspace": {
+      "width": 314,
+      "height": 44
+    }
+  },
+  "columnCenters": [
+    466,
+    715,
+    854,
+    977,
+    1125,
+    1298
+  ],
+  "headerAndFourRowsIdentical": true
+}

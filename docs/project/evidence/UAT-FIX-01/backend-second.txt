@@ -1,0 +1,20 @@
+Creating test database for alias 'default'...
+
+.............F..............................................................................................
+======================================================================
+FAIL: test_public_registration_closed_no_hash_or_profile_created (accounts.tests.AccountFlowTests.test_public_registration_closed_no_hash_or_profile_created)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\accounts\tests.py", line 32, in test_public_registration_closed_no_hash_or_profile_created
+    self.assertEqual(response.status_code,400 if body is None else 403)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 403 != 400
+
+----------------------------------------------------------------------
+Ran 108 tests in 10.814s
+
+FAILED (failures=1)
+Destroying test database for alias 'default'...
+
+Found 108 test(s).
+System check identified no issues (0 silenced).

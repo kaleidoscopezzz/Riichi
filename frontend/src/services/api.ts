@@ -60,9 +60,12 @@ export async function api<T>(
 export type User = { id: number; username: string; is_staff: boolean; date_joined: string }
 export type Player = {
   id: number
-  username: string
+  username?: string
   nickname: string
-  date_joined: string
+  is_active?: boolean
+  can_delete?: boolean
+  reference_count?: number
+  date_joined?: string
   created_at: string
   updated_at: string
 }

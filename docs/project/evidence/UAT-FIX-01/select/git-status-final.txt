@@ -1,0 +1,220 @@
+ M AGENTS.md
+ M README.md
+ M backend/accounts/tests.py
+ M backend/accounts/views.py
+ M backend/players/serializers.py
+ M backend/players/urls.py
+ M backend/players/views.py
+ M backend/tournaments/services.py
+ M backend/tournaments/tests.py
+ M docs/F0-06-functional-spec.md
+ M docs/architecture.md
+ M docs/project/baselines.md
+ M docs/requirements.md
+ M docs/roadmap.md
+ M frontend/src/app.tsx
+ M frontend/src/components/auth-provider.tsx
+ M frontend/src/components/competition-action.tsx
+ M frontend/src/components/machine-editor.tsx
+ M frontend/src/components/navigation.ts
+ M frontend/src/components/tournament-editor.tsx
+ M frontend/src/pages/accounts.test.tsx
+ M frontend/src/pages/auth.tsx
+ M frontend/src/pages/dashboard.tsx
+ M frontend/src/pages/machines.test.tsx
+ M frontend/src/pages/machines.tsx
+ M frontend/src/pages/placeholder.tsx
+ M frontend/src/pages/players.tsx
+ M frontend/src/pages/profile.tsx
+ M frontend/src/pages/rounds.test.tsx
+ M frontend/src/pages/rounds.tsx
+ M frontend/src/pages/tournaments.test.tsx
+ M frontend/src/pages/tournaments.tsx
+ M frontend/src/services/api.ts
+ M frontend/src/services/tournaments.ts
+ M frontend/src/styles/globals.css
+ M frontend/vitest.config.ts
+?? backend/accounts/management/__init__.py
+?? backend/accounts/management/commands/__init__.py
+?? backend/accounts/management/commands/init_admin.py
+?? backend/players/services.py
+?? backend/players/tests.py
+?? backend/verification/uat_fix_01.py
+?? docs/project/UAT-FIX-01-files.md
+?? docs/project/UAT-FIX-01-select-inventory.md
+?? docs/project/UAT-FIX-01-verification.md
+?? docs/project/evidence/UAT-FIX-01/after-detail-dark1440.png
+?? docs/project/evidence/UAT-FIX-01/after-detail-footer-final.png
+?? docs/project/evidence/UAT-FIX-01/after-detail-footer.png
+?? docs/project/evidence/UAT-FIX-01/after-tournaments-dark1440.png
+?? docs/project/evidence/UAT-FIX-01/alignment-metrics.json
+?? docs/project/evidence/UAT-FIX-01/audit-initial.json
+?? docs/project/evidence/UAT-FIX-01/backend-complete.txt
+?? docs/project/evidence/UAT-FIX-01/backend-final.txt
+?? docs/project/evidence/UAT-FIX-01/backend-initial.txt
+?? docs/project/evidence/UAT-FIX-01/backend-second.txt
+?? docs/project/evidence/UAT-FIX-01/before-detail-footer-complete.png
+?? docs/project/evidence/UAT-FIX-01/before-detail-footer.png
+?? docs/project/evidence/UAT-FIX-01/before-detail.png
+?? docs/project/evidence/UAT-FIX-01/before-login.png
+?? docs/project/evidence/UAT-FIX-01/before-tournaments.png
+?? docs/project/evidence/UAT-FIX-01/browser-console-final.json
+?? docs/project/evidence/UAT-FIX-01/browser-layout-matrix-final.json
+?? docs/project/evidence/UAT-FIX-01/browser-layout-matrix.json
+?? docs/project/evidence/UAT-FIX-01/browser-summary.txt
+?? docs/project/evidence/UAT-FIX-01/build-final.txt
+?? docs/project/evidence/UAT-FIX-01/build-layout-final.txt
+?? docs/project/evidence/UAT-FIX-01/build.txt
+?? docs/project/evidence/UAT-FIX-01/check-final.txt
+?? docs/project/evidence/UAT-FIX-01/check.txt
+?? docs/project/evidence/UAT-FIX-01/create-roster-desktop.png
+?? docs/project/evidence/UAT-FIX-01/dashboard-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/dashboard-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/dashboard-390-light.png
+?? docs/project/evidence/UAT-FIX-01/delete-confirm-desktop.png
+?? docs/project/evidence/UAT-FIX-01/detail-footer-390-dark-final.png
+?? docs/project/evidence/UAT-FIX-01/diff-check-final.txt
+?? docs/project/evidence/UAT-FIX-01/diff-check-initial.txt
+?? docs/project/evidence/UAT-FIX-01/fault-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/final-audit.json
+?? docs/project/evidence/UAT-FIX-01/final-column-content-metrics.json
+?? docs/project/evidence/UAT-FIX-01/finish-390-light.png
+?? docs/project/evidence/UAT-FIX-01/frontend-complete.txt
+?? docs/project/evidence/UAT-FIX-01/frontend-final.txt
+?? docs/project/evidence/UAT-FIX-01/frontend-initial.txt
+?? docs/project/evidence/UAT-FIX-01/frontend-second.txt
+?? docs/project/evidence/UAT-FIX-01/git-status-final.txt
+?? docs/project/evidence/UAT-FIX-01/http-all-sizes.txt
+?? docs/project/evidence/UAT-FIX-01/http-final.txt
+?? docs/project/evidence/UAT-FIX-01/http.txt
+?? docs/project/evidence/UAT-FIX-01/login-320-dark-final.png
+?? docs/project/evidence/UAT-FIX-01/login-390-light-final.png
+?? docs/project/evidence/UAT-FIX-01/lottery-390-light.png
+?? docs/project/evidence/UAT-FIX-01/machine-editor-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/machines-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/machines-390-light.png
+?? docs/project/evidence/UAT-FIX-01/migrate.txt
+?? docs/project/evidence/UAT-FIX-01/migrations-check-final.txt
+?? docs/project/evidence/UAT-FIX-01/migrations-check.txt
+?? docs/project/evidence/UAT-FIX-01/npm-audit-final.json
+?? docs/project/evidence/UAT-FIX-01/npm-audit.json
+?? docs/project/evidence/UAT-FIX-01/pip-check.txt
+?? docs/project/evidence/UAT-FIX-01/player-editor-320-dark-final.png
+?? docs/project/evidence/UAT-FIX-01/players-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/players-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/players-390-light.png
+?? docs/project/evidence/UAT-FIX-01/players-desktop1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/profile-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/profile-390-light.png
+?? docs/project/evidence/UAT-FIX-01/result-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/audit.json
+?? docs/project/evidence/UAT-FIX-01/select/backend-check.txt
+?? docs/project/evidence/UAT-FIX-01/select/backend-tests.txt
+?? docs/project/evidence/UAT-FIX-01/select/browser-console-position-final.json
+?? docs/project/evidence/UAT-FIX-01/select/browser-console.json
+?? docs/project/evidence/UAT-FIX-01/select/browser-summary.txt
+?? docs/project/evidence/UAT-FIX-01/select/build-final-layout.txt
+?? docs/project/evidence/UAT-FIX-01/select/build-final.txt
+?? docs/project/evidence/UAT-FIX-01/select/build-initial.txt
+?? docs/project/evidence/UAT-FIX-01/select/build-position-final.txt
+?? docs/project/evidence/UAT-FIX-01/select/diff-check-final.txt
+?? docs/project/evidence/UAT-FIX-01/select/expanded-menu-metrics-all.json
+?? docs/project/evidence/UAT-FIX-01/select/expanded-menu-metrics-final.json
+?? docs/project/evidence/UAT-FIX-01/select/expanded-menu-metrics.json
+?? docs/project/evidence/UAT-FIX-01/select/final-machines-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/final-machines-1440-light.png
+?? docs/project/evidence/UAT-FIX-01/select/final-machines-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/final-machines-320-light.png
+?? docs/project/evidence/UAT-FIX-01/select/final-machines-390-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/final-machines-390-light.png
+?? docs/project/evidence/UAT-FIX-01/select/final-players-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/final-players-1440-light.png
+?? docs/project/evidence/UAT-FIX-01/select/final-players-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/final-players-320-light.png
+?? docs/project/evidence/UAT-FIX-01/select/final-players-390-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/final-players-390-light.png
+?? docs/project/evidence/UAT-FIX-01/select/final-tournaments-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/final-tournaments-1440-light.png
+?? docs/project/evidence/UAT-FIX-01/select/final-tournaments-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/final-tournaments-320-light.png
+?? docs/project/evidence/UAT-FIX-01/select/final-tournaments-390-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/final-tournaments-390-light.png
+?? docs/project/evidence/UAT-FIX-01/select/git-status-final.txt
+?? docs/project/evidence/UAT-FIX-01/select/keyboard-tab-320-light-final.png
+?? docs/project/evidence/UAT-FIX-01/select/layout-matrix-final.json
+?? docs/project/evidence/UAT-FIX-01/select/layout-matrix.json
+?? docs/project/evidence/UAT-FIX-01/select/lottery-320-dark-final.png
+?? docs/project/evidence/UAT-FIX-01/select/lottery-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/lottery-320-light-position-final.png
+?? docs/project/evidence/UAT-FIX-01/select/lottery-320-light.png
+?? docs/project/evidence/UAT-FIX-01/select/lottery-end-320-dark-final.png
+?? docs/project/evidence/UAT-FIX-01/select/lottery-scroll-end-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/machine-edit-390-light.png
+?? docs/project/evidence/UAT-FIX-01/select/machine-filter-320-light-final.png
+?? docs/project/evidence/UAT-FIX-01/select/machine-filter-390-light.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-machines-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-machines-1440-light.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-machines-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-machines-320-light.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-machines-390-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-machines-390-light.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-players-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-players-1440-light.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-players-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-players-320-light.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-players-390-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-players-390-light.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-tournaments-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-tournaments-1440-light.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-tournaments-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-tournaments-320-light.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-tournaments-390-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/matrix-tournaments-390-light.png
+?? docs/project/evidence/UAT-FIX-01/select/native-after.txt
+?? docs/project/evidence/UAT-FIX-01/select/native-before.txt
+?? docs/project/evidence/UAT-FIX-01/select/npm-audit.json
+?? docs/project/evidence/UAT-FIX-01/select/player-filter-390-light.png
+?? docs/project/evidence/UAT-FIX-01/select/qa-prepare.txt
+?? docs/project/evidence/UAT-FIX-01/select/replacement-1440-light.png
+?? docs/project/evidence/UAT-FIX-01/select/round-count-1440-light.png
+?? docs/project/evidence/UAT-FIX-01/select/round-count-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/round-view-1440-light.png
+?? docs/project/evidence/UAT-FIX-01/select/round-view-collision-1440x600-dark-final.png
+?? docs/project/evidence/UAT-FIX-01/select/round-view-collision-1440x600-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/round-view-collision-1440x600-light.png
+?? docs/project/evidence/UAT-FIX-01/select/round-view-six-1440-light.png
+?? docs/project/evidence/UAT-FIX-01/select/runtime-regression-54.json
+?? docs/project/evidence/UAT-FIX-01/select/runtime-regression-final.json
+?? docs/project/evidence/UAT-FIX-01/select/runtime-regression-settled.json
+?? docs/project/evidence/UAT-FIX-01/select/table-picker-390-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/table-picker-390-light.png
+?? docs/project/evidence/UAT-FIX-01/select/tournament-filter-1440-dark-final.png
+?? docs/project/evidence/UAT-FIX-01/select/tournament-filter-1440-dark-position-final.png
+?? docs/project/evidence/UAT-FIX-01/select/tournament-filter-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/tournament-filter-1440-light.png
+?? docs/project/evidence/UAT-FIX-01/select/tournament-filter-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/select/tournament-filter-320-light.png
+?? docs/project/evidence/UAT-FIX-01/select/typecheck-final.txt
+?? docs/project/evidence/UAT-FIX-01/select/typecheck-initial.txt
+?? docs/project/evidence/UAT-FIX-01/select/vite-runtime-diagnostic.txt
+?? docs/project/evidence/UAT-FIX-01/select/vitest-final.txt
+?? docs/project/evidence/UAT-FIX-01/select/vitest-initial.txt
+?? docs/project/evidence/UAT-FIX-01/select/vitest-position-final.txt
+?? docs/project/evidence/UAT-FIX-01/settings-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/settings-390-light.png
+?? docs/project/evidence/UAT-FIX-01/tournament-editor-320-dark-final.png
+?? docs/project/evidence/UAT-FIX-01/tournament-editor-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/tournaments-1440-dark.png
+?? docs/project/evidence/UAT-FIX-01/tournaments-320-dark.png
+?? docs/project/evidence/UAT-FIX-01/tournaments-390-light.png
+?? docs/project/evidence/UAT-FIX-01/tournaments-four-rows-final.png
+?? docs/project/evidence/UAT-FIX-01/typecheck-final.txt
+?? docs/project/evidence/UAT-FIX-01/typecheck.txt
+?? docs/project/evidence/UAT-FIX-01/ui-completed-390-light.png
+?? docs/project/evidence/UAT-FIX-01/ui-completed-dom.txt
+?? docs/project/evidence/UAT-FIX-01/vitest-final.txt
+?? frontend/src/components/ui/select.test.tsx
+?? frontend/src/components/ui/select.tsx
+?? frontend/src/pages/players.test.tsx
+?? frontend/src/test/select-option.ts
+?? frontend/src/test/setup-dom.ts

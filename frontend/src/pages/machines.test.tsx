@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { selectOption } from '@/test/select-option'
 import { MemoryRouter } from 'react-router-dom'
 import { MachinesPage } from './machines'
 import { App } from '@/app'
@@ -154,7 +155,7 @@ describe('设备管理工作台', () => {
     expect(detail).toHaveBeenCalledWith(9)
     await user.clear(screen.getByLabelText('设备名称'))
     await user.type(screen.getByLabelText('设备名称'), '检修设备')
-    await user.selectOptions(screen.getByLabelText('设备状态'), 'maintenance')
+    await selectOption(user, '设备状态', '维护中')
     await user.click(screen.getByRole('button', { name: '保存修改' }))
     await waitFor(() =>
       expect(save).toHaveBeenCalledWith(
@@ -206,7 +207,7 @@ describe('设备管理工作台', () => {
     await waitFor(() =>
       expect(list).toHaveBeenLastCalledWith(1, '107', '', expect.any(AbortSignal)),
     )
-    await user.selectOptions(screen.getByLabelText('状态筛选'), 'retired')
+    await selectOption(user, '状态筛选', '已退役')
     await waitFor(() =>
       expect(list).toHaveBeenLastCalledWith(1, '107', 'retired', expect.any(AbortSignal)),
     )
@@ -245,9 +246,9 @@ describe('设备路由权限', () => {
     expect(await screen.findByRole('heading', { name: '无权访问' })).toBeTruthy()
     expect(list).not.toHaveBeenCalled()
   })
-  it('普通用户导航和仪表盘不显示设备入口', async () => {
+  it('普通用户不能进入管理仪表盘', async () => {
     showApp('/dashboard')
-    expect(await screen.findByRole('heading', { name: '仪表盘' })).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: '无权访问' })).toBeTruthy()
     expect(screen.queryByRole('link', { name: /麻将机管理/ })).toBeNull()
   })
   it('匿名用户跳转登录', async () => {

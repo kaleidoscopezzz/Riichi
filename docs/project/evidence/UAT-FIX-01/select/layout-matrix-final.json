@@ -1,0 +1,290 @@
+[
+  {
+    "path": "dashboard",
+    "theme": "dark",
+    "client": 1425,
+    "interactiveNativeSelects": 0,
+    "scroll": 1425,
+    "width": 1440
+  },
+  {
+    "path": "tournaments",
+    "theme": "dark",
+    "client": 1425,
+    "interactiveNativeSelects": 0,
+    "scroll": 1425,
+    "width": 1440
+  },
+  {
+    "path": "machines",
+    "theme": "dark",
+    "client": 1425,
+    "interactiveNativeSelects": 0,
+    "scroll": 1425,
+    "width": 1440
+  },
+  {
+    "path": "players",
+    "theme": "dark",
+    "client": 1425,
+    "interactiveNativeSelects": 0,
+    "scroll": 1425,
+    "width": 1440
+  },
+  {
+    "path": "profile",
+    "theme": "dark",
+    "client": 1440,
+    "interactiveNativeSelects": 0,
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "path": "settings",
+    "theme": "dark",
+    "client": 1440,
+    "interactiveNativeSelects": 0,
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "path": "dashboard",
+    "theme": "light",
+    "client": 1425,
+    "interactiveNativeSelects": 0,
+    "scroll": 1425,
+    "width": 1440
+  },
+  {
+    "path": "tournaments",
+    "theme": "light",
+    "client": 1425,
+    "interactiveNativeSelects": 0,
+    "scroll": 1425,
+    "width": 1440
+  },
+  {
+    "path": "machines",
+    "theme": "light",
+    "client": 1425,
+    "interactiveNativeSelects": 0,
+    "scroll": 1425,
+    "width": 1440
+  },
+  {
+    "path": "players",
+    "theme": "light",
+    "client": 1425,
+    "interactiveNativeSelects": 0,
+    "scroll": 1425,
+    "width": 1440
+  },
+  {
+    "path": "profile",
+    "theme": "light",
+    "client": 1440,
+    "interactiveNativeSelects": 0,
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "path": "settings",
+    "theme": "light",
+    "client": 1440,
+    "interactiveNativeSelects": 0,
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "path": "dashboard",
+    "theme": "dark",
+    "client": 375,
+    "interactiveNativeSelects": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "path": "tournaments",
+    "theme": "dark",
+    "client": 375,
+    "interactiveNativeSelects": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "path": "machines",
+    "theme": "dark",
+    "client": 375,
+    "interactiveNativeSelects": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "path": "players",
+    "theme": "dark",
+    "client": 375,
+    "interactiveNativeSelects": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "path": "profile",
+    "theme": "dark",
+    "client": 390,
+    "interactiveNativeSelects": 0,
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "path": "settings",
+    "theme": "dark",
+    "client": 375,
+    "interactiveNativeSelects": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "path": "dashboard",
+    "theme": "light",
+    "client": 375,
+    "interactiveNativeSelects": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "path": "tournaments",
+    "theme": "light",
+    "client": 375,
+    "interactiveNativeSelects": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "path": "machines",
+    "theme": "light",
+    "client": 375,
+    "interactiveNativeSelects": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "path": "players",
+    "theme": "light",
+    "client": 375,
+    "interactiveNativeSelects": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "path": "profile",
+    "theme": "light",
+    "client": 390,
+    "interactiveNativeSelects": 0,
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "path": "settings",
+    "theme": "light",
+    "client": 375,
+    "interactiveNativeSelects": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "path": "dashboard",
+    "theme": "dark",
+    "client": 305,
+    "interactiveNativeSelects": 0,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "path": "tournaments",
+    "theme": "dark",
+    "client": 305,
+    "interactiveNativeSelects": 0,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "path": "machines",
+    "theme": "dark",
+    "client": 305,
+    "interactiveNativeSelects": 0,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "path": "players",
+    "theme": "dark",
+    "client": 305,
+    "interactiveNativeSelects": 0,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "path": "profile",
+    "theme": "dark",
+    "client": 320,
+    "interactiveNativeSelects": 0,
+    "scroll": 320,
+    "width": 320
+  },
+  {
+    "path": "settings",
+    "theme": "dark",
+    "client": 305,
+    "interactiveNativeSelects": 0,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "path": "dashboard",
+    "theme": "light",
+    "client": 305,
+    "interactiveNativeSelects": 0,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "path": "tournaments",
+    "theme": "light",
+    "client": 305,
+    "interactiveNativeSelects": 0,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "path": "machines",
+    "theme": "light",
+    "client": 305,
+    "interactiveNativeSelects": 0,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "path": "players",
+    "theme": "light",
+    "client": 305,
+    "interactiveNativeSelects": 0,
+    "scroll": 305,
+    "width": 320
+  },
+  {
+    "path": "profile",
+    "theme": "light",
+    "client": 320,
+    "interactiveNativeSelects": 0,
+    "scroll": 320,
+    "width": 320
+  },
+  {
+    "path": "settings",
+    "theme": "light",
+    "client": 305,
+    "interactiveNativeSelects": 0,
+    "scroll": 305,
+    "width": 320
+  }
+]

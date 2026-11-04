@@ -1,0 +1,40 @@
+Creating test database for alias 'default'...
+
+.D:\Riichi\backend\.venv\Lib\site-packages\rest_framework\pagination.py:198: UnorderedObjectListWarning: Pagination may yield inconsistent results with an unordered object_list: <class 'players.models.PlayerProfile'> QuerySet.
+  paginator = self.django_paginator_class(queryset, page_size)
+............F.......................FF...........................................................
+======================================================================
+FAIL: test_public_registration_closed_no_hash_or_profile_created (accounts.tests.AccountFlowTests.test_public_registration_closed_no_hash_or_profile_created)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\accounts\tests.py", line 32, in test_public_registration_closed_no_hash_or_profile_created
+    self.assertEqual(response.status_code,403)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 400 != 403
+
+======================================================================
+FAIL: test_draft_edit_and_roster_replacement (tournaments.tests.TournamentTests.test_draft_edit_and_roster_replacement)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\tournaments\tests.py", line 63, in test_draft_edit_and_roster_replacement
+    self.assertEqual(response.status_code, 200)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 400 != 200
+
+======================================================================
+FAIL: test_existing_player_query_eligible_filter_preserves_contract (tournaments.tests.TournamentTests.test_existing_player_query_eligible_filter_preserves_contract)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\tournaments\tests.py", line 90, in test_existing_player_query_eligible_filter_preserves_contract
+    self.assertEqual(original["count"], 17)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 16 != 17
+
+----------------------------------------------------------------------
+Ran 98 tests in 10.826s
+
+FAILED (failures=3)
+Destroying test database for alias 'default'...
+
+Found 98 test(s).
+System check identified no issues (0 silenced).

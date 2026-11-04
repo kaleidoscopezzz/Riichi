@@ -1,0 +1,27 @@
+frontend/src\pages\machines.tsx:192:            <select
+frontend/src\pages\machines.tsx:199:              <option value="">全部状态</option>
+frontend/src\pages\machines.tsx:201:                <option key={value} value={value}>
+frontend/src\components\competition-action.tsx:120:          <select
+frontend/src\components\competition-action.tsx:131:            <option value="">选择真实物理桌</option>
+frontend/src\components\competition-action.tsx:133:              <option
+frontend/src\components\competition-action.tsx:288:                <select
+frontend/src\components\competition-action.tsx:295:                  <option value="">请选择</option>
+frontend/src\components\competition-action.tsx:299:                      <option key={m.machine_id} value={m.machine_id}>
+frontend/src\components\competition-action.tsx:374:                  <select
+frontend/src\components\competition-action.tsx:385:                    <option value="">选择选手</option>
+frontend/src\components\competition-action.tsx:387:                      <option key={pk} value={pk} disabled={order.includes(pk) && order[i] !== pk}>
+frontend/src\pages\players.tsx:115:            <select
+frontend/src\pages\players.tsx:123:              <option value="active">有效选手</option>
+frontend/src\pages\players.tsx:124:              <option value="archived">已归档</option>
+frontend/src\pages\players.tsx:125:              <option value="">全部选手</option>
+frontend/src\components\machine-editor.tsx:136:                <select
+frontend/src\components\machine-editor.tsx:142:                    <option key={status} value={status}>
+frontend/src\pages\rounds.tsx:193:                        <select
+frontend/src\pages\rounds.tsx:199:                            <option key={r.id} value={r.round_number}>
+frontend/src\pages\tournaments.tsx:134:            <select
+frontend/src\pages\tournaments.tsx:141:              <option value="">全部状态</option>
+frontend/src\pages\tournaments.tsx:142:              <option value="draft">草稿</option>
+frontend/src\pages\tournaments.tsx:143:              <option value="started">已启动</option>
+frontend/src\pages\tournaments.tsx:144:              <option value="completed">已完赛</option>
+frontend/src\components\tournament-editor.tsx:296:                <select value={rounds} onChange={(e) => setRounds(e.target.value)}>
+frontend/src\components\tournament-editor.tsx:298:                    <option value={v} key={v}>

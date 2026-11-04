@@ -1,0 +1,10 @@
+UAT-FIX-01, 2026-11-04, local isolated SQLite QA; ports 5187/8027.
+PASS: staff login, session reload, /register redirects login without a registration form, legacy nonstaff login displays admin-only rejection, logout.
+PASS: UI create 4 players, edit nickname, archive and restore; physical deletion confirmation was opened and CANCELLED in UI (actual delete verified over HTTP and unit tests).
+PASS: real list search, page 2, archive filter returns page 1; 36 final route/width/theme cases scrollWidth <= documentElement.clientWidth.
+PASS: UI-created tournament #8, 4 players/1 round, machine 005 selected then replaced by 006 with audit reason, 25000 x4 confirmed, public lottery recorded and separately confirmed, unique champion, complete and release, reload persists.
+PASS: result entry 320 dark, public draw and completion 390 light, equipment editor 320 dark, tournament editor 320 dark, player editor 320 dark; detail footer 390 dark has two 330x44 buttons. Desktop detail footer has equal 314x44 buttons; baseline footer 62x44 vs 130x36.
+PASS: final 1440px six-column header and 4 real QA rows; name left, other content center differences <0.01 px.
+Final visual QA caught and fixed inherited html min-width overflow with Windows scrollbar and missing account-form class on new player form (input now 50px high).
+Raw early screenshots retained; report links final settled screenshots. A few transient Sheet click/locator errors and HMR closures were re-observed before actions, no blind resubmission.
+No real Owner credentials or Owner DB used. No Owner password initialization performed.

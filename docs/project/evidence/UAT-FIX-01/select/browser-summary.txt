@@ -1,0 +1,12 @@
+Owner UAT Select appendix, 2026-11-04. Local isolated QA ports 5187/8027.
+PASS: all 9 migrated call sites observed, including tournament/player/machine filters, machine editor, tournament round count, first-round physical table picker (shared with legacy review), replacement, lottery order, round view.
+PASS: final 36 layout cases (1440/390/320 x dark/light x six pages), zero horizontal overflow and zero interactive native selects.
+PASS: final 18 expanded list-filter cases, all menus and long text within viewport. Screenshots final-*.png and expanded-menu-metrics-final.json.
+PASS: Sheet portals z-index80, desktop/mobile dark/light captures for table/round/lottery. 17 lottery options with a long nickname wrap and scroll; End reaches final option; selected player disabled in another rank.
+PASS: empty physical table choice clears selection and disables preview; tournament round 4 updates draft summary; six-round view switches to round2 without changing scores.
+PASS: real Tab from search input to search button to combobox; Enter opens, Escape returns focus. First Escape inside Sheet leaves Sheet open.
+Diagnostic: an early viewport max-height bound to a changing available-height variable clipped selected round6 in a 600px-high viewport; replaced with min-height0 and constant viewport max-height, allowing Radix flex/scroll behavior; final screenshot shows selected round6 visible.
+Diagnostic: initial automated matrix used locator.press on off-screen machine triggers without user Tab/scroll, producing 4 off-screen measurements; preserved raw matrix/screenshots, reran via actual clicks after scroll and verified real Tab navigation. Final 18 cases all pass.
+No lottery was submitted, no table allocation/replacement was submitted through UI in this appendix; local QA preparation used real APIs to create pending/16-person tied tournaments #16/#17 only. Owner DB untouched.
+
+Final follow-up: Vite terminal exposed ResizeObserver notifications not captured by console-only logs. Fresh-session diagnostic log recorded 2 before the positioning fix. Select Popper now tracks Sheet transforms using updatePositionStrategy=always; global smooth focus scrolling removed (scroll-behavior:auto). Then 54 keyboard cases across all 9 locations x 3 widths x 2 themes passed viewport checks (runtime-regression-settled.json). No new ResizeObserver/Unhandled error notifications after the position change in the preserved fresh-session Vite log. No errors were suppressed. Early 54-case files are diagnostic snapshots, not final PASS evidence.

@@ -1,0 +1,39 @@
+PASS: 0 literal native select/option/optgroup tags in frontend/src.
+[
+  {
+    "file": "frontend/src/components/competition-action.tsx",
+    "line": 121
+  },
+  {
+    "file": "frontend/src/components/competition-action.tsx",
+    "line": 285
+  },
+  {
+    "file": "frontend/src/components/competition-action.tsx",
+    "line": 370
+  },
+  {
+    "file": "frontend/src/components/machine-editor.tsx",
+    "line": 137
+  },
+  {
+    "file": "frontend/src/components/tournament-editor.tsx",
+    "line": 297
+  },
+  {
+    "file": "frontend/src/pages/machines.tsx",
+    "line": 191
+  },
+  {
+    "file": "frontend/src/pages/players.tsx",
+    "line": 116
+  },
+  {
+    "file": "frontend/src/pages/rounds.tsx",
+    "line": 194
+  },
+  {
+    "file": "frontend/src/pages/tournaments.tsx",
+    "line": 135
+  }
+]

@@ -33,7 +33,7 @@ export function ProfilePage() {
     setError(null)
     setSuccess('')
     if (!nickname.trim()) {
-      setError(new Error('选手昵称不能为空。'))
+      setError(new Error('管理员显示名称不能为空。'))
       return
     }
     setBusy(true)
@@ -42,7 +42,7 @@ export function ProfilePage() {
         await api<Player>('/players/me/', { method: 'PATCH', body: { nickname: nickname.trim() } }),
       )
       setNickname(nickname.trim())
-      setSuccess('选手昵称已保存。')
+      setSuccess('管理员显示名称已保存。')
     } catch (problem) {
       setError(problem as Error)
     } finally {
@@ -52,9 +52,9 @@ export function ProfilePage() {
   if (loading) return <p role="status">正在加载个人资料…</p>
   return (
     <section className="settings-panel profile-panel">
-      <span className="eyebrow">PLAYER IDENTITY</span>
-      <h2>我的选手档案</h2>
-      <p>登录用户名用于账号身份，选手昵称用于参赛展示。</p>
+      <span className="eyebrow">ADMINISTRATOR PROFILE</span>
+      <h2>管理员资料</h2>
+      <p>此处维护后台显示名称；比赛选手请在选手管理中维护。</p>
       <dl className="system-info">
         <div>
           <dt>登录用户名</dt>
@@ -73,7 +73,7 @@ export function ProfilePage() {
       {profile ? (
         <form className="account-form" onSubmit={save}>
           <label>
-            选手昵称
+            显示名称
             <input
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
@@ -83,7 +83,7 @@ export function ProfilePage() {
             />
           </label>
           <Button type="submit" disabled={busy}>
-            {busy ? '正在保存…' : '保存昵称'}
+            {busy ? '正在保存…' : '保存显示名称'}
           </Button>
         </form>
       ) : (

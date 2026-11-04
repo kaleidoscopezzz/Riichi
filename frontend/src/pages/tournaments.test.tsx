@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { selectOption } from '@/test/select-option'
 import { MemoryRouter } from 'react-router-dom'
 import { TournamentsPage } from './tournaments'
 import { App } from '@/app'
@@ -135,7 +136,7 @@ describe('赛事工作台', () => {
     await waitFor(() =>
       expect(fetchTournaments).toHaveBeenLastCalledWith(1, '冬季', '', expect.any(AbortSignal)),
     )
-    await user.selectOptions(screen.getByLabelText('状态筛选'), 'started')
+    await selectOption(user, '状态筛选', '已启动')
     await waitFor(() =>
       expect(fetchTournaments).toHaveBeenLastCalledWith(
         1,
@@ -187,7 +188,7 @@ describe('赛事工作台', () => {
     render(<TournamentsPage />)
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: '创建赛事' }))
-    await user.click(await screen.findByRole('button', { name: /选手1.*@user1/ }))
+    await user.click(await screen.findByRole('button', { name: /选手1.*选手 #1/ }))
     expect(screen.getByText('已选 1 / 16 人')).toBeTruthy()
     await user.click(screen.getByRole('button', { name: '下一页选手' }))
     await waitFor(() =>
@@ -198,7 +199,7 @@ describe('赛事工作台', () => {
     await waitFor(() =>
       expect(findPlayers).toHaveBeenLastCalledWith(1, '选手1', expect.any(AbortSignal)),
     )
-    await user.click(screen.getByRole('button', { name: /选手1.*@user1/ }))
+    await user.click(screen.getByRole('button', { name: /选手1.*选手 #1/ }))
     expect(screen.getByText('已选 0 / 16 人')).toBeTruthy()
   })
   it('编辑草稿将配置及名单放在同一请求', async () => {

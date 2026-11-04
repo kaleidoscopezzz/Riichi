@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, RefreshCw, Trophy, Flag, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { FormFeedback } from '@/components/form-feedback'
 import {
@@ -190,17 +191,15 @@ export function RoundsPage() {
                       <h3>对局与成绩</h3>
                       <label>
                         查看轮次{' '}
-                        <select
+                        <Select
                           aria-label="查看轮次"
                           value={visible?.round_number}
-                          onChange={(e) => setSelectedRound(Number(e.target.value))}
-                        >
-                          {rounds.map((r) => (
-                            <option key={r.id} value={r.round_number}>
-                              第 {r.round_number} 轮
-                            </option>
-                          ))}
-                        </select>
+                          onValueChange={(value) => setSelectedRound(Number(value))}
+                          options={rounds.map((r) => ({
+                            value: r.round_number,
+                            label: `第 ${r.round_number} 轮`,
+                          }))}
+                        />
                       </label>
                     </div>
                     <div className="competition-tables">

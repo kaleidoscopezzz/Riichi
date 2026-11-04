@@ -12,7 +12,7 @@ F0-04 已正式验收：Tag `baseline/F0-04`，Commit `434a8aa9ae5bd075705322e05
 
 F0-05 已正式 **CLOSED / PASS**：Branch `main`，Tag `baseline/F0-05`，Commit `41929da1e53f8bb481beb4ea3bc31b65f9ee86ff`。Owner在2026-11-04的D0-01任务中确认F0-01～05本地/GitHub正式基线均已验收；本次只读核验HEAD与本地Tag解引用一致。未在D0-01重新查询远端引用，不能将Owner提供的历史验收冒称本轮远端实查。F0-05原报告中的“待验收”保留为历史快照。
 
-## D0-01正式文档与F0-06候选
+## D0-01正式文档与F0-06开发时记录（当前候选见UAT节）
 
 D0-01已正式 **CLOSED / PASS**，文档Commit为`5f31891b4ae3a589057e7054758abb08ca42ec72`。Owner在F0-06任务中确认Planner正式验收、GitHub已推送及本地/远程SHA核对一致。2026-11-04本次开发前本地main/HEAD核实与该SHA一致、工作区干净；本轮不冒称重新查询过远端。
 
@@ -52,3 +52,7 @@ F0-06开发许可已正式生效，完整核心工作流已形成未提交候选
 每次基线记录至少包含：任务编号、基线日期（Asia/Shanghai）、范围、完整 Commit SHA、分支、可选标签、Planner 验收结论与时间、实际验证证据、远端确认结果，以及已知限制。
 
 依赖锁、源代码或配置变更后，旧验证只证明旧候选。建立新基线前应针对实际候选重新完成受影响检查。密钥、`.env`、本地数据库、虚拟环境、依赖目录和构建缓存均不得纳入基线。
+
+## UAT-FIX-01 候选起点与基线暂缓
+
+Owner确认F0-06 GitHub候选为`b9e83bb0c8e31ab660b37e7e0a46c1f0bb424e65`，Planner源码及测试证据审查通过；本轮开发前main/HEAD一致、工作区干净。Owner人工验收提出四项整改，暂缓建立baseline/F0-06。UAT修复不commit/tag/push，保留所有旧Tag/报告/证据；Owner提交候选、Planner复核、Owner再次点击验收通过后才能建立正式基线。本轮实际证据见[整改报告](UAT-FIX-01-verification.md)。

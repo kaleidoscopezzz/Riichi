@@ -1,0 +1,21 @@
+
+> riichi-frontend@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 D:/Riichi/frontend
+
+(node:4724) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:4924) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3856) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:30304) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  9 passed (9)
+      Tests  86 passed (86)
+   Start at  15:34:17
+   Duration  8.75s (transform 1.08s, setup 115ms, import 5.03s, tests 19.29s, environment 7.91s)
+

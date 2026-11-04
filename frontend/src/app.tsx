@@ -15,8 +15,8 @@ export function App() {
   return (
     <Routes>
       <Route path="login" element={<AuthPage key="login" />} />
-      <Route path="register" element={<AuthPage key="register" register />} />
-      <Route element={<RouteGuard />}>
+      <Route path="register" element={<Navigate to="/login" replace />} />
+      <Route element={<RouteGuard admin />}>
         <Route element={<AppLayout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />

@@ -124,8 +124,8 @@ export function DashboardPage() {
                     (
                       {
                         '/tournaments': '配置个人赛事，确认名单与规则',
-                        '/players': '查询已注册选手与账号资料',
-                        '/profile': '维护你的选手昵称和账号资料',
+                        '/players': '新增、编辑选手，维护有效与归档档案',
+                        '/profile': '维护管理员显示名称和账号资料',
                         '/machines': '统一设备编号，维护物理设备台账',
                       } as Record<string, string>
                     )[path]

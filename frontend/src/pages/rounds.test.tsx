@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { selectOption } from '@/test/select-option'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { RoundsPage } from './rounds'
 import { TournamentRoundSummary } from '@/components/tournament-round-summary'
@@ -279,14 +280,14 @@ describe('完整比赛工作台', () => {
     const u = userEvent.setup()
     await u.click(await screen.findByRole('button', { name: '选择物理桌并生成首轮' }))
     expect(screen.getByRole('button', { name: '预览并确认' }).hasAttribute('disabled')).toBe(true)
-    await u.selectOptions(screen.getByLabelText('逻辑桌 A 物理桌'), '2')
+    await selectOption(u, '逻辑桌 A 物理桌', '107 · 空闲桌')
     expect(screen.queryByRole('option', { name: /维护桌/ })).toBeNull()
     await u.click(screen.getByRole('button', { name: '预览并确认' }))
     expect(generateRound).not.toHaveBeenCalled()
     await u.click(screen.getByRole('button', { name: '取消' }))
     expect(generateRound).not.toHaveBeenCalled()
     await u.click(screen.getByRole('button', { name: '选择物理桌并生成首轮' }))
-    await u.selectOptions(screen.getByLabelText('逻辑桌 A 物理桌'), '2')
+    await selectOption(u, '逻辑桌 A 物理桌', '107 · 空闲桌')
     await u.click(screen.getByRole('button', { name: '预览并确认' }))
     await u.click(screen.getByRole('button', { name: '确认生成轮次' }))
     await waitFor(() => expect(generateRound).toHaveBeenCalledWith(5, 1, [2]))
@@ -302,7 +303,7 @@ describe('完整比赛工作台', () => {
     show()
     const u = userEvent.setup()
     await u.click(await screen.findByRole('button', { name: '选择物理桌并生成首轮' }))
-    await u.selectOptions(screen.getByLabelText('逻辑桌 A 物理桌'), '2')
+    await selectOption(u, '逻辑桌 A 物理桌', '107 · 空闲桌')
     await u.click(screen.getByRole('button', { name: '预览并确认' }))
     await u.click(screen.getByRole('button', { name: '确认生成轮次' }))
     expect(screen.getByRole('button', { name: '正在提交…' }).hasAttribute('disabled')).toBe(true)
@@ -392,7 +393,7 @@ describe('完整比赛工作台', () => {
     await u.keyboard('{Escape}')
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     await u.click(screen.getByRole('button', { name: '故障换桌' }))
-    await u.selectOptions(screen.getByLabelText('目标空闲物理桌'), '2')
+    await selectOption(u, '目标空闲物理桌', '107 · 空闲桌')
     await u.type(screen.getByLabelText('故障及替换原因'), '设备故障')
     await u.click(screen.getByRole('button', { name: '预览替换' }))
     await u.click(screen.getByRole('button', { name: '确认故障替换' }))
@@ -409,7 +410,7 @@ describe('完整比赛工作台', () => {
     const u = userEvent.setup()
     await u.click(await screen.findByRole('button', { name: '记录公开抽签 1' }))
     for (let i = 0; i < 4; i++)
-      await u.selectOptions(screen.getByLabelText(`抽签顺位 ${i + 1}`), String(4 - i))
+      await selectOption(u, `抽签顺位 ${i + 1}`, `快照选手${4 - i}`)
     await u.type(screen.getByLabelText('抽签方式'), '现场签条')
     await u.type(screen.getByLabelText('实际抽签时间'), '2026-11-04T12:00')
     await u.type(screen.getByLabelText('公开过程说明'), '全员公开监督')

@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Check, LockKeyhole, Search, X } from 'lucide-react'
 import { Button } from './ui/button'
+import { Select } from './ui/select'
 import { Badge } from './ui/badge'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet'
 import { FormFeedback } from './form-feedback'
@@ -55,7 +56,9 @@ export function PlayerPicker({
         <h3>参赛名单</h3>
         <Badge variant="outline">已选 {selected.length} / 16 人</Badge>
       </div>
-      <p className="field-hint">草稿可暂留空；启动需要 4、8、12 或 16 人。选手来自已注册账号。</p>
+      <p className="field-hint">
+        草稿可暂留空；启动需要 4、8、12 或 16 人。由雀庄管理员维护有效选手。
+      </p>
       <div className="selected-players" aria-label="已选人员">
         {selected.length ? (
           selected.map((p) => (
@@ -79,7 +82,7 @@ export function PlayerPicker({
           <Search size={16} />
           <input
             aria-label="搜索参赛选手"
-            placeholder="昵称或用户名"
+            placeholder="选手昵称"
             value={query}
             maxLength={150}
             disabled={disabled}
@@ -107,7 +110,7 @@ export function PlayerPicker({
       </div>
       <FormFeedback error={error} />
       {loading ? (
-        <p role="status">正在加载已注册选手…</p>
+        <p role="status">正在加载有效选手…</p>
       ) : error ? (
         <Button type="button" variant="outline" onClick={() => setRetry((v) => v + 1)}>
           重试选手查询
@@ -134,7 +137,7 @@ export function PlayerPicker({
                               id: 0,
                               player_id: p.id,
                               display_name: p.nickname,
-                              username: p.username,
+                              username: p.username || '',
                               is_active: p.is_active,
                               display_name_snapshot: '',
                             },
@@ -145,8 +148,8 @@ export function PlayerPicker({
                   <span>
                     <strong>{p.nickname}</strong>
                     <small>
-                      @{p.username}
-                      {!p.is_active && ' · 账号已停用'}
+                      选手 #{p.id}
+                      {!p.is_active && ' · 已归档'}
                     </small>
                   </span>
                   {checked ? <Check size={17} /> : <span className="picker-add">+</span>}
@@ -154,7 +157,7 @@ export function PlayerPicker({
               )
             })
           ) : (
-            <p className="field-hint">没有匹配的已注册选手。</p>
+            <p className="field-hint">没有匹配的有效选手。</p>
           )}
         </div>
       )}
@@ -291,13 +294,13 @@ export function TournamentEditor({
               </label>
               <label>
                 总轮数
-                <select value={rounds} onChange={(e) => setRounds(e.target.value)}>
-                  {[1, 2, 3, 4, 5, 6].map((v) => (
-                    <option value={v} key={v}>
-                      {v} 轮
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  aria-label="总轮数"
+                  value={rounds}
+                  disabled={busy}
+                  onValueChange={setRounds}
+                  options={[1, 2, 3, 4, 5, 6].map((v) => ({ value: v, label: `${v} 轮` }))}
+                />
               </label>
             </section>
             <section>
@@ -442,7 +445,9 @@ export function TournamentDetail({
           <SheetTitle>{confirm ? '确认启动赛事' : '赛事详情'}</SheetTitle>
           <SheetDescription>
             {row.status !== 'draft'
-              ? (row.status === 'completed' ? '已完赛 · 成绩与冠军已归档。' : '已启动 · 规则与参赛名单已冻结。')
+              ? row.status === 'completed'
+                ? '已完赛 · 成绩与冠军已归档。'
+                : '已启动 · 规则与参赛名单已冻结。'
               : '草稿 · 启动前可调整配置与参赛名单。'}
           </SheetDescription>
         </SheetHeader>
@@ -457,7 +462,9 @@ export function TournamentDetail({
           <X />
         </Button>
         <div className="tournament-detail">
-          <Badge variant="outline">{row.status === 'draft' ? '草稿' : row.status === 'completed' ? '已完赛' : '已启动'}</Badge>
+          <Badge variant="outline">
+            {row.status === 'draft' ? '草稿' : row.status === 'completed' ? '已完赛' : '已启动'}
+          </Badge>
           <h2>{row.name}</h2>
           <p>{row.description || '未填写赛事说明'}</p>
           <TournamentRules row={row} />
@@ -472,8 +479,8 @@ export function TournamentDetail({
                 <div key={p.player_id}>
                   <strong>{p.display_name}</strong>
                   <small>
-                    @{p.username}
-                    {!p.is_active && ' · 账号已停用'}
+                    选手 #{p.player_id}
+                    {!p.is_active && ' · 已归档'}
                   </small>
                 </div>
               ))}

@@ -1,0 +1,409 @@
+
+> riichi-frontend@0.1.0 test
+> vitest run --reporter=dot
+
+
+ RUN  v4.1.12 D:/Riichi/frontend
+
+(node:27788) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:27944) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:26148) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7632) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+···········································x··············x···········
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/machines.test.tsx > 设备路由权限 > 普通用户导航和仪表盘不显示设备入口
+TestingLibraryElementError: Unable to find role="heading" and name "仪表盘"
+
+Ignored nodes: comments, script, style
+<body
+  style=""
+>
+  <div>
+    <div
+      class="session-state"
+      role="alert"
+    >
+      <h1>
+        无权访问
+      </h1>
+      <p>
+        此管理页面仅向管理员开放。
+      </p>
+      <a
+        href="/dashboard"
+      >
+        返回仪表盘
+      </a>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body
+  style=""
+>
+  <div>
+    <div
+      class="session-state"
+      role="alert"
+    >
+      <h1>
+        无权访问
+      </h1>
+      <p>
+        此管理页面仅向管理员开放。
+      </p>
+      <a
+        href="/dashboard"
+      >
+        返回仪表盘
+      </a>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/machines.test.tsx:250:25
+    248|   it('普通用户导航和仪表盘不显示设备入口', async () => {
+    249|     showApp('/dashboard')
+    250|     expect(await screen.findByRole('heading', { name: '仪表盘' })).toBeTr…
+       |                         ^
+    251|     expect(screen.queryByRole('link', { name: /麻将机管理/ })).toBeNull()
+    252|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/pages/tournaments.test.tsx > 赛事工作台 > 选手分页搜索、去重和已选移除
+TestingLibraryElementError: Unable to find role="button" and name `/选手1.*@user1/`
+
+Ignored nodes: comments, script, style
+<body
+  data-scroll-locked="1"
+  style="pointer-events: none;"
+>
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
+  <div
+    aria-hidden="true"
+    data-aria-hidden="true"
+  >
+    <div
+      class="tournament-workspace"
+    >
+      <section
+        class="tournament-hero"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            INDIVIDUAL TOURNAMENTS
+          </span>
+          <h2>
+            从一份规则，开启一场赛事。
+          </h2>
+          <p>
+            独立配置每场个人赛，确认选手与规则后启动。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="default"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-plus"
+            fill="none"
+            height="17"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="17"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          创建赛事
+        </button>
+      </section>
+      <div
+        class="tournament-boundary"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-flag"
+          fill="none"
+          height="20"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"
+          />
+        </svg>
+        <p>
+          启动后选桌、录入成绩并逐轮重排，完成指定轮次后决出冠军。
+        </p>
+      </div>
+      <section
+        class="settings-panel tournament-list"
+        tabindex="-1"
+      >
+        <div
+          class="section-heading"
+        >
+          <div>
+            <span
+              class="eyebrow"
+            >
+              TOURNAMENT DIRECTORY
+            </span>
+            <h2>
+              赛事档案
+            </h2>
+          </div>
+          <button
+            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-9 px-4 py-2 has-[>svg]:px-3"
+            data-size="default"
+            data-slot="button"
+            data-variant="ghost"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-refresh-cw"
+              fill="none"
+              height="15"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="15"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+              />
+              <path
+                d="M21 3v5h-5"
+              />
+              <path
+                d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+              />
+              <path
+                d="M8 16H3v5"
+              />
+            </svg>
+            刷新列表
+          </button>
+        </div>
+        <form
+          class="machine-toolbar"
+        >
+          <div
+            class="machine-search"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-search"
+              fill="none"
+              height="17"
+              stroke="currentColor"
+ ...
+
+Ignored nodes: comments, script, style
+<body
+  data-scroll-locked="1"
+  style="pointer-events: none;"
+>
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
+  <div
+    aria-hidden="true"
+    data-aria-hidden="true"
+  >
+    <div
+      class="tournament-workspace"
+    >
+      <section
+        class="tournament-hero"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            INDIVIDUAL TOURNAMENTS
+          </span>
+          <h2>
+            从一份规则，开启一场赛事。
+          </h2>
+          <p>
+            独立配置每场个人赛，确认选手与规则后启动。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="default"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-plus"
+            fill="none"
+            height="17"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="17"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          创建赛事
+        </button>
+      </section>
+      <div
+        class="tournament-boundary"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-flag"
+          fill="none"
+          height="20"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"
+          />
+        </svg>
+        <p>
+          启动后选桌、录入成绩并逐轮重排，完成指定轮次后决出冠军。
+        </p>
+      </div>
+      <section
+        class="settings-panel tournament-list"
+        tabindex="-1"
+      >
+        <div
+          class="section-heading"
+        >
+          <div>
+            <span
+              class="eyebrow"
+            >
+              TOURNAMENT DIRECTORY
+            </span>
+            <h2>
+              赛事档案
+            </h2>
+          </div>
+          <button
+            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-9 px-4 py-2 has-[>svg]:px-3"
+            data-size="default"
+            data-slot="button"
+            data-variant="ghost"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-refresh-cw"
+              fill="none"
+              height="15"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="15"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+              />
+              <path
+                d="M21 3v5h-5"
+              />
+              <path
+                d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+              />
+              <path
+                d="M8 16H3v5"
+              />
+            </svg>
+            刷新列表
+          </button>
+        </div>
+        <form
+          class="machine-toolbar"
+        >
+          <div
+            class="machine-search"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-search"
+              fill="none"
+              height="17"
+              stroke="currentColor"
+ ...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/tournaments.test.tsx:190:35
+    188|     const user = userEvent.setup()
+    189|     await user.click(screen.getByRole('button', { name: '创建赛事' }))
+    190|     await user.click(await screen.findByRole('button', { name: /选手1.*@…
+       |                                   ^
+    191|     expect(screen.getByText('已选 1 / 16 人')).toBeTruthy()
+    192|     await user.click(screen.getByRole('button', { name: '下一页选手' }))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 5 passed (7)
+      Tests  2 failed | 68 passed (70)
+   Start at  14:42:23
+   Duration  10.34s (transform 1.38s, setup 0ms, import 7.90s, tests 13.88s, environment 12.17s)
+

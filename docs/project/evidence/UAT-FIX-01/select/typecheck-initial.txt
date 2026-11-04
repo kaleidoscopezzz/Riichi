@@ -1,0 +1,14 @@
+
+> riichi-frontend@0.1.0 typecheck
+> tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json
+
+src/test/select-option.ts(9,64): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(role: ByRoleMatcher, options?: ByRoleOptions | undefined): HTMLElement', gave the following error.
+    Object literal may only specify known properties, and 'exact' does not exist in type 'ByRoleOptions'.
+  Overload 2 of 2, '(role: ByRoleMatcher, options?: ByRoleOptions | undefined): HTMLElement', gave the following error.
+    Object literal may only specify known properties, and 'exact' does not exist in type 'ByRoleOptions'.
+src/test/select-option.ts(10,70): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(role: ByRoleMatcher, options?: ByRoleOptions | undefined, waitForElementOptions?: waitForOptions | undefined): Promise<HTMLElement>', gave the following error.
+    Object literal may only specify known properties, and 'exact' does not exist in type 'ByRoleOptions'.
+  Overload 2 of 2, '(role: ByRoleMatcher, options?: ByRoleOptions | undefined, waitForElementOptions?: waitForOptions | undefined): Promise<HTMLElement>', gave the following error.
+    Object literal may only specify known properties, and 'exact' does not exist in type 'ByRoleOptions'.

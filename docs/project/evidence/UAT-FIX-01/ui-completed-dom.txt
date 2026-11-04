@@ -1,0 +1,119 @@
+- link "跳转到主要内容":
+  - /url: "#main-content"
+- banner:
+  - button "打开导航菜单":
+  - navigation "breadcrumb":
+    - list:
+      - link "工作空间":
+        - /url: /dashboard
+      - link "分桌工作台" [disabled]
+  - button "切换为暗色主题":
+  - link "我的个人资料":
+    - /url: /profile
+    - text: uat_owner_qa
+  - button "退出"
+- main:
+  - generic: RIICHI WORKSPACE
+  - heading "分桌工作台" [level=1]
+  - paragraph: 固定选桌、逐轮计分与冠军结果
+  - generic: 个人赛 · V1.0
+  - link "返回赛事管理":
+    - /url: /tournaments
+    - text: 返回赛事管理
+  - generic: TOURNAMENT / 比赛工作台
+  - heading "UAT UI 老板维护四人赛" [level=2]
+  - paragraph: 记录每一场对局，让每一分都有依据。
+  - button "刷新工作台":
+    - text: 刷新工作台
+  - generic: 4 位选手
+  - generic: 1 / 1 轮
+  - generic: 已完赛 · 结果只读
+  - generic: CHAMPION / 个人冠军
+  - heading "UI维护选手四" [level=2]
+  - paragraph: 全部成绩已归档，本赛事物理桌已自动释放。
+  - region "本场固定物理桌":
+    - strong: 逻辑桌 A
+    - generic: 已释放
+    - button "占用历史"
+  - heading "对局与成绩" [level=3]
+  - text: 查看轮次
+  - combobox "查看轮次":
+    - option "第 1 轮" [selected]
+  - article:
+    - generic: ROUND 1
+    - heading "逻辑桌 A" [level=3]
+    - generic: 已确认
+    - paragraph: 本轮开始时物理桌 005
+    - generic: 东
+    - strong: UI维护选手二
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 南
+    - strong: UI维护选手一改名
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 西
+    - strong: UI维护选手三
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 北
+    - strong: UI维护选手四
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - text: 成绩锁定，可在排行榜查看精确值
+  - generic: STANDINGS
+  - heading "最终排名" [level=3]
+  - generic: 仅计入已确认成绩
+  - table:
+    - rowgroup:
+      - row "名次 选手 累计积分 已确认 第一 / 第二 逐轮成绩档案":
+        - columnheader "名次"
+        - columnheader "选手"
+        - columnheader "累计积分"
+        - columnheader "已确认"
+        - columnheader "第一 / 第二"
+        - columnheader "逐轮成绩档案"
+    - rowgroup:
+      - row "1 UI维护选手四 0.00 精确 0/1 1 轮 1 / 0":
+        - cell "1"
+        - rowheader "UI维护选手四"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "1 轮"
+        - cell "1 / 0"
+        - cell:
+          - generic "查看 1 轮"
+      - row "2 UI维护选手三 0.00 精确 0/1 1 轮 1 / 0":
+        - cell "2"
+        - rowheader "UI维护选手三"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "1 轮"
+        - cell "1 / 0"
+        - cell:
+          - generic "查看 1 轮"
+      - row "3 UI维护选手二 0.00 精确 0/1 1 轮 1 / 0":
+        - cell "3"
+        - rowheader "UI维护选手二"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "1 轮"
+        - cell "1 / 0"
+        - cell:
+          - generic "查看 1 轮"
+      - row "4 UI维护选手一改名 0.00 精确 0/1 1 轮 1 / 0":
+        - cell "4"
+        - rowheader "UI维护选手一改名"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "1 轮"
+        - cell "1 / 0"
+        - cell:
+          - generic "查看 1 轮"
+- contentinfo:
+  - generic: RIICHI·让对局回归精彩
+  - generic: Foundation 06/完整赛事运行与精确计分

@@ -26,8 +26,8 @@ def player_rows(ids):
     # write already holds the database write reservation before these reads.
     users = list(get_user_model().objects.select_for_update().filter(player_profile__id__in=ids).order_by("pk"))
     profiles = list(PlayerProfile.objects.select_for_update().filter(pk__in=ids).order_by("pk"))
-    if len(profiles) != len(ids) or any(not user.is_active for user in users):
-        raise ValidationError({"participant_ids": ["名单包含不存在或账号已停用的选手，请重新选择。"]})
+    if len(profiles) != len(ids) or any(not user.is_active or user.is_staff or user.is_superuser for user in users):
+        raise ValidationError({"participant_ids": ["名单包含不存在、已归档或管理员档案，请重新选择。"]})
     return profiles
 
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Trophy, X } from 'lucide-react'
 import { Button } from './ui/button'
+import { Select } from './ui/select'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet'
 import { FormFeedback } from './form-feedback'
 import type { Tournament } from '@/services/tournaments'
@@ -117,28 +118,24 @@ export function CompetitionAction({
       {Array.from({ length: needed }, (_, i) => (
         <label className="round-field" key={i}>
           逻辑桌 {'ABCD'[i]}
-          <select
+          <Select
             aria-label={`逻辑桌 ${'ABCD'[i]} 物理桌`}
             value={selected[i] || ''}
-            onChange={(e) =>
+            disabled={busy}
+            onValueChange={(value) =>
               setSelected((v) =>
-                Array.from({ length: needed }, (_, j) =>
-                  j === i ? Number(e.target.value) : v[j] || 0,
-                ),
+                Array.from({ length: needed }, (_, j) => (j === i ? Number(value) : v[j] || 0)),
               )
             }
-          >
-            <option value="">选择真实物理桌</option>
-            {free.map((m) => (
-              <option
-                key={m.machine_id}
-                value={m.machine_id}
-                disabled={selected.includes(m.machine_id) && selected[i] !== m.machine_id}
-              >
-                {m.machine_no} · {m.name}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: '', label: '选择真实物理桌' },
+              ...free.map((m) => ({
+                value: m.machine_id,
+                label: `${m.machine_no} · ${m.name}`,
+                disabled: selected.includes(m.machine_id) && selected[i] !== m.machine_id,
+              })),
+            ]}
+          />
         </label>
       ))}
     </div>
@@ -285,22 +282,21 @@ export function CompetitionAction({
               <p>仅故障时替换逻辑桌 {action.fixed.label}。已生成轮次的历史映射与座次不变。</p>
               <label className="round-field">
                 目标空闲物理桌
-                <select
+                <Select
+                  aria-label="目标空闲物理桌"
                   value={target}
-                  onChange={(e) => {
+                  disabled={busy}
+                  onValueChange={(value) => {
                     setStage(false)
-                    setTarget(e.target.value)
+                    setTarget(value)
                   }}
-                >
-                  <option value="">请选择</option>
-                  {resources
-                    .filter((m) => m.assignable)
-                    .map((m) => (
-                      <option key={m.machine_id} value={m.machine_id}>
-                        {m.machine_no} · {m.name}
-                      </option>
-                    ))}
-                </select>
+                  options={[
+                    { value: '', label: '请选择' },
+                    ...resources
+                      .filter((m) => m.assignable)
+                      .map((m) => ({ value: m.machine_id, label: `${m.machine_no} · ${m.name}` })),
+                  ]}
+                />
               </label>
               <label className="round-field">
                 故障及替换原因
@@ -371,24 +367,28 @@ export function CompetitionAction({
               {action.members.map((_, i) => (
                 <label className="round-field" key={i}>
                   抽签顺位 {i + 1}
-                  <select
-                    disabled={!!lotteryId}
+                  <Select
+                    aria-label={`抽签顺位 ${i + 1}`}
+                    disabled={busy || !!lotteryId}
                     value={order[i] || ''}
-                    onChange={(e) =>
+                    onValueChange={(value) =>
                       setOrder((v) =>
                         Array.from({ length: action.members.length }, (_, j) =>
-                          j === i ? Number(e.target.value) : v[j] || 0,
+                          j === i ? Number(value) : v[j] || 0,
                         ),
                       )
                     }
-                  >
-                    <option value="">选择选手</option>
-                    {action.members.map((pk) => (
-                      <option key={pk} value={pk} disabled={order.includes(pk) && order[i] !== pk}>
-                        {ws.standings.find((s) => s.participant_id === pk)?.display_name}
-                      </option>
-                    ))}
-                  </select>
+                    options={[
+                      { value: '', label: '选择选手' },
+                      ...action.members.map((pk) => ({
+                        value: pk,
+                        label:
+                          ws.standings.find((s) => s.participant_id === pk)?.display_name ||
+                          `选手 #${pk}`,
+                        disabled: order.includes(pk) && order[i] !== pk,
+                      })),
+                    ]}
+                  />
                 </label>
               ))}
               <label className="round-field">

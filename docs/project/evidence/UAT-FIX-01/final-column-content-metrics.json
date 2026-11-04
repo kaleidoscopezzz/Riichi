@@ -1,0 +1,192 @@
+[
+  [
+    {
+      "containerCenter": 466.328125,
+      "contentCenter": 327,
+      "left": 299,
+      "text": "赛事名称"
+    },
+    {
+      "containerCenter": 714.59375,
+      "contentCenter": 714.59375,
+      "left": 647.65625,
+      "text": "状态"
+    },
+    {
+      "containerCenter": 854.09375,
+      "contentCenter": 854.09375,
+      "left": 795.53125,
+      "text": "参赛人数"
+    },
+    {
+      "containerCenter": 976.859375,
+      "contentCenter": 976.859375,
+      "left": 926.65625,
+      "text": "总轮数"
+    },
+    {
+      "containerCenter": 1124.7265625,
+      "contentCenter": 1124.71875,
+      "left": 1041.0625,
+      "text": "创建时间"
+    },
+    {
+      "containerCenter": 1297.6875,
+      "contentCenter": 1297.6875,
+      "left": 1222.390625,
+      "text": "操作"
+    }
+  ],
+  [
+    {
+      "containerCenter": 466.328125,
+      "contentCenter": 463.9375,
+      "left": 299,
+      "text": "QA 长名称赛事用于核对列宽及换行保护 · 麻将个人赛 · 麻将个人赛 · 麻将个人赛 · 麻将个人赛 · 麻将个人赛 · 麻将个人赛个人赛 · ID 4"
+    },
+    {
+      "containerCenter": 714.59375,
+      "contentCenter": 714.59375,
+      "left": 647.65625,
+      "text": "草稿"
+    },
+    {
+      "containerCenter": 854.09375,
+      "contentCenter": 854.0859375,
+      "left": 795.53125,
+      "text": "4 人"
+    },
+    {
+      "containerCenter": 976.859375,
+      "contentCenter": 976.8515625,
+      "left": 926.65625,
+      "text": "3 轮"
+    },
+    {
+      "containerCenter": 1124.7265625,
+      "contentCenter": 1124.71875,
+      "left": 1041.0625,
+      "text": "2026/11/4"
+    },
+    {
+      "containerCenter": 1297.6875,
+      "contentCenter": 1297.6875,
+      "left": 1222.390625,
+      "text": "查看详情"
+    }
+  ],
+  [
+    {
+      "containerCenter": 466.328125,
+      "contentCenter": 346.09375,
+      "left": 299,
+      "text": "QA 待完善赛事个人赛 · ID 3"
+    },
+    {
+      "containerCenter": 714.59375,
+      "contentCenter": 714.59375,
+      "left": 647.65625,
+      "text": "草稿"
+    },
+    {
+      "containerCenter": 854.09375,
+      "contentCenter": 854.0859375,
+      "left": 795.53125,
+      "text": "4 人"
+    },
+    {
+      "containerCenter": 976.859375,
+      "contentCenter": 976.8515625,
+      "left": 926.65625,
+      "text": "3 轮"
+    },
+    {
+      "containerCenter": 1124.7265625,
+      "contentCenter": 1124.71875,
+      "left": 1041.0625,
+      "text": "2026/11/4"
+    },
+    {
+      "containerCenter": 1297.6875,
+      "contentCenter": 1297.6875,
+      "left": 1222.390625,
+      "text": "查看详情"
+    }
+  ],
+  [
+    {
+      "containerCenter": 466.328125,
+      "contentCenter": 346.09375,
+      "left": 299,
+      "text": "QA 已启动赛事个人赛 · ID 2"
+    },
+    {
+      "containerCenter": 714.59375,
+      "contentCenter": 714.59375,
+      "left": 647.65625,
+      "text": "已启动"
+    },
+    {
+      "containerCenter": 854.09375,
+      "contentCenter": 854.0859375,
+      "left": 795.53125,
+      "text": "4 人"
+    },
+    {
+      "containerCenter": 976.859375,
+      "contentCenter": 976.8515625,
+      "left": 926.65625,
+      "text": "3 轮"
+    },
+    {
+      "containerCenter": 1124.7265625,
+      "contentCenter": 1124.71875,
+      "left": 1041.0625,
+      "text": "2026/11/4"
+    },
+    {
+      "containerCenter": 1297.6875,
+      "contentCenter": 1297.6875,
+      "left": 1222.390625,
+      "text": "查看详情"
+    }
+  ],
+  [
+    {
+      "containerCenter": 466.328125,
+      "contentCenter": 339.09375,
+      "left": 299,
+      "text": "QA 完赛档案个人赛 · ID 1"
+    },
+    {
+      "containerCenter": 714.59375,
+      "contentCenter": 714.59375,
+      "left": 647.65625,
+      "text": "已完赛"
+    },
+    {
+      "containerCenter": 854.09375,
+      "contentCenter": 854.0859375,
+      "left": 795.53125,
+      "text": "4 人"
+    },
+    {
+      "containerCenter": 976.859375,
+      "contentCenter": 976.8515625,
+      "left": 926.65625,
+      "text": "1 轮"
+    },
+    {
+      "containerCenter": 1124.7265625,
+      "contentCenter": 1124.71875,
+      "left": 1041.0625,
+      "text": "2026/11/4"
+    },
+    {
+      "containerCenter": 1297.6875,
+      "contentCenter": 1297.6875,
+      "left": 1222.390625,
+      "text": "查看详情"
+    }
+  ]
+]

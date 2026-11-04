@@ -1,0 +1,434 @@
+[
+  {
+    "path": "tournaments",
+    "label": "状态筛选",
+    "width": 1440,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "machines",
+    "label": "状态筛选",
+    "width": 1440,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 5
+  },
+  {
+    "path": "players",
+    "label": "选手状态",
+    "width": 1440,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 3
+  },
+  {
+    "path": "machines",
+    "label": "设备状态",
+    "width": 1440,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 3
+  },
+  {
+    "path": "tournaments",
+    "label": "总轮数",
+    "width": 1440,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 6
+  },
+  {
+    "path": "tournaments/15/rounds",
+    "label": "查看轮次",
+    "width": 1440,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 6
+  },
+  {
+    "path": "tournaments/16/rounds",
+    "label": "逻辑桌 A 物理桌",
+    "width": 1440,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "tournaments/17/rounds",
+    "label": "目标空闲物理桌",
+    "width": 1440,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "tournaments/17/rounds",
+    "label": "抽签顺位 1",
+    "width": 1440,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 17
+  },
+  {
+    "path": "tournaments",
+    "label": "状态筛选",
+    "width": 1440,
+    "theme": "light",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "machines",
+    "label": "状态筛选",
+    "width": 1440,
+    "theme": "light",
+    "inViewport": true,
+    "options": 5
+  },
+  {
+    "path": "players",
+    "label": "选手状态",
+    "width": 1440,
+    "theme": "light",
+    "inViewport": true,
+    "options": 3
+  },
+  {
+    "path": "machines",
+    "label": "设备状态",
+    "width": 1440,
+    "theme": "light",
+    "inViewport": true,
+    "options": 3
+  },
+  {
+    "path": "tournaments",
+    "label": "总轮数",
+    "width": 1440,
+    "theme": "light",
+    "inViewport": true,
+    "options": 6
+  },
+  {
+    "path": "tournaments/15/rounds",
+    "label": "查看轮次",
+    "width": 1440,
+    "theme": "light",
+    "inViewport": true,
+    "options": 6
+  },
+  {
+    "path": "tournaments/16/rounds",
+    "label": "逻辑桌 A 物理桌",
+    "width": 1440,
+    "theme": "light",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "tournaments/17/rounds",
+    "label": "目标空闲物理桌",
+    "width": 1440,
+    "theme": "light",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "tournaments/17/rounds",
+    "label": "抽签顺位 1",
+    "width": 1440,
+    "theme": "light",
+    "inViewport": true,
+    "options": 17
+  },
+  {
+    "path": "tournaments",
+    "label": "状态筛选",
+    "width": 390,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "machines",
+    "label": "状态筛选",
+    "width": 390,
+    "theme": "dark",
+    "inViewport": false,
+    "options": 5
+  },
+  {
+    "path": "players",
+    "label": "选手状态",
+    "width": 390,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 3
+  },
+  {
+    "path": "machines",
+    "label": "设备状态",
+    "width": 390,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 3
+  },
+  {
+    "path": "tournaments",
+    "label": "总轮数",
+    "width": 390,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 6
+  },
+  {
+    "path": "tournaments/15/rounds",
+    "label": "查看轮次",
+    "width": 390,
+    "theme": "dark",
+    "inViewport": false,
+    "options": 6
+  },
+  {
+    "path": "tournaments/16/rounds",
+    "label": "逻辑桌 A 物理桌",
+    "width": 390,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "tournaments/17/rounds",
+    "label": "目标空闲物理桌",
+    "width": 390,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "tournaments/17/rounds",
+    "label": "抽签顺位 1",
+    "width": 390,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 17
+  },
+  {
+    "path": "tournaments",
+    "label": "状态筛选",
+    "width": 390,
+    "theme": "light",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "machines",
+    "label": "状态筛选",
+    "width": 390,
+    "theme": "light",
+    "inViewport": false,
+    "options": 5
+  },
+  {
+    "path": "players",
+    "label": "选手状态",
+    "width": 390,
+    "theme": "light",
+    "inViewport": true,
+    "options": 3
+  },
+  {
+    "path": "machines",
+    "label": "设备状态",
+    "width": 390,
+    "theme": "light",
+    "inViewport": true,
+    "options": 3
+  },
+  {
+    "path": "tournaments",
+    "label": "总轮数",
+    "width": 390,
+    "theme": "light",
+    "inViewport": true,
+    "options": 6
+  },
+  {
+    "path": "tournaments/15/rounds",
+    "label": "查看轮次",
+    "width": 390,
+    "theme": "light",
+    "inViewport": false,
+    "options": 6
+  },
+  {
+    "path": "tournaments/16/rounds",
+    "label": "逻辑桌 A 物理桌",
+    "width": 390,
+    "theme": "light",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "tournaments/17/rounds",
+    "label": "目标空闲物理桌",
+    "width": 390,
+    "theme": "light",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "tournaments/17/rounds",
+    "label": "抽签顺位 1",
+    "width": 390,
+    "theme": "light",
+    "inViewport": true,
+    "options": 17
+  },
+  {
+    "path": "tournaments",
+    "label": "状态筛选",
+    "width": 320,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "machines",
+    "label": "状态筛选",
+    "width": 320,
+    "theme": "dark",
+    "inViewport": false,
+    "options": 5
+  },
+  {
+    "path": "players",
+    "label": "选手状态",
+    "width": 320,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 3
+  },
+  {
+    "path": "machines",
+    "label": "设备状态",
+    "width": 320,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 3
+  },
+  {
+    "path": "tournaments",
+    "label": "总轮数",
+    "width": 320,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 6
+  },
+  {
+    "path": "tournaments/15/rounds",
+    "label": "查看轮次",
+    "width": 320,
+    "theme": "dark",
+    "inViewport": false,
+    "options": 6
+  },
+  {
+    "path": "tournaments/16/rounds",
+    "label": "逻辑桌 A 物理桌",
+    "width": 320,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "tournaments/17/rounds",
+    "label": "目标空闲物理桌",
+    "width": 320,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "tournaments/17/rounds",
+    "label": "抽签顺位 1",
+    "width": 320,
+    "theme": "dark",
+    "inViewport": true,
+    "options": 17
+  },
+  {
+    "path": "tournaments",
+    "label": "状态筛选",
+    "width": 320,
+    "theme": "light",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "machines",
+    "label": "状态筛选",
+    "width": 320,
+    "theme": "light",
+    "inViewport": false,
+    "options": 5
+  },
+  {
+    "path": "players",
+    "label": "选手状态",
+    "width": 320,
+    "theme": "light",
+    "inViewport": true,
+    "options": 3
+  },
+  {
+    "path": "machines",
+    "label": "设备状态",
+    "width": 320,
+    "theme": "light",
+    "inViewport": true,
+    "options": 3
+  },
+  {
+    "path": "tournaments",
+    "label": "总轮数",
+    "width": 320,
+    "theme": "light",
+    "inViewport": true,
+    "options": 6
+  },
+  {
+    "path": "tournaments/15/rounds",
+    "label": "查看轮次",
+    "width": 320,
+    "theme": "light",
+    "inViewport": false,
+    "options": 6
+  },
+  {
+    "path": "tournaments/16/rounds",
+    "label": "逻辑桌 A 物理桌",
+    "width": 320,
+    "theme": "light",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "tournaments/17/rounds",
+    "label": "目标空闲物理桌",
+    "width": 320,
+    "theme": "light",
+    "inViewport": true,
+    "options": 4
+  },
+  {
+    "path": "tournaments/17/rounds",
+    "label": "抽签顺位 1",
+    "width": 320,
+    "theme": "light",
+    "inViewport": true,
+    "options": 17
+  }
+]

@@ -1,7 +1,6 @@
 import json
 
-from django.contrib.auth import authenticate, get_user_model, login, logout
-from django.db import IntegrityError, transaction
+from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
@@ -11,10 +10,11 @@ from django.views.decorators.debug import sensitive_post_parameters, sensitive_v
 from django.views.decorators.cache import never_cache
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 
 from common.api import error_response
-from .serializers import RegisterSerializer, LoginSerializer, user_data
+from .serializers import LoginSerializer, user_data
 
 
 @method_decorator([csrf_protect, never_cache, sensitive_post_parameters("password", "password_confirm")], name="dispatch")
@@ -39,22 +39,8 @@ class AuthWriteView(View):
 
 class RegisterView(AuthWriteView):
     @sensitive_variables()
-    def execute(self, request, data):
-        if request.user.is_authenticated:
-            return error_response("already_authenticated", "请先退出当前账号。", status=409)
-        serializer = RegisterSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        values = serializer.validated_data
-        try:
-            with transaction.atomic():
-                user = get_user_model().objects.create_user(username=values["username"], password=values["password"])
-                profile = user.player_profile
-                profile.nickname = values["nickname"]
-                profile.save(update_fields=["nickname", "updated_at"])
-        except IntegrityError:
-            return error_response("registration_conflict", "注册冲突，请检查用户名后重试。", status=409)
-        # Registration does not implicitly sign in; login has its own CSRF-checked flow.
-        return JsonResponse({"data": user_data(user)}, status=201)
+    def post(self, request):
+        return error_response("registration_closed", "本系统仅向雀庄管理员开放，选手由管理员维护。", status=403)
 
 
 class LoginView(AuthWriteView):
@@ -65,6 +51,8 @@ class LoginView(AuthWriteView):
         user = authenticate(request, **serializer.validated_data)
         if user is None:
             return error_response("invalid_credentials", "用户名或密码错误，或账号不可用。", status=400)
+        if not user.is_staff:
+            return error_response("admin_required", "仅雀庄管理员可以登录管理后台。", status=403)
         login(request, user)
         return JsonResponse({"data": user_data(user)})
 
@@ -80,6 +68,7 @@ class LogoutView(AuthWriteView):
 
 
 class MeView(APIView):
+    permission_classes = [IsAdminUser]
     def get(self, request):
         return Response({"data": user_data(request.user)}, headers={"Cache-Control": "no-store"})
 

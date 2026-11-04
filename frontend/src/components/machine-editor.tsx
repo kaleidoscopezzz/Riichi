@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { X, Archive } from 'lucide-react'
 import { Button } from './ui/button'
+import { Select } from './ui/select'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet'
 import { FormFeedback } from './form-feedback'
 import {
@@ -133,17 +134,17 @@ export function MachineEditor({
             ) : (
               <label>
                 设备状态
-                <select
+                <Select
+                  aria-label="设备状态"
                   name="status"
                   value={values.status}
-                  onChange={(e) => field('status', e.target.value as MachineInput['status'])}
-                >
-                  {(['available', 'maintenance', 'disabled'] as const).map((status) => (
-                    <option key={status} value={status}>
-                      {machineLabels[status]}
-                    </option>
-                  ))}
-                </select>
+                  disabled={busy || readOnly}
+                  onValueChange={(value) => field('status', value as MachineInput['status'])}
+                  options={(['available', 'maintenance', 'disabled'] as const).map((status) => ({
+                    value: status,
+                    label: machineLabels[status],
+                  }))}
+                />
               </label>
             )}
             <label>

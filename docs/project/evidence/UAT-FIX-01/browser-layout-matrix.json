@@ -1,0 +1,254 @@
+[
+  {
+    "page": "dashboard",
+    "theme": "light",
+    "height": 1000,
+    "scrollWidth": 1425,
+    "width": 1440
+  },
+  {
+    "page": "players",
+    "theme": "light",
+    "height": 1000,
+    "scrollWidth": 1425,
+    "width": 1440
+  },
+  {
+    "page": "machines",
+    "theme": "light",
+    "height": 1000,
+    "scrollWidth": 1425,
+    "width": 1440
+  },
+  {
+    "page": "tournaments",
+    "theme": "light",
+    "height": 1000,
+    "scrollWidth": 1425,
+    "width": 1440
+  },
+  {
+    "page": "profile",
+    "theme": "light",
+    "height": 1000,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "page": "settings",
+    "theme": "light",
+    "height": 1000,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "page": "dashboard",
+    "theme": "dark",
+    "height": 1000,
+    "scrollWidth": 1425,
+    "width": 1440
+  },
+  {
+    "page": "players",
+    "theme": "dark",
+    "height": 1000,
+    "scrollWidth": 1425,
+    "width": 1440
+  },
+  {
+    "page": "machines",
+    "theme": "dark",
+    "height": 1000,
+    "scrollWidth": 1425,
+    "width": 1440
+  },
+  {
+    "page": "tournaments",
+    "theme": "dark",
+    "height": 1000,
+    "scrollWidth": 1425,
+    "width": 1440
+  },
+  {
+    "page": "profile",
+    "theme": "dark",
+    "height": 1000,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "page": "settings",
+    "theme": "dark",
+    "height": 1000,
+    "scrollWidth": 1440,
+    "width": 1440
+  },
+  {
+    "page": "dashboard",
+    "theme": "light",
+    "height": 844,
+    "scrollWidth": 375,
+    "width": 390
+  },
+  {
+    "page": "players",
+    "theme": "light",
+    "height": 844,
+    "scrollWidth": 375,
+    "width": 390
+  },
+  {
+    "page": "machines",
+    "theme": "light",
+    "height": 844,
+    "scrollWidth": 375,
+    "width": 390
+  },
+  {
+    "page": "tournaments",
+    "theme": "light",
+    "height": 844,
+    "scrollWidth": 375,
+    "width": 390
+  },
+  {
+    "page": "profile",
+    "theme": "light",
+    "height": 844,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "page": "settings",
+    "theme": "light",
+    "height": 844,
+    "scrollWidth": 375,
+    "width": 390
+  },
+  {
+    "page": "dashboard",
+    "theme": "dark",
+    "height": 844,
+    "scrollWidth": 375,
+    "width": 390
+  },
+  {
+    "page": "players",
+    "theme": "dark",
+    "height": 844,
+    "scrollWidth": 375,
+    "width": 390
+  },
+  {
+    "page": "machines",
+    "theme": "dark",
+    "height": 844,
+    "scrollWidth": 375,
+    "width": 390
+  },
+  {
+    "page": "tournaments",
+    "theme": "dark",
+    "height": 844,
+    "scrollWidth": 375,
+    "width": 390
+  },
+  {
+    "page": "profile",
+    "theme": "dark",
+    "height": 844,
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "page": "settings",
+    "theme": "dark",
+    "height": 844,
+    "scrollWidth": 375,
+    "width": 390
+  },
+  {
+    "page": "dashboard",
+    "theme": "light",
+    "height": 844,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "page": "players",
+    "theme": "light",
+    "height": 844,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "page": "machines",
+    "theme": "light",
+    "height": 844,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "page": "tournaments",
+    "theme": "light",
+    "height": 844,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "page": "profile",
+    "theme": "light",
+    "height": 844,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "page": "settings",
+    "theme": "light",
+    "height": 844,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "page": "dashboard",
+    "theme": "dark",
+    "height": 844,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "page": "players",
+    "theme": "dark",
+    "height": 844,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "page": "machines",
+    "theme": "dark",
+    "height": 844,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "page": "tournaments",
+    "theme": "dark",
+    "height": 844,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "page": "profile",
+    "theme": "dark",
+    "height": 844,
+    "scrollWidth": 320,
+    "width": 320
+  },
+  {
+    "page": "settings",
+    "theme": "dark",
+    "height": 844,
+    "scrollWidth": 320,
+    "width": 320
+  }
+]

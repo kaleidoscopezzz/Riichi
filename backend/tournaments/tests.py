@@ -58,7 +58,8 @@ class TournamentTests(TestCase):
         self.assertIsNone(row["expected_table_count"])
         response = self.write(f'{row["id"]}/', {"name": "新名称", "round_count": 6}, "patch")
         self.assertEqual(response.json()["data"]["name"], "新名称")
-        ids = self.ids[:3] + [self.admin.player_profile.pk]
+        self.assertEqual(self.write(f'{row["id"]}/participants/', {"participant_ids": [self.admin.player_profile.pk]}, "put").status_code, 400)
+        ids = self.ids[:4]
         response = self.write(f'{row["id"]}/participants/', {"participant_ids": ids}, "put")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["data"]["participant_count"], 4)
@@ -87,10 +88,10 @@ class TournamentTests(TestCase):
         self.users[0].save()
         original = self.client.get("/api/v1/players/").json()["data"]
         eligible = self.client.get("/api/v1/players/?eligible=true").json()["data"]
-        self.assertEqual(original["count"], 17)
-        self.assertEqual(eligible["count"], 16)
+        self.assertEqual(original["count"], 16)
+        self.assertEqual(eligible["count"], 15)
         self.assertNotIn(self.ids[0], [player["id"] for player in eligible["results"]])
-        self.assertIn(self.admin.player_profile.pk, [player["id"] for player in eligible["results"]])
+        self.assertNotIn(self.admin.player_profile.pk, [player["id"] for player in eligible["results"]])
         self.assertEqual(set(original["results"][0]), set(eligible["results"][0]))
         self.assertEqual(self.client.get("/api/v1/players/?eligible=invalid").status_code, 400)
 

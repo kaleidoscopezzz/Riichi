@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Flag, Plus, RefreshCw, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { FormFeedback } from '@/components/form-feedback'
 import { TournamentDetail, TournamentEditor } from '@/components/tournament-editor'
@@ -131,18 +132,20 @@ export function TournamentsPage() {
           <Button variant="outline">搜索</Button>
           <label className="machine-filter">
             状态筛选
-            <select
+            <Select
+              aria-label="状态筛选"
               value={status}
-              onChange={(e) => {
-                setStatus(e.target.value)
+              onValueChange={(value) => {
+                setStatus(value)
                 setPage(1)
               }}
-            >
-              <option value="">全部状态</option>
-              <option value="draft">草稿</option>
-              <option value="started">已启动</option>
-              <option value="completed">已完赛</option>
-            </select>
+              options={[
+                { value: '', label: '全部状态' },
+                { value: 'draft', label: '草稿' },
+                { value: 'started', label: '已启动' },
+                { value: 'completed', label: '已完赛' },
+              ]}
+            />
           </label>
         </form>
         <FormFeedback error={error} />
@@ -184,7 +187,11 @@ export function TournamentsPage() {
                 </div>
                 <span role="cell">
                   <Badge variant="outline" className={`tournament-status ${row.status}`}>
-                    {row.status === 'draft' ? '草稿' : row.status === 'completed' ? '已完赛' : '已启动'}
+                    {row.status === 'draft'
+                      ? '草稿'
+                      : row.status === 'completed'
+                        ? '已完赛'
+                        : '已启动'}
                   </Badge>
                 </span>
                 <span role="cell">{row.participant_count} 人</span>

@@ -12,7 +12,7 @@ const details = {
   },
   '/players': {
     title: '等待每一位选手入席',
-    description: '查看已注册选手，并为个人赛事选择参赛成员。',
+    description: '查看雀庄维护的选手，并为个人赛事选择参赛成员。',
     features: ['系统账号与选手资料', '赛事参赛成员管理', '赛事选手选择'],
   },
   '/machines': {

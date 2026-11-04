@@ -55,7 +55,10 @@ export const findPlayers = async (page: number, search: string, signal?: AbortSi
     `/players/?${new URLSearchParams({ page: String(page), search, eligible: 'true' })}`,
     { signal },
   )
-  return { ...result, results: result.results.map((player) => ({ ...player, is_active: true })) }
+  return {
+    ...result,
+    results: result.results.map((player) => ({ ...player, is_active: player.is_active !== false })),
+  }
 }
 
 // An exact preview in thousandths. No floating-point scoring calculation.

@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (problem) {
       if (current !== generation.current) return
       setUser(null)
-      if (!(problem instanceof ApiError && problem.code === 'not_authenticated'))
+      if (!(problem instanceof ApiError && problem.status === 403))
         setError(problem instanceof Error ? problem.message : '无法恢复登录状态。')
     } finally {
       if (current === generation.current) setLoading(false)

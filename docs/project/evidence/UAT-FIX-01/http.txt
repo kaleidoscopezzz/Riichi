@@ -1,0 +1,30 @@
+{
+  "result": "PASS",
+  "requests_including_csrf": 190,
+  "managed_players_created": 16,
+  "edit_archive_restore_delete": "PASS",
+  "snapshot_protection": "PASS",
+  "public_registration_closed": true,
+  "csrf": "PASS",
+  "exact_scoring_lottery_release": "PASS",
+  "tournament_runs": [
+    {
+      "tournament_id": 5,
+      "size": 4,
+      "rounds": 1,
+      "champion": 19
+    },
+    {
+      "tournament_id": 6,
+      "size": 8,
+      "rounds": 3,
+      "champion": 28
+    },
+    {
+      "tournament_id": 7,
+      "size": 16,
+      "rounds": 6,
+      "champion": 44
+    }
+  ]
+}

@@ -2,7 +2,9 @@
 
 **轻量级四人立直麻将个人赛事管理系统**，帮助麻将馆管理员快速创建赛事、安排选手、录入成绩、重排座次并决出冠军；物理桌是辅助资源。
 
-正式代码基线为 **F0-05（CLOSED / PASS）**；D0-01文档已CLOSED / PASS（Commit `5f31891b4ae3a589057e7054758abb08ca42ec72`）。本工作区已实现 **F0-06完整核心候选**：账号/选手、独立赛事、固定选桌、1～6轮成绩确认与精确计分、累计排名、后续重排、公开抽签、唯一冠军、正式完赛及自动释放。候选尚未提交，等待Planner独立验收，无F0-06正式基线。
+正式代码基线为 **F0-05（CLOSED / PASS）**。F0-06完整候选已推送GitHub（`b9e83bb0c8e31ab660b37e7e0a46c1f0bb424e65`），Planner源码/测试证据审查通过，Owner人工验收后正在进行 **UAT-FIX-01** 整改；baseline/F0-06暂未建立。
+
+当前产品仅供雀庄老板/管理员使用。选手由老板新增、编辑、归档或删除，无需本人注册/登录；公开注册API关闭，/register返回登录页，普通账号不能登录后台。完整赛事、精确计分、冠军及自动释放保持F0-06规则不变。
 
 Riichi Premium 界面以深海军蓝、石墨黑和中性色为基础，提供仪表盘、赛事管理、选手管理、麻将机管理和系统设置五个基础页面。仪表盘展示欢迎信息、功能入口与实际后端连接状态，不包含虚构赛事统计。
 
@@ -123,7 +125,7 @@ npm run build
 
 正式代码基线 `baseline/F0-05`，Commit `41929da1e53f8bb481beb4ea3bc31b65f9ee86ff`，Branch main，Planner CLOSED / PASS；F0-01～05历史基线/报告均保留。D0-01门禁已由Owner确认完成并授权F0-06；本次候选不commit/tag/push，等待Planner审查。
 
-## F0-02 账号系统使用（已验收）
+## F0-02 账号系统（历史已验收，当前初始化见下方UAT说明）
 
 先查看迁移状态再迁移；不得删除已有数据库或使用 fake。当前原 F0-01 SQLite（仅 contenttypes 已迁移）已验证可以正常升级。User 必须由 accounts/0001_initial 创建。
 
@@ -134,11 +136,11 @@ Set-Location D:\Riichi\backend
 .\.venv\Scripts\python.exe manage.py createsuperuser
 ```
 
-createsuperuser 交互输入自己的用户名和密码，自动创建选手档案；没有默认管理员凭据。普通用户访问 /register，成功后到 /login 登录；/profile 修改本人昵称。只有管理员看到 /players 菜单并能搜索分页列表。昵称与用户名分别存储，当前只允许修改昵称。
+createsuperuser 交互输入自己的用户名和密码，自动创建选手档案；没有默认管理员凭据。UAT-FIX-01已关闭公开注册与普通账号登录；管理员访问/login，/players维护选手，/profile只维护管理员显示名称。选手昵称与内部技术用户名分别保存，界面不显示无意义内部用户名。旧自助注册行为只见历史报告。
 
 浏览器统一使用同一个主机名（推荐 http://127.0.0.1:5173），不要混用 localhost 与 127.0.0.1。前端开发仍按上文启动 npm run dev，依赖更新后执行 npm ci。生产必须同源部署 API 反向代理并启用 HTTPS；Session Cookie HttpOnly/SameSite=Lax，写请求带 CSRF。CSRF_TRUSTED_ORIGINS 示例为两个明确的本地前端来源，生产来源应由环境明确配置。
 
-登录状态由服务器 Session Cookie 恢复，密码、Session ID、认证 Token 均不写入 localStorage。注册/登录不会接受权限字段，普通用户没有管理员列表权限。公网开放前仍需独立完成登录限流等加固。本次不提供密码找回、邮箱验证或第三方登录。
+登录状态由服务器 Session Cookie 恢复，密码、Session ID、认证 Token 均不写入 localStorage。公开注册不可用；内部选手没有可用密码与管理权限。管理员创建选手时仅接受昵称白名单。公网开放前仍需独立完成登录限流等加固。本次不提供密码找回、邮箱验证或第三方登录。
 
 API 与请求示例、测试结果和限制见 [F0-02 交付报告](docs/project/F0-02-verification.md)。原 F0-01 报告和证据保留为历史快照。
 
@@ -184,7 +186,7 @@ F0-05已正式验收，上述是F0-05当时行为；[原始交付报告](docs/pr
 
 ## F0-06 完整个人赛工作流（候选）
 
-管理员从赛事详情进入分桌工作台，完成：创建草稿/选择已注册选手→启动冻结→明确选择人数/4张真实物理桌并确认A～D→首轮随机→逐桌录入/保存草稿/正式确认→查看累计榜→生成下一轮→最后一轮公开抽签（如需）→二次确认正式完赛→查看唯一冠军及只读档案。换轮不重选或释放物理桌；故障换桌需原因和确认。
+管理员从赛事详情进入分桌工作台，完成：创建草稿/选择老板维护的有效选手→启动冻结→明确选择人数/4张真实物理桌并确认A～D→首轮随机→逐桌录入/保存草稿/正式确认→查看累计榜→生成下一轮→最后一轮公开抽签（如需）→二次确认正式完赛→查看唯一冠军及只读档案。换轮不重选或释放物理桌；故障换桌需原因和确认。
 
 店内可以登记超过四张桌，单场最多四张。原始终局点数为整数，允许负数与零，范围±(2^53−1)；确认总和必须四倍赛事开局点数，异常只可存草稿。确认后锁定，未确认草稿不计分。积分以Fraction计算，分子/分母字符串无损保存，前端小数只作展示。TBD-001/002及OP-01～05均RESOLVED，详见统一规范。
 
@@ -207,3 +209,25 @@ $env:DATABASE_URL = 'sqlite:///D:/Riichi/backend/.verification/my-f006-qa.sqlite
 ```
 
 前端仍运行npm run dev，访问http://127.0.0.1:5173，API前缀/api/v1。完整API契约、测试数量、文件SQLite并发/历史迁移及真实HTTP/UI证据见[F0-06报告](docs/project/F0-06-verification.md)。本次没有新增依赖或修改锁文件。PostgreSQL实连迁移/并发、HTTPS部署及公网安全仍UNVERIFIED，不等同已上线。F0-06之后仅集成测试、部署、安全加固、发布验收；不开发微信/团体赛，不拆新核心功能阶段。
+
+## UAT-FIX-01：选手维护与 admin 初始化
+
+当前整改说明、API和真实截图见[UAT-FIX-01报告](docs/project/UAT-FIX-01-verification.md)。本次没有新增迁移或依赖，原F0-01～F0-06报告/失败证据不改；不更改Owner数据库或指定密码。Git提交/推送/Tag由Owner执行，最终F0-06基线等待Planner复核与Owner再次人工验收。
+
+管理员在选手管理新增昵称，即可用于4/8/12/16人赛事；内部唯一User使用不可用密码且无管理权限。状态可筛选有效/归档，归档不可加入新赛事。未被任何赛事引用的档案可以二次确认删除；已有草稿/历史引用时只能归档。物理删除只删除PlayerProfile，同时停用保留内部User，防止误删其他身份审计；不能通过User级联清除比赛历史。已启动赛事昵称、RoundSeat、成绩、榜单和冠军快照保持不变，旧草稿含归档/管理员档案需Owner手动调整名单。
+
+以下命令必须由 **Owner在本地PowerShell交互执行**，密码不在聊天、参数、脚本、README或日志里传递。执行前确认目标库及备份、showmigrations；确需升级时先在副本核验再正常migrate，无fake/重置。
+
+```powershell
+Set-Location D:\Riichi\backend
+# 默认开发库：新PowerShell窗口未设置DATABASE_URL时使用本地.env配置。
+# 若当前窗口已有临时QA覆盖，先明确选择正确目标，勿将QA凭据当作admin密码。
+.\.venv\Scripts\python.exe manage.py showmigrations
+.\.venv\Scripts\python.exe manage.py init_admin
+```
+
+init_admin固定用户名为admin：不存在时委托Django createsuperuser交互创建；已存在且为有效staff/superuser时委托changepassword交互更新；已有普通/停用admin时直接拒绝，不自动提权或覆盖。创建冲突由Django拒绝，密码散列/强度校验沿用官方机制。没有启动自动重设或迁移改密。等价原生命令为`createsuperuser --username admin`和`changepassword admin`，须先人工核实账号归属与权限，不对未知普通账号提权。
+
+**不同数据库独立初始化**：QA库在该窗口显式设置新的隔离DATABASE_URL后运行相同命令，其admin只存在于QA库；Owner开发库使用其.env中的实际配置；正式PostgreSQL在受保护的部署环境配置独立DATABASE_URL，再交互运行`manage.py init_admin --database default`（如配置多库，明确对应已配置alias）。命令只显示alias，不打印包含密码的数据库URL。不同库的账号/密码彼此独立，不读取旧credentials.json，不复用QA密码。
+
+本轮没有为Owner实际设置或修改admin密码，需Owner运行上述命令输入指定密码。正式互联网部署使用独立高强度密码；已在聊天或文档公开的密码不适合作为长期生产密码。PostgreSQL实连、正式部署与公网安全仍UNVERIFIED。

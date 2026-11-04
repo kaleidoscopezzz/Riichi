@@ -1,0 +1,16 @@
+
+> riichi-frontend@0.1.0 dev
+> vite --host 127.0.0.1 --port 5187 --strictPort
+
+
+  VITE v8.3.5  ready in 369 ms
+
+  ➜  Local:   http://127.0.0.1:5187/
+15:56:03 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:374:50
+
+15:56:03 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:374:50
+
+15:57:28 [vite] (client) hmr update /src/styles/globals.css, /src/components/ui/select.tsx
+15:59:11 [vite] (client) hmr update /src/styles/globals.css

@@ -10,6 +10,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { FormFeedback } from '@/components/form-feedback'
@@ -143,9 +144,7 @@ export function MachinesPage() {
               <span>{label}</span>
               <Icon size={18} />
             </div>
-            <p>
-              {data && !loading && !error ? data.summary[key] : '—'}
-            </p>
+            <p>{data && !loading && !error ? data.summary[key] : '—'}</p>
             <span>
               {key === 'active'
                 ? '可登记多张物理桌，单场最多选择四张'
@@ -189,20 +188,18 @@ export function MachinesPage() {
           </Button>
           <label className="machine-filter">
             状态筛选
-            <select
+            <Select
+              aria-label="状态筛选"
               value={status}
-              onChange={(e) => {
-                setStatus(e.target.value)
+              onValueChange={(value) => {
+                setStatus(value)
                 setPage(1)
               }}
-            >
-              <option value="">全部状态</option>
-              {Object.entries(machineLabels).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: '', label: '全部状态' },
+                ...Object.entries(machineLabels).map(([value, label]) => ({ value, label })),
+              ]}
+            />
           </label>
         </form>
         <FormFeedback error={error} />

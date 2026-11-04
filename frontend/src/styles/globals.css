@@ -68,8 +68,8 @@
   border-color: var(--border);
 }
 html {
-  min-width: 320px;
-  scroll-behavior: smooth;
+  min-width: 0;
+  scroll-behavior: auto;
 }
 body {
   margin: 0;
@@ -2416,16 +2416,6 @@ a:focus-visible {
   font-size: 13px;
   color: var(--muted);
 }
-.machine-filter select,
-.machine-form select {
-  min-height: 44px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  background: var(--background);
-  color: var(--foreground);
-  font-size: 14px;
-}
 .machine-row {
   display: grid;
   grid-template-columns: minmax(190px, 1.5fr) minmax(100px, 1fr) 90px 110px 195px;
@@ -2582,7 +2572,6 @@ a:focus-visible {
   opacity: 0.8;
 }
 .machine-form input,
-.machine-form select,
 .machine-form textarea {
   width: 100%;
 }
@@ -2721,10 +2710,6 @@ a:focus-visible {
     width: 100%;
     justify-content: space-between;
   }
-  .machine-filter select {
-    flex: 1;
-    max-width: 220px;
-  }
   .machine-row {
     grid-template-columns: 1fr auto;
     gap: 16px;
@@ -2759,7 +2744,6 @@ a:focus-visible {
     padding: 22px;
   }
   .machine-form input,
-  .machine-form select,
   .machine-form textarea {
     font-size: 16px;
   }
@@ -2859,7 +2843,6 @@ a:focus-visible {
   opacity: 0.65;
 }
 .tournament-form input,
-.tournament-form select,
 .tournament-form textarea {
   width: 100%;
   font-size: 15px;
@@ -3104,7 +3087,6 @@ a:focus-visible {
     flex-wrap: wrap;
   }
 }
-.tournament-form select,
 .tournament-form textarea {
   padding: 12px;
   background: var(--background);
@@ -3112,8 +3094,7 @@ a:focus-visible {
   border: 1px solid var(--border);
   border-radius: 8px;
 }
-.tournament-form textarea:focus-visible,
-.tournament-form select:focus-visible {
+.tournament-form textarea:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
 }
@@ -3463,7 +3444,6 @@ a:focus-visible {
   gap: 10px;
   font-size: 14px;
 }
-.round-field select,
 .round-field textarea {
   padding: 12px;
   width: 100%;
@@ -3566,6 +3546,7 @@ a:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+
 .tournament-round-summary {
   border: 1px solid var(--border);
   background: var(--gold-wash);
@@ -3703,13 +3684,6 @@ a:focus-visible {
   gap: 8px;
   font-size: 14px;
   color: var(--muted);
-}
-.competition-section-heading select {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px;
-  margin-left: 8px;
 }
 .next-round {
   margin-top: 20px;
@@ -3859,5 +3833,352 @@ a:focus-visible {
   }
   .competition-progress {
     gap: 14px;
+  }
+}
+/* UAT-FIX-01: shared action containers, scoped to explicit action regions. */
+.machine-form-footer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  align-items: stretch;
+  gap: 12px;
+}
+.machine-form-footer > [data-slot='button'] {
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: normal;
+  text-align: center;
+}
+.tournament-row {
+  grid-template-columns:
+    minmax(0, 2fr) minmax(72px, 0.8fr) minmax(68px, 0.7fr) minmax(60px, 0.6fr)
+    minmax(96px, 1fr) minmax(104px, 0.9fr);
+}
+.tournament-row > [role='cell'],
+.tournament-row > [role='columnheader'] {
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.tournament-row > :first-child {
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  flex-direction: column;
+  overflow-wrap: anywhere;
+}
+.tournament-row > div[role='cell']:first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+}
+.tournament-row-heading {
+  font-size: 14px;
+}
+.tournament-row small,
+.machine-dates {
+  font-size: 14px;
+}
+.tournament-row [data-slot='badge'] {
+  max-width: 100%;
+}
+.player-workspace {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.player-list {
+  min-width: 0;
+}
+.player-row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.5fr) minmax(70px, 0.6fr) minmax(70px, 0.6fr) minmax(100px, 0.8fr)
+    minmax(210px, 1.4fr);
+  gap: 14px;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+  font-size: 15px;
+}
+.player-row > :not(:first-child) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-width: 0;
+}
+.player-row > :first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.player-row small {
+  display: block;
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.player-row-heading {
+  color: var(--muted);
+  font-size: 14px;
+}
+.player-actions {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.player-list .machine-toolbar {
+  margin: 22px 0;
+}
+.player-list h3 {
+  font-size: 20px;
+}
+.player-list .section-heading p {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 8px;
+}
+.competition-action-body > [data-slot='button'] {
+  min-height: 44px;
+  height: auto;
+  padding: 11px 16px;
+  white-space: normal;
+  line-height: 1.5;
+  text-align: center;
+}
+.pagination > [data-slot='button'],
+.machine-toolbar > [data-slot='button'] {
+  min-height: 44px;
+}
+.machine-toolbar > [data-slot='button'],
+.machine-search {
+  height: 46px;
+}
+.machine-search input {
+  height: 44px;
+  padding-block: 10px;
+}
+.machine-actions [data-slot='button'],
+.machine-row-heading,
+.machine-identity small {
+  font-size: 14px;
+}
+@media (min-width: 761px) {
+  .machine-row > [role='cell']:not(:first-child),
+  .machine-row > [role='columnheader']:not(:first-child) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-width: 0;
+  }
+}
+@media (max-width: 1050px) {
+  .player-row {
+    grid-template-columns: minmax(0, 1.2fr) 70px 70px 100px minmax(150px, 1fr);
+    gap: 10px;
+  }
+}
+@media (max-width: 800px) {
+  .tournament-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .tournament-row-heading {
+    display: none;
+  }
+  .tournament-row > :first-child {
+    grid-column: 1/-1;
+  }
+  .tournament-row > :last-child {
+    grid-column: 2/4;
+    justify-content: flex-end;
+  }
+  .player-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .player-row-heading {
+    display: none;
+  }
+  .player-row > :first-child {
+    grid-column: 1/-1;
+  }
+  .player-row > :last-child {
+    grid-column: 1/-1;
+    justify-content: flex-start;
+  }
+  .player-row time {
+    display: none !important;
+  }
+}
+@media (max-width: 390px) {
+  .machine-form-footer {
+    grid-template-columns: 1fr;
+  }
+  .machine-toolbar {
+    gap: 10px;
+  }
+  .pagination {
+    gap: 10px;
+  }
+  .player-list .section-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+}
+
+/* Shared Radix Select: business pages supply data, never their own menus. */
+.riichi-select-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  height: auto;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+  transition:
+    border-color 120ms,
+    background-color 120ms;
+}
+.riichi-select-trigger > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.riichi-select-trigger > svg {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.riichi-select-trigger:hover:not(:disabled) {
+  background: var(--hover);
+}
+.riichi-select-trigger:focus-visible,
+.riichi-select-trigger[data-state='open'] {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-color: var(--gold);
+}
+.riichi-select-trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.riichi-select-trigger[aria-invalid='true'] {
+  border-color: var(--color-destructive);
+}
+.riichi-select-content {
+  z-index: 80;
+  width: var(--radix-select-trigger-width);
+  max-width: calc(100vw - 24px);
+  max-height: min(360px, var(--radix-select-content-available-height));
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 5px;
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow:
+    0 12px 36px #10151e26,
+    0 2px 6px #10151e12;
+}
+.dark .riichi-select-content {
+  box-shadow:
+    0 12px 36px #0006,
+    0 2px 6px #0003;
+}
+.riichi-select-viewport {
+  min-height: 0;
+  max-height: 310px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.riichi-select-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 34px 10px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+.riichi-select-item > span:first-child {
+  min-width: 0;
+}
+.riichi-select-item[data-state='checked'] {
+  color: var(--gold);
+  background: var(--gold-wash);
+}
+.riichi-select-item[data-highlighted] {
+  background: var(--hover);
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+.riichi-select-item[data-disabled] {
+  color: var(--muted);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.riichi-select-indicator {
+  position: absolute;
+  right: 10px;
+  display: flex;
+  color: var(--gold);
+}
+.riichi-select-scroll {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  color: var(--muted);
+}
+.machine-filter .riichi-select-trigger {
+  width: 150px;
+}
+.machine-filter {
+  white-space: nowrap;
+}
+.competition-section-heading > label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.competition-section-heading .riichi-select-trigger {
+  width: 130px;
+  margin-left: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .riichi-select-trigger {
+    transition: none;
+  }
+}
+@media (max-width: 760px) {
+  .machine-filter .riichi-select-trigger {
+    flex: 1;
+    width: auto;
   }
 }
