@@ -1,6 +1,8 @@
 # Riichi
 
-Web 四人立直麻将赛事管理系统。V1.0 仅支持个人赛，当前 **F0-05** 支持账号、选手、设备、赛事草稿与启动、首轮随机分桌，以及真实设备分配/调整/释放历史。成绩、计分、后续轮次和冠军判定未实现。
+**轻量级四人立直麻将个人赛事管理系统**，帮助麻将馆管理员快速创建赛事、安排选手、录入成绩、重排座次并决出冠军；物理桌是辅助资源。
+
+当前可运行正式基线为 **F0-05（CLOSED / PASS）**，已实现账号、选手、设备、赛事配置/启动、首轮随机及轮次级设备分配/释放。成绩、计分、后续轮次、冠军和赛事级固定选桌尚未实现。当前任务 **D0-01仅修订Markdown**；F0-06未启动，将在一个任务中完成V1.0全部剩余核心功能。
 
 Riichi Premium 界面以深海军蓝、石墨黑和中性色为基础，提供仪表盘、赛事管理、选手管理、麻将机管理和系统设置五个基础页面。仪表盘展示欢迎信息、功能入口与实际后端连接状态，不包含虚构赛事统计。
 
@@ -110,17 +112,18 @@ npm run build
 
 ## 文档与当前边界
 
-- [需求与 TBD](docs/requirements.md)
+- [需求与已确认规则](docs/requirements.md)
 - [开发路线](docs/roadmap.md)
 - [架构与目录](docs/architecture.md)
 - [基线管理](docs/project/baselines.md)
 - [开发约束](AGENTS.md)
+- [F0-06完整功能规范（目标，最终决策已落实）](docs/F0-06-functional-spec.md)
 
-账号、选手、设备、赛事配置/启动、首轮随机分桌与资源占用已实现；成绩、后续轮次、计分和冠军判定属于后续任务。微信仍为未来候选。
+账号、选手、赛事配置/启动与首轮已实现。成绩、精确计分、累计榜、后续分桌、最终冠军/公开抽签和完赛自动释放统一纳入F0-06，不拆F0-07/F0-08。微信、团体赛仍为未来候选，不纳入V1.0。
 
-当前正式基线 baseline/F0-04（434a8aa9ae5bd075705322e0556688b7424db16a），Planner CLOSED/PASS。历史基线保留；F0-05未正式验收、未建立基线，不执行commit/tag/push，等待Planner审查和Owner手动Git操作。
+当前正式基线 `baseline/F0-05`，Commit `41929da1e53f8bb481beb4ea3bc31b65f9ee86ff`，Branch main，Planner CLOSED / PASS；F0-01～05历史基线/报告均保留。D0-01不commit/tag/push；只有Planner批准文档、Owner推送文档Commit、远程内容核验一致后，才允许启动F0-06。
 
-## F0-02 账号系统使用
+## F0-02 账号系统使用（已验收）
 
 先查看迁移状态再迁移；不得删除已有数据库或使用 fake。当前原 F0-01 SQLite（仅 contenttypes 已迁移）已验证可以正常升级。User 必须由 accounts/0001_initial 创建。
 
@@ -139,7 +142,7 @@ createsuperuser 交互输入自己的用户名和密码，自动创建选手档�
 
 API 与请求示例、测试结果和限制见 [F0-02 交付报告](docs/project/F0-02-verification.md)。原 F0-01 报告和证据保留为历史快照。
 
-## F0-03 麻将机资源管理
+## F0-03 麻将机资源管理（历史交付边界，已验收）
 
 沿用上述虚拟环境、环境配置和启动命令，先检查并执行数据库迁移：
 
@@ -157,7 +160,7 @@ API：GET/POST /api/v1/machines/，GET/PATCH /api/v1/machines/{id}/，POST /api/
 
 [本阶段报告、调用示例与验证边界](docs/project/F0-03-verification.md)。没有新增依赖，F0-01/F0-02证据保留；SQLite并发已实测，PostgreSQL实际连接/并发与公网部署仍未验证。
 
-## F0-04 赛事领域基础
+## F0-04 赛事领域基础（历史交付边界，已验收）
 
 使用上方PowerShell启动命令，先showmigrations、migrate，再按需交互执行createsuperuser。管理员访问 `/tournaments`，创建/编辑草稿、搜索分页选择真实有效选手，检查规则和名单后明确确认启动。普通用户没有管理菜单或API权限。启动不分桌、不分配设备、不产生比赛成绩。
 
@@ -165,7 +168,7 @@ API：GET/POST /api/v1/machines/，GET/PATCH /api/v1/machines/{id}/，POST /api/
 
 API（均需管理员Session，所有写请求带CSRF）：GET/POST `/api/v1/tournaments/`；GET/PATCH `/api/v1/tournaments/{id}/`；PUT `/api/v1/tournaments/{id}/participants/`；POST `/api/v1/tournaments/{id}/start/`。列表支持search/status/page。点数为整数、Uma用精确十进制字符串传递，oka只读。
 
-本阶段未增加依赖或改动锁文件。实际执行的迁移、测试、HTTP和浏览器检查、请求示例及工程限制见 [F0-04交付报告](docs/project/F0-04-verification.md)。全部旧证据保留。验证只迁移独立QA库；开发库尚未应用F0-04，正式本地使用前请正常执行migrate。PostgreSQL与公网部署仍未验证。
+F0-04当时的迁移、测试、HTTP/浏览器及数据库状态见 [原始交付报告](docs/project/F0-04-verification.md)，保留历史快照。当前本地迁移状态应由使用者通过showmigrations实查；D0-01未检查或修改数据库。PostgreSQL与公网部署仍未验证。
 
 ## F0-05 首轮分桌与物理设备
 
@@ -177,4 +180,21 @@ active占用的设备不能维护/停用/退役；先确认实体使用已结束
 
 API：GET/POST `/api/v1/tournaments/{id}/rounds/`（生成体`{"round_number":1}`），GET `/api/v1/tournaments/{id}/rounds/1/`，GET `/api/v1/round-tables/{id}/`、`.../machine/history/`，POST `.../machine/reassign/`（`{"machine_id":3}`）、`.../machine/release/`（`{"reason":"实体使用结束"}`），GET `/api/v1/machine-resources/`。全部限管理员Session，写请求必须携带当前CSRF。
 
-没有新增依赖或修改依赖锁。迁移与QA只在被忽略的独立数据库执行，开发库保持原样；实际使用前须正常migrate至最新。详见 [F0-05交付、自检与验证边界](docs/project/F0-05-verification.md)。旧报告/失败证据保留，PostgreSQL及生产部署未验证。
+F0-05已正式验收，上述是当前代码行为；[原始交付报告](docs/project/F0-05-verification.md)保留当时QA与迁移记录。历史失败证据不修改，D0-01不重跑功能测试、不迁移或改依赖，也不把历史结果冒称本轮通过。
+
+## D0-01与F0-06目标
+
+F0-05当前仍最多4台非退役设备、轮次级MachineAllocation、仅首轮生成；尚未改成新目标。
+
+F0-06目标为店内可登记5张或更多物理桌，单赛事首轮前显式选择1～4张并固定A～D映射，后续只重排选手/分组/四风，正式完赛自动释放。故障替换保留简化审计，不作为日常换轮步骤。新增迁移须安全解除capacity_slot容量依赖，保留machineId、旧分桌和设备历史，见[非破坏性兼容设计](docs/architecture.md#兼容与迁移设计建议尚未执行)。本任务没有执行这些改造。
+
+TBD-001/002均为**RESOLVED**，已确认采用`split_rank_bonus_v1`与`performance_v1`。Planner五项最终决策已落实，详细规则、公开抽签、条件零和、完整流程及验收统一见[F0-06规范](docs/F0-06-functional-spec.md)：
+
+- 终局点数允许负数/零，四人均为整数；正式确认总和必须4×开局，异常可存草稿但不能跳过校验。
+- 后续分桌按累计分、第一/第二次数、逆序逐轮积分，完全相同按首轮持久化随机顺序；新轮四风重新随机。冠军全同仍公开抽签，不使用首轮兜底。
+- F0-04已启动未分桌及F0-05已有分桌均须兼容；旧占用全部有效时继承固定桌位，已释放/异常需管理员复核。保留首轮与历史，新旧资源统一互斥。
+- Fraction等精确有理数为权威计分与排名、无损存储；Decimal/字符串仅作精确输入解析，前端近似展示不排序，禁止浮点累计。允许修改冲突的旧测试断言，保留有效旧测试和全部历史验收证据，补齐新需求回归。
+
+上述为F0-06目标，当前代码尚未实现；不做任意公式编辑器，不静默升级或重算历史。
+
+F0-06是最后一次核心功能开发，须一次交付成绩到冠军完整闭环；之后仅集成测试、部署、安全加固及发布验收。D0-01完成后停止，等待Planner文档审查与Owner文档提交/远程核验。

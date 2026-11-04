@@ -1,86 +1,61 @@
 # Riichi 开发约束
 
-## 项目与职责
+## 当前任务与规范
 
-Riichi 是前后端分离、模块化单体的 Web 四人立直麻将赛事管理系统。产品范围以 `docs/requirements.md` 为准；Developer 实现 Planner 明确下发的任务，测试和自检不能替代 Planner 的外部验收。
+Riichi定位为**轻量级四人立直麻将个人赛事管理系统**，帮助管理员快速组织比赛、录入成绩、重排座次并决出冠军；设备调度不是产品主线。需求以[requirements](docs/requirements.md)为总览，F0-06详细规则以[统一功能规范](docs/F0-06-functional-spec.md)为准，技术与兼容设计见[architecture](docs/architecture.md)。
 
-当前任务为 **F0-05 比赛轮次、首轮分桌与麻将机资源分配**。仅生成已启动赛事第一轮、随机四风座次、真实机器分配/调整/释放及历史；不得实现后续轮次积分分桌、成绩、计分、排名、冠军、取消/删除/完赛、强制中断、微信或团队赛，不得无关重构账号与选手模块。
+当前任务 **D0-01：F0-06开发前文档统一修订**。仅允许修改Markdown，不改Python、TypeScript、样式、迁移、数据库结构，不安装/升级依赖，不启动任何F0-06功能开发。可读取源码和只读核验Git。只执行文档检查，不用功能测试或迁移制造不相关写入。
 
-F0-01～F0-04 已正式验收；当前基线 `baseline/F0-04`，Commit `434a8aa9ae5bd075705322e0556688b7424db16a`，分支 main，Planner CLOSED / PASS。不得修改、移动或删除已有基线 Tag。Developer 自检不能替代 Planner 验收。
+F0-01～F0-05均已正式CLOSED / PASS。当前main基线为`baseline/F0-05`，Commit `41929da1e53f8bb481beb4ea3bc31b65f9ee86ff`。不改、移、删历史Tag，保留所有旧验证报告、失败证据及迁移。
 
-## 技术与目录边界
+F0-06是V1.0唯一剩余、最后一次核心功能开发，**未启动**；须一个任务完成成绩、计分、累计榜、后续分桌、唯一冠军、公开抽签、完赛及自动释放，不拆为F0-07/F0-08。只有Planner批准文档、Owner推送文档Commit、远程文档核验一致后才能开始。D0-01完成立即停止，等待审查。
 
-- `backend/`：Python 3.13、Django 5.2 LTS、Django REST Framework；开发使用 SQLite，生产预留 PostgreSQL 配置。项目配置、公共服务和未来领域模块保持分离。
-- `frontend/`：React、TypeScript、Vite、Tailwind CSS、shadcn/ui、Lucide React。布局、路由页面、通用组件、API 服务和样式分层组织。
-- `docs/`：已确认需求、TBD、路线、架构、验证证据和基线制度。新增需求和改变范围须由 Planner 明确确认。
-- 不为未来业务建立大量空文件，不引入当前不需要的微服务、Redis、Celery 或基础设施。
-- 运行时、虚拟环境、依赖及下载缓存保存在项目目录内。不得擅自安装全局依赖或修改全局环境。
+## 技术与工程边界
 
-## 实现规则
+- 前后端分离、模块化单体：backend为Python3.13/Django5.2 LTS/DRF，SQLite开发、PostgreSQL生产预留；frontend为React/TypeScript/Vite/Tailwind/shadcn/ui/Lucide。
+- 配置、公共服务、accounts、players、machines、tournaments按现有边界组织，不引入微服务、Redis、Celery、任意公式编辑器或动态表达式执行。
+- 运行时、虚拟环境、依赖和缓存留在项目内；不得全局安装或改全局环境。稳定依赖锁随真正依赖变更维护，本次不改。
+- 简体中文、Riichi Premium、统一组件和反馈，桌面/手机、深浅主题、键盘与焦点、可读对比度。只展示真实API数据，不虚构赛事、选手、成绩或统计。
+- 密钥、DEBUG、主机、数据库及来源走环境变量；不提交.env、数据库、依赖、构建和凭据，不开放全局CORS，不把开发配置当生产配置。
+- 先读相关实现再做授权范围修改，不擅改产品范围。技术设计选择不能改变已确认业务规则；新的业务分歧须另报Planner。
 
-1. 简体中文为主要界面语言。遵守 Riichi Premium 的深海军蓝、石墨黑、中性色及适度金色/青绿色设计，保持统一组件、间距、字体、边框、圆角和交互反馈。
-2. 业务占位须清楚标注尚未实现；不得虚构赛事、选手、成绩或统计数字。请求须有加载、成功、错误和重试反馈。
-3. 使用 shadcn/ui 成熟组件作为基础，不另造一套相同用途的组件体系。兼容桌面和手机，关注键盘操作、可访问名称和可读对比度。
-4. 密钥、调试开关、允许主机、数据库及跨域来源从环境变量读取；`.env.example` 只包含占位值或安全的本地开发值。
-5. 不提交真实密钥、`.env`、虚拟环境、依赖目录、构建产物或本地数据库。不允许全局开放 CORS，也不允许把开发配置作为生产配置。
-6. 锁定兼容的稳定依赖并维护可复现记录。依赖升级应说明目的并执行受影响的检查。
-7. 先读取相关实现与文档，再做范围内最小修改；保留已有文件和失败证据，不以删除证据掩盖验证问题。
+## 身份、会话及历史保护
 
-## 验证要求
+- AbstractUser在accounts/0001_initial，PlayerProfile通过OneToOne关联AUTH_USER_MODEL；原子注册/档案创建，不新建平行身份体系。
+- 沿用Django SessionAuthentication。注册/登录/退出显式csrf_protect，DRF写操作正确CSRF；前端Cookie凭据、写前取当前CSRF，仅请求内存保留，不写localStorage或日志。
+- 管理员仅createsuperuser初始化，无默认管理员密码。服务端权限/严格字段白名单，普通用户只改本人资料，不在前端独立决定权限。
+- 改迁移前查迁移图及真实库，先备份副本验证；禁止修改历史迁移、fake、删库、清数据或重建掩盖兼容异常。生产数据库未验证必须标UNVERIFIED。
+- machineId、TournamentParticipant、RoundTable、RoundSeat及MachineAllocation历史身份保持稳定，不用编号或昵称关联历史。
 
-交付前至少执行并如实记录：
+## 当前实现事实与F0-06目标
 
-- 后端系统检查、数据库迁移、健康检查自动化测试，以及实际 HTTP 健康响应。
-- 前端 TypeScript 检查、生产构建，以及布局和所有基础路由的浏览器检查。
-- 前后端健康检查联调，包含正常、加载和失败反馈的检查。
-- 敏感信息与 Git 忽略规则检查。
+- F0-05当前仍是最多4台非退役设备（capacity_slot数据库兜底）、轮次级MachineAllocation、仅首轮随机；维护/停用也占容量，退役是只读终态，active设备禁止维护/停用/退役。
+- 当前Tournament只有draft/started；启动冻结数字规则、名单与昵称。当前没有成绩、后续轮次、冠军、正式完赛、策略版本或赛事级固定物理桌。
+- F0-06目标是店内5张或更多桌、单赛事显式选择1～4张，固定A～D映射贯穿轮次，完赛自动释放；仅选手/分组/四风重排。旧实现不得被文档宣称已改造。
+- F0-06须用新增迁移解除capacity_slot容量依赖，保留旧列/ID/历史的兼容路径；统一赛事预留与旧active记录的资源写入，不能产生双重占用或自动抢回已释放旧设备。D0-01只写方案，不执行。
+- 兼容F0-04已启动未分桌与F0-05已生成分桌赛事：原占用全部有效时继承固定桌位，已释放/异常占用才由管理员复核。不得重排首轮或破坏历史，新旧资源统一互斥。
+- 当前SQLite写预留与PostgreSQL稳定设备PK锁顺序属于已实现代码策略；F0-06新增预留/成绩/完赛须统一锁顺序、唯一约束与整体回滚。不得把跨表服务校验冒称数据库CHECK。
 
-测试须针对真实行为，新增测试与改动风险相称。记录准确命令、执行环境、结果和未验证原因；失败或未执行不得标为通过。PostgreSQL 仅预留配置时，不得声称生产数据库已验证。
+## 已确认计分及冠军规则
 
-## Git 与交付限制
+- TBD-001 **RESOLVED**：`split_rank_bonus_v1`，终局原始同点均分覆盖名次的Uma及第一名Oka，禁止座次/ID隐藏优先；公式、示例和条件零和见统一规范。
+- TBD-002 **RESOLVED**：`performance_v1`，总分→第一次数→第二次数→从最后轮向前的单场积分→公开抽签，管理员确认/审计，冠军唯一。
+- Fraction等精确有理数完成权威计分、累计、排名及无损存储；Decimal/字符串可精确解析输入，禁止先经float或有限精度舍入。前端近似展示不参与排序，禁止浮点累计。本阶段不写算法。
+- F0-06须让每场保存策略标识、rules_version及数字配置，草稿可改支持项、启动冻结；历史赋可追溯默认版本，不改原配置/分桌，不静默重算历史。
+- 终局点数允许负数/零，四人均须整数；正式确认总和必须等于4×开局，异常可存草稿但无跳过校验入口。
+- 后续分桌依次按累计分、第一名次数、第二名次数、逆序逐轮积分排序，完全相同按首轮持久化随机排列顺序；新轮四风重新随机。旧首轮序列从已有桌号/东南西北还原，不用记录ID或重新抽序；该兜底不用于冠军决胜。
+- Planner五项最终决策已确认，规范OP-01～OP-05均RESOLVED。不得重新引入互斥方案，或添加罚分、积分补正、座次轮换、避重对手等其他赛制。
 
-- F0-05 保持当前 `main`，只进行工程实现和验证。**不得自行执行 `git commit`、`git tag`、`git push`。**
-- 不修改远程仓库配置，不重写历史，不删除已有文件，不执行破坏性 Git 操作。
-- 可以执行 `git status`、`git diff`、`git check-ignore` 等只读检查。
-- 本阶段不执行 commit、tag、push，Git 由项目 Owner 手动操作，Planner 负责验收与双基线核验。F0-01～F0-04 已建立正式基线，F0-05 尚未正式验收、尚未建立基线。详见 `docs/project/baselines.md`。
-- 最终报告须列出工程文件、API、界面、启动方法、实际验证、Git 状态、已知问题和自检结论。完成后停止本阶段开发，等待 Planner 验收。
+## 验证与交付
 
-## F0-02 账号安全与迁移
+D0-01必须核对HEAD/Tag、读取现状、搜索全部Markdown旧状态并区分历史快照，检查链接、仅Markdown变更及git diff --check，给出对比、风险和Git状态。不得把旧阶段测试结果当作本轮重跑通过。
 
-- User 使用 AbstractUser，必须出现在 accounts/0001_initial；PlayerProfile 通过 OneToOne 关联 settings.AUTH_USER_MODEL。注册与档案创建必须原子提交。
-- 采用 Django SessionAuthentication；注册、登录、退出为显式 csrf_protect 的 Django JSON View，资料 PATCH 使用 SessionAuthentication 的 CSRF 校验。不得添加 csrf_exempt。
-- 前端凭据使用 HttpOnly Session Cookie；每次写请求从 csrf 初始化端点取得当前 Token，仅保留在请求内存，不将认证凭据写入 localStorage，不记录明文密码、Cookie 或 CSRF Token。
-- 管理员仅通过 createsuperuser 初始化，无默认管理员密码。权限在服务端检查；注册拒绝敏感字段，普通用户仅改本人昵称。
-- 改迁移前先查现有迁移图和数据库，禁止删除数据库、fake 或破坏性重置。兼容异常应停止报告。
-- 测试包括事务回滚、唯一约束、权限及真实 enforce_csrf_checks，前端表单/恢复/守卫/角色菜单；联调使用独立测试数据库，不把验证账号作为展示数据。
-- 公网上线前另行实现登录限流等加固；F0-02 不实现找回密码、外部认证或微信能力。
+F0-06获准后，须验证完整4人1轮、8/12人多轮、16人6轮，覆盖负数/零/总和校验、有理数无损精度、成绩锁定、后续分桌与首轮兜底、冠军全同公开抽签、固定选桌/自动释放、旧数据兼容、并发/回滚、管理员/Session/CSRF及真实API/UI。Planner允许修改与新需求冲突的旧断言，但须记录差异、保留原有效测试和历史验收证据，并补新需求回归；不得删失败用例或篡改证据冒充通过。
 
-## F0-03 设备约束
+功能开发交付须实际执行Django check/migrate/makemigrations检查/全量测试、TypeScript/Vitest/build/npm audit、HTTP/浏览器/安全忽略检查，保存准确命令、环境、结果及UNVERIFIED。D0-01不执行功能验证。F0-06之后仅集成测试、部署、安全加固、发布验收；微信、团体赛仍属未来候选。
 
-- MahjongMachine.id 为稳定 machineId，machine_no 为三位数字业务编号；未来赛事以 FK 引用 id，不能按名称或编号关联历史实体。
-- available、maintenance、disabled 均占现役容量，最多4台；retired 释放容量但保留原始ID和资料，是普通API不能恢复或编辑的终态。没有物理删除API。
-- 数据库使用1～4唯一容量槽与状态/槽位CHECK约束兜底；现役编号使用条件唯一约束。不能仅使用count再insert或仅依赖SQLite不支持的行锁来承诺并发安全。
-- 非退役状态可相互调整，退役仅通过专用POST并经前端确认。available仅说明设备状态，不说明赛事空闲或占用。
-- 全部设备接口使用现有SessionAuthentication、IsAdminUser与CSRF规则，普通用户/匿名不得读写，内部容量槽不能由请求指定。
-- 必须测试数据库约束、并发容量、状态终态、权限、CSRF及原有回归；区分SQLite内存测试、文件测试和未验证的PostgreSQL。
-- 所有验证数据和凭据仅放项目内被忽略的独立QA数据库/目录，不把验证设备作为生产演示数据。
+## Git与停止限制
 
-## F0-04 赛事约束
-
-- Tournament 独立保存规则；PlayerProfile FK 参赛，(tournament, player) 数据库唯一。昵称在启动事务中保存快照。
-- 仅 draft → started；全部外部修改通过 tournaments/services.py，在事务的第一条数据库语句对 draft 父行条件写入，再读取/修改规则、名单或启动。不得绕过此共享写入入口；SQLite 不依赖无效的 select_for_update，忙锁返回409。
-- 启动须再次检查配置、4/8/12/16人和有效账号；规则、名单、快照、状态、时间整体提交或回滚。started 无编辑、恢复或删除 API。
-- 点数为正整数，Uma 使用整数或十进制字符串输入并保存字符串，Oka 用 Decimal 推导。不得使用浮点计分，不自行要求 Uma 总和或顺序大小，不解决 TBD-001/002。
-- 复用管理员 Session/CSRF 与 JSON 错误结构。内部 status、started_at、created_by、revision 和 Oka 只读；选手选择必须查询真实分页API。
-- 必测权限/CSRF、配置独立性、四种人数、无效名单、快照、回滚、并发启动及启动/编辑竞态、旧功能回归。独立QA库验证迁移和HTTP；生产 PostgreSQL 未验证不得声称通过。
-
-## F0-05 轮次与占用约束
-
-- 只通过round_services生成第一轮：SystemRandom无固定生产种子，测试可注入rng；4/8/12/16人对应1/2/3/4桌，各桌四风、全员恰好一次。生成后不重排，不提供座次编辑。
-- RoundSeat跨表一致性由clean及服务审计，数据库UNIQUE/CHECK仅保证可表达的单行与唯一规则；不得把跨表校验冒称数据库CHECK。
-- 分配稳定machineId并快照machine_no；available且无active分配才可用，按编号升序选择。active机器与active桌各自条件唯一，released保留历史及释放时间/管理员/说明。
-- 状态变更、生成、调整、释放共用machines.locking.lock_machine_pool。SQLite第一条语句为不改变值的UPDATE取得写预留；PostgreSQL按稳定PK顺序锁物理池，再锁赛事/写子记录，禁止反序取设备锁。新插入而未在本次锁定集合中的设备留到后续请求。
-- active设备禁止维护/停用/退役，可编辑普通资料；调整先校验目标，再原子释放旧分配并创建新分配。同机调整明确409，不增加历史。
-- 释放为占用终态，无恢复入口；释放不等于成绩确认或轮次结束，Tournament保持started。
-- 管理员Session、CSRF和严格字段继续适用。独立QA库运行真实文件SQLite并发与旧全量回归，PostgreSQL未实测须列UNVERIFIED。
-- 第二至第六轮等待未来已确认成绩及累计积分；当前明确拒绝，不生成假排名，不解决TBD-001/002。
+- 保持main，D0-01不执行git commit、tag、push，不改远端、历史或已有基线，不删除文件。
+- Owner负责Git提交/推送，Planner负责文档审查及双端核验。自检不替代外部验收。
+- D0-01报告须列文件、五项最终决策落实、基线、两个RESOLVED规则、兼容方案、完整F0-06范围和实际文档检查；完成停止，等待Planner。
