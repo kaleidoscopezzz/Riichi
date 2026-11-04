@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchRounds } from '@/services/rounds'
+import { fetchWorkspace } from '@/services/competition'
 import { Button } from './ui/button'
 import { FormFeedback } from './form-feedback'
 
@@ -11,12 +12,12 @@ export function TournamentRoundSummary({ id }: { id: number }) {
     const controller = new AbortController()
     setSummary(null)
     setError(null)
-    void fetchRounds(id, controller.signal)
-      .then(({ results }) => {
+    void Promise.all([fetchRounds(id, controller.signal), fetchWorkspace(id, controller.signal)])
+      .then(([{ results }, workspace]) => {
         if (!controller.signal.aborted)
           setSummary({
             rounds: results.length,
-            active: results.flatMap((r) => r.tables).filter((t) => t.active_allocation).length,
+            active: workspace.mapping.filter((f) => f.machine_id).length,
           })
       })
       .catch((e) => {
@@ -48,7 +49,7 @@ export function TournamentRoundSummary({ id }: { id: number }) {
           </dl>
           <p>
             {summary.rounds
-              ? '首轮座次已持久化，进入分桌工作台查看与管理设备。'
+              ? '进入比赛工作台录入成绩、查看累计榜与后续轮次。'
               : '尚未生成第一轮，请进入分桌工作台检查资源并确认生成。'}
           </p>
         </>

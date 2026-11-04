@@ -1,0 +1,349 @@
+- link "跳转到主要内容":
+  - /url: "#main-content"
+- complementary:
+  - link "Riichi 首页":
+    - /url: /dashboard
+    - generic: R
+    - text: riichi
+    - generic: TOURNAMENT SYSTEM
+  - generic: 工作空间
+  - navigation "主导航":
+    - link "仪表盘":
+      - /url: /dashboard
+      - generic: 仪表盘
+    - link "赛事管理":
+      - /url: /tournaments
+      - generic: 赛事管理
+    - link "选手管理":
+      - /url: /players
+      - generic: 选手管理
+    - link "麻将机管理":
+      - /url: /machines
+      - generic: 麻将机管理
+    - link "系统设置":
+      - /url: /settings
+      - generic: 系统设置
+    - link "个人资料":
+      - /url: /profile
+      - generic: 个人资料
+  - paragraph: 从容组织，专注对局
+  - text: 为立直麻将赛事而设计
+  - text: RIICHI PREMIUM
+  - generic: V1.0
+- banner:
+  - navigation "breadcrumb":
+    - list:
+      - link "工作空间":
+        - /url: /dashboard
+      - link "分桌工作台" [disabled]
+  - generic: 服务已连接
+  - button "切换为亮色主题":
+  - link "我的个人资料":
+    - /url: /profile
+    - text: f006_qa_admin
+  - button "退出"
+- main:
+  - generic: RIICHI WORKSPACE
+  - heading "分桌工作台" [level=1]
+  - paragraph: 第一轮座次与真实设备占用
+  - generic: 个人赛 · V1.0
+  - link "返回赛事管理":
+    - /url: /tournaments
+    - text: 返回赛事管理
+  - generic: TOURNAMENT / 比赛工作台
+  - heading "浏览器验收 · 16人6轮" [level=2]
+  - paragraph: 记录每一场对局，让每一分都有依据。
+  - button "刷新工作台":
+    - text: 刷新工作台
+  - generic: 16 位选手
+  - generic: 6 / 6 轮
+  - generic: 已完赛 · 结果只读
+  - generic: CHAMPION / 个人冠军
+  - heading "验收选手16" [level=2]
+  - paragraph: 全部成绩已归档，本赛事物理桌已自动释放。
+  - region "本场固定物理桌":
+    - strong: 逻辑桌 A
+    - generic: 已释放
+    - button "占用历史"
+    - strong: 逻辑桌 B
+    - generic: 已释放
+    - button "占用历史"
+    - strong: 逻辑桌 C
+    - generic: 已释放
+    - button "占用历史"
+    - strong: 逻辑桌 D
+    - generic: 已释放
+    - button "占用历史"
+  - heading "对局与成绩" [level=3]
+  - text: 查看轮次
+  - combobox "查看轮次":
+    - option "第 1 轮"
+    - option "第 2 轮"
+    - option "第 3 轮"
+    - option "第 4 轮"
+    - option "第 5 轮"
+    - option "第 6 轮" [selected]
+  - article:
+    - generic: ROUND 6
+    - heading "逻辑桌 A" [level=3]
+    - generic: 已确认
+    - paragraph: 本轮开始时物理桌 002
+    - generic: 东
+    - strong: 验收选手04
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 南
+    - strong: 验收选手14
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 西
+    - strong: 验收选手12
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 北
+    - strong: 验收选手06
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - text: 成绩锁定，可在排行榜查看精确值
+  - article:
+    - generic: ROUND 6
+    - heading "逻辑桌 B" [level=3]
+    - generic: 已确认
+    - paragraph: 本轮开始时物理桌 003
+    - generic: 东
+    - strong: 验收选手15
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 南
+    - strong: 验收选手01
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 西
+    - strong: 验收选手02
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 北
+    - strong: 验收选手13
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - text: 成绩锁定，可在排行榜查看精确值
+  - article:
+    - generic: ROUND 6
+    - heading "逻辑桌 C" [level=3]
+    - generic: 已确认
+    - paragraph: 本轮开始时物理桌 005
+    - generic: 东
+    - strong: 验收选手07
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 南
+    - strong: 验收选手10
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 西
+    - strong: 验收选手03
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 北
+    - strong: 验收选手11
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - text: 成绩锁定，可在排行榜查看精确值
+  - article:
+    - generic: ROUND 6
+    - heading "逻辑桌 D" [level=3]
+    - generic: 已确认
+    - paragraph: 本轮开始时物理桌 007
+    - generic: 东
+    - strong: 验收选手09
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 南
+    - strong: 验收选手16
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 西
+    - strong: 验收选手08
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - generic: 北
+    - strong: 验收选手05
+    - generic: "25000"
+    - generic "0/1": 0.00 分 · 并列
+    - text: 成绩锁定，可在排行榜查看精确值
+  - generic: STANDINGS
+  - heading "最终排名" [level=3]
+  - generic: 仅计入已确认成绩
+  - table:
+    - rowgroup:
+      - row "名次 选手 累计积分 已确认 第一 / 第二 逐轮成绩档案":
+        - columnheader "名次"
+        - columnheader "选手"
+        - columnheader "累计积分"
+        - columnheader "已确认"
+        - columnheader "第一 / 第二"
+        - columnheader "逐轮成绩档案"
+    - rowgroup:
+      - row "1 验收选手16 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "1"
+        - rowheader "验收选手16"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "2 验收选手15 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "2"
+        - rowheader "验收选手15"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "3 验收选手14 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "3"
+        - rowheader "验收选手14"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "4 验收选手13 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "4"
+        - rowheader "验收选手13"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "5 验收选手12 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "5"
+        - rowheader "验收选手12"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "6 验收选手11 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "6"
+        - rowheader "验收选手11"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "7 验收选手10 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "7"
+        - rowheader "验收选手10"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "8 验收选手09 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "8"
+        - rowheader "验收选手09"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "9 验收选手08 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "9"
+        - rowheader "验收选手08"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "10 验收选手07 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "10"
+        - rowheader "验收选手07"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "11 验收选手06 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "11"
+        - rowheader "验收选手06"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "12 验收选手05 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "12"
+        - rowheader "验收选手05"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "13 验收选手04 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "13"
+        - rowheader "验收选手04"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "14 验收选手03 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "14"
+        - rowheader "验收选手03"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "15 验收选手02 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "15"
+        - rowheader "验收选手02"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+      - row "16 验收选手01 0.00 精确 0/1 6 轮 6 / 0":
+        - cell "16"
+        - rowheader "验收选手01"
+        - cell "0.00 精确 0/1":
+          - strong: "0.00"
+          - generic: 精确 0/1
+        - cell "6 轮"
+        - cell "6 / 0"
+        - cell:
+          - generic "查看 6 轮"
+- contentinfo:
+  - generic: RIICHI·让对局回归精彩
+  - generic: Foundation 06/完整赛事运行与精确计分

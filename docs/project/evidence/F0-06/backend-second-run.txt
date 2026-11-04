@@ -1,0 +1,20 @@
+Creating test database for alias 'default'...
+
+.......................................................F.................................
+======================================================================
+FAIL: test_long_decimal_nonzero_uma_and_different_start (tournaments.tests_competition.CompetitionTests.test_long_decimal_nonzero_uma_and_different_start)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\tournaments\tests_competition.py", line 82, in test_long_decimal_nonzero_uma_and_different_start
+    self.assertEqual(unpack(results[0]['bonus']), (Fraction(t.uma[0])+30)/3)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Fraction(5012345678901234567890123456789, 300000000000000000000000000000) != Fraction(2004115226300411522630041152263, 100000000000000000000000000000)
+
+----------------------------------------------------------------------
+Ran 89 tests in 8.912s
+
+FAILED (failures=1)
+Destroying test database for alias 'default'...
+
+Found 89 test(s).
+System check identified no issues (0 silenced).

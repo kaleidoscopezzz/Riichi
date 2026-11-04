@@ -1,0 +1,38 @@
+Creating test database for alias 'default'...
+
+......................................................................................FF.F.......
+======================================================================
+FAIL: test_confirmation_vs_finish (tournaments.tests_competition.CompetitionConcurrencyTests.test_confirmation_vs_finish)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\tournaments\tests_competition.py", line 319, in test_confirmation_vs_finish
+    self.assertIn('ok', result)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^
+AssertionError: 'ok' not found in ['tournament_busy', 'results_incomplete']
+
+======================================================================
+FAIL: test_confirmation_vs_next_round (tournaments.tests_competition.CompetitionConcurrencyTests.test_confirmation_vs_next_round)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\tournaments\tests_competition.py", line 308, in test_confirmation_vs_next_round
+    self.assertIn('ok', result)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^
+AssertionError: 'ok' not found in ['tournament_busy', 'results_incomplete']
+
+======================================================================
+FAIL: test_finish_competes_with_reuse (tournaments.tests_competition.CompetitionConcurrencyTests.test_finish_competes_with_reuse)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\tournaments\tests_competition.py", line 338, in test_finish_competes_with_reuse
+    self.assertIn('ok', result)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^
+AssertionError: 'ok' not found in ['tournament_busy', 'machine_occupied']
+
+----------------------------------------------------------------------
+Ran 97 tests in 11.034s
+
+FAILED (failures=3)
+Destroying test database for alias 'default'...
+
+Found 97 test(s).
+System check identified no issues (0 silenced).

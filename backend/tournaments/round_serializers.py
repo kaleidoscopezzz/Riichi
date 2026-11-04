@@ -6,6 +6,7 @@ from .models import MachineAllocation, RoundTable, TournamentRound
 
 class GenerateRoundSerializer(StrictFieldsMixin, serializers.Serializer):
     round_number = ExactInteger(min_value=1, max_value=6)
+    machine_ids = serializers.ListField(child=ExactInteger(min_value=1), max_length=4, required=False)
 
 
 class ReassignSerializer(StrictFieldsMixin, serializers.Serializer):
@@ -32,10 +33,15 @@ class TableSerializer(serializers.ModelSerializer):
     seats = serializers.SerializerMethodField()
     active_allocation = serializers.SerializerMethodField()
     allocation_history = serializers.SerializerMethodField()
+    result = serializers.SerializerMethodField()
 
     class Meta:
         model = RoundTable
-        fields = ["id", "round_id", "round_number", "tournament_id", "table_number", "seats", "active_allocation", "allocation_history", "created_at"]
+        fields = ["id", "round_id", "round_number", "tournament_id", "table_number", "seats", "active_allocation", "allocation_history", "created_at", "tournament_table_id", "machine_snapshot", "result"]
+
+    def get_result(self, obj):
+        from .competition_services import result_data
+        return result_data(obj)
 
     def get_seats(self, obj):
         order = {wind: i for i, wind in enumerate(["east", "south", "west", "north"])}
@@ -54,4 +60,4 @@ class RoundSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TournamentRound
-        fields = ["id", "tournament_id", "round_number", "generated_at", "generated_by", "created_at", "tables"]
+        fields = ["id", "tournament_id", "round_number", "generated_at", "generated_by", "created_at", "tables", "generation_snapshot"]

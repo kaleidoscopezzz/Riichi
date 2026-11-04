@@ -7,18 +7,18 @@ import { Button } from '@/components/ui/button'
 const details = {
   '/tournaments': {
     title: '精彩赛事，即将从这里开始',
-    description: '未来可在这里组织个人赛、安排轮次与分桌，并记录每一场对局的结果。',
+    description: '组织个人赛、安排轮次与分桌，并记录每一场对局的结果。',
     features: ['赛事与轮次管理', '随机与积分分桌', '点数录入与个人排名'],
   },
   '/players': {
     title: '等待每一位选手入席',
-    description: '未来可在这里查看已注册的系统选手，并为个人赛事选择参赛成员。',
+    description: '查看已注册选手，并为个人赛事选择参赛成员。',
     features: ['系统账号与选手资料', '赛事参赛成员管理', '赛事选手选择'],
   },
   '/machines': {
     title: '让每一张牌桌，各就其位',
-    description: '未来可在这里管理最多 4 台独立编号的麻将机，为赛事分桌提供设备支持。',
-    features: ['设备独立编号', '设备与赛事分桌关联', '最多 4 台设备'],
+    description: '管理独立编号的物理麻将桌，单场选择一至四张。',
+    features: ['设备独立编号', '设备与赛事分桌关联', '单场最多四张'],
   },
 } as const
 

@@ -98,7 +98,7 @@ export function AppLayout() {
   const page =
     navigation.find((item) => item.path === pathname) ||
     (/^\/tournaments\/\d+\/rounds$/.test(pathname)
-      ? { ...navigation[1], title: '分桌工作台', caption: '第一轮座次与真实设备占用' }
+      ? { ...navigation[1], title: '分桌工作台', caption: '固定选桌、逐轮计分与冠军结果' }
       : undefined)
   const { theme, setTheme } = useTheme()
   const [open, setOpen] = useState(false)
@@ -196,7 +196,7 @@ export function AppLayout() {
             RIICHI<span className="footer-dot">·</span>让对局回归精彩
           </span>
           <span>
-            Foundation 05<span className="footer-dot">/</span>首轮分桌与设备分配
+            Foundation 06<span className="footer-dot">/</span>完整赛事运行与精确计分
           </span>
         </footer>
       </div>

@@ -441,8 +441,8 @@ export function TournamentDetail({
           <span className="eyebrow">{confirm ? 'READY TO START' : 'TOURNAMENT DOSSIER'}</span>
           <SheetTitle>{confirm ? '确认启动赛事' : '赛事详情'}</SheetTitle>
           <SheetDescription>
-            {row.status === 'started'
-              ? '已启动 · 规则与参赛名单已冻结。'
+            {row.status !== 'draft'
+              ? (row.status === 'completed' ? '已完赛 · 成绩与冠军已归档。' : '已启动 · 规则与参赛名单已冻结。')
               : '草稿 · 启动前可调整配置与参赛名单。'}
           </SheetDescription>
         </SheetHeader>
@@ -457,11 +457,11 @@ export function TournamentDetail({
           <X />
         </Button>
         <div className="tournament-detail">
-          <Badge variant="outline">{row.status === 'draft' ? '草稿' : '已启动'}</Badge>
+          <Badge variant="outline">{row.status === 'draft' ? '草稿' : row.status === 'completed' ? '已完赛' : '已启动'}</Badge>
           <h2>{row.name}</h2>
           <p>{row.description || '未填写赛事说明'}</p>
           <TournamentRules row={row} />
-          {row.status === 'started' && <TournamentRoundSummary id={row.id} />}
+          {row.status !== 'draft' && <TournamentRoundSummary id={row.id} />}
           <section>
             <div className="tournament-section-heading">
               <h3>参赛名单</h3>
@@ -503,7 +503,7 @@ export function TournamentDetail({
             <Button variant="outline" disabled={busy} onClick={close}>
               {confirm ? '暂不启动' : '关闭'}
             </Button>
-            {row.status === 'started' && (
+            {row.status !== 'draft' && (
               <Button asChild>
                 <a href={`/tournaments/${row.id}/rounds`}>进入分桌工作台</a>
               </Button>

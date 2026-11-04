@@ -16,7 +16,7 @@ class MahjongMachine(models.Model):
     description = models.TextField(max_length=2000, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # Internal capacity invariant, not a table number or a future allocation lock.
+    # Read-only legacy slot. New machines use NULL; no capacity limit.
     capacity_slot = models.PositiveSmallIntegerField(null=True, unique=True, editable=False)
 
     class Meta:
@@ -26,9 +26,5 @@ class MahjongMachine(models.Model):
             models.CheckConstraint(condition=Q(machine_no__regex=r"^[0-9]{3}$"), name="machine_number_format"),
             models.CheckConstraint(condition=~Q(machine_no__regex=r"[^0-9]"), name="machine_number_digits_only"),
             models.CheckConstraint(condition=Q(name__regex=r"\S"), name="machine_name_not_blank"),
-            models.CheckConstraint(
-                condition=(Q(status="retired", capacity_slot__isnull=True) | (~Q(status="retired") & Q(capacity_slot__isnull=False, capacity_slot__in=[1, 2, 3, 4]))),
-                name="machine_active_capacity_slot",
-            ),
             models.UniqueConstraint(fields=["machine_no"], condition=~Q(status="retired"), name="machine_active_number_unique"),
         ]

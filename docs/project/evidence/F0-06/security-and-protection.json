@@ -1,0 +1,20 @@
+{
+  "ignore_check": "PASS",
+  "paths": [
+    "backend/.env",
+    "backend/db.sqlite3",
+    "backend/.venv/",
+    "backend/.verification/f0-06/credentials.json",
+    "frontend/node_modules/",
+    "frontend/dist/",
+    ".tools/",
+    ".cache/",
+    "backend/__pycache__/x.pyc"
+  ],
+  "literal_sensitive_values_scan": "PASS",
+  "checked_sensitive_value_count": 3,
+  "source_config_identity_dependency_locks_unchanged": true,
+  "all_historical_migrations_reports_evidence_unchanged": true,
+  "owner_database_sha256_unchanged": "c4738a1eada032c19a2f9e33f2dcb555a961f1457321b5bd2ebccd92ffa3a2c9",
+  "no_staged_files": true
+}

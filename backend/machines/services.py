@@ -22,19 +22,13 @@ def database_busy(exc):
 
 
 def create_machine(values):
-    # Insert first, without a read-then-write count race. Each failed candidate
-    # slot rolls back its own transaction. Constraints arbitrate concurrent writers.
-    for slot in range(1, 5):
-        try:
-            with transaction.atomic():
-                return MahjongMachine.objects.create(**values, capacity_slot=slot)
-        except IntegrityError:
-            continue
-        except OperationalError as exc:
-            database_busy(exc)
-    if MahjongMachine.objects.filter(machine_no=values["machine_no"]).exclude(status="retired").exists():
-        raise MachineConflict("现役设备编号已存在，请使用其他编号。", "duplicate_machine_no")
-    raise MachineConflict("现役设备容量已满（最多 4 台），请先退役设备。", "machine_capacity_full")
+    try:
+        with transaction.atomic():
+            return MahjongMachine.objects.create(**values)
+    except IntegrityError:
+        raise MachineConflict("现役设备编号已存在，请使用其他编号。", "duplicate_machine_no") from None
+    except OperationalError as exc:
+        database_busy(exc)
 
 
 def change_machine(machine_id, values=None, *, retire=False):
@@ -46,8 +40,8 @@ def change_machine(machine_id, values=None, *, retire=False):
                 raise MachineConflict("设备已经退役，不能重复退役。" if retire else "已退役设备仅供查看，不能编辑或重新启用。", "already_retired" if retire else "retired_readonly")
             changes = {"status": "retired", "capacity_slot": None} if retire else dict(values)
             if changes.get("status", machine.status) != "available":
-                from tournaments.models import MachineAllocation
-                if MachineAllocation.objects.filter(machine=machine, status="active").exists():
+                from tournaments.models import MachineAllocation, TournamentMachineReservation
+                if MachineAllocation.objects.filter(machine=machine, status="active").exists() or TournamentMachineReservation.objects.filter(machine=machine, status="active").exists():
                     raise MachineConflict("设备正被逻辑桌占用，请先确认释放后再维护、停用或退役。", "machine_in_use")
             changes["updated_at"] = timezone.now()
             # SQLite does not implement SELECT FOR UPDATE. The conditional write

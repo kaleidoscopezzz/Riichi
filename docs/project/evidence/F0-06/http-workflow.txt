@@ -1,0 +1,14 @@
+{
+  "result": "PASS",
+  "requests_including_csrf": 194,
+  "tournament_id": 1,
+  "players": 16,
+  "rounds": 6,
+  "confirmed_tables": 24,
+  "negative_zero_points": true,
+  "first_round_unchanged": true,
+  "frozen_tables_persisted": true,
+  "unique_champion": 11,
+  "resources_released": true,
+  "unauthenticated_and_csrf_denied": true
+}

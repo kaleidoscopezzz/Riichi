@@ -12,7 +12,8 @@ from machines.models import MahjongMachine
 from machines.services import create_machine, change_machine, MachineConflict
 from .models import TournamentRound, RoundTable, RoundSeat, MachineAllocation
 from .services import create_tournament, mutate_tournament, TournamentConflict
-from .round_services import generate_first_round, change_allocation, validate_round_structure
+from .round_services import change_allocation, validate_round_structure
+from .legacy_test_fixture import generate_first_round
 
 User = get_user_model()
 
@@ -46,11 +47,11 @@ class RoundTests(RoundFixtures, TestCase):
     def test_four_sizes_complete_seats_and_ordered_machine_assignment(self):
         for size in [4, 8, 12, 16]:
             row = self.tournament(size)
-            result = self.write(f"tournaments/{row.pk}/rounds/", {"round_number": 1})
+            result = self.write(f"tournaments/{row.pk}/rounds/", {"round_number": 1, "machine_ids": [m.pk for m in sorted(self.machines, key=lambda m: m.machine_no)[:size//4]]})
             self.assertEqual(result.status_code, 201, result.content)
             tables = result.json()["data"]["tables"]
             self.assertEqual(len(tables), size // 4)
-            self.assertEqual([t["active_allocation"]["machine_no"] for t in tables], ["010", "102", "303", "999"][:size // 4])
+            self.assertEqual([t["machine_snapshot"]["machine_no"] for t in tables], ["010", "102", "303", "999"][:size // 4])
             for table in tables:
                 self.assertEqual([s["seat_wind"] for s in table["seats"]], ["east", "south", "west", "north"])
                 self.assertEqual(len(table["seats"]), 4)
@@ -58,7 +59,10 @@ class RoundTests(RoundFixtures, TestCase):
             seats = [s["participant_id"] for t in tables for s in t["seats"]]
             self.assertEqual(len(set(seats)), size)
             self.assertEqual(set(seats), set(row.participants.values_list("id", flat=True)))
-            self.release_all(TournamentRound.objects.get(pk=result.json()["data"]["id"]))
+            from .models import TournamentMachineReservation
+            from .competition_services import release_reservation
+            for reservation in TournamentMachineReservation.objects.filter(table__tournament=row, status="active"):
+                release_reservation(reservation, self.admin, "测试夹具清理")
 
     def test_injectable_random_source_persisted_and_not_overwritten(self):
         class ReverseRandom:
@@ -82,7 +86,7 @@ class RoundTests(RoundFixtures, TestCase):
         row = self.tournament()
         for number in [2, 3, 4, 5, 6]:
             response = self.write(f"tournaments/{row.pk}/rounds/", {"round_number": number})
-            self.assertEqual((response.status_code, response.json()["error"]["code"]), (409, "later_round_unavailable"))
+            self.assertEqual((response.status_code, response.json()["error"]["code"]), (409, "round_not_next"))
         for body in [{"round_number": 0}, {"round_number": 7}, {"round_number": True}, {"round_number": 1.0}, {"round_number": 1, "seats": []}, {"round_number": 1, "machine_id": 1}]:
             self.assertEqual(self.write(f"tournaments/{row.pk}/rounds/", body).status_code, 400)
         self.assertFalse(TournamentRound.objects.exists())

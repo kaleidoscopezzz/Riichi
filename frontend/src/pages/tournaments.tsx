@@ -103,7 +103,7 @@ export function TournamentsPage() {
       </section>
       <div className="tournament-boundary">
         <Flag size={20} />
-        <p>赛事启动后可生成第一轮随机分桌，并分配真实设备。成绩与后续轮次将在后续阶段开放。</p>
+        <p>启动后选桌、录入成绩并逐轮重排，完成指定轮次后决出冠军。</p>
       </div>
       <FormFeedback success={success} />
       <section className="settings-panel tournament-list" ref={list} tabIndex={-1}>
@@ -141,6 +141,7 @@ export function TournamentsPage() {
               <option value="">全部状态</option>
               <option value="draft">草稿</option>
               <option value="started">已启动</option>
+              <option value="completed">已完赛</option>
             </select>
           </label>
         </form>
@@ -183,7 +184,7 @@ export function TournamentsPage() {
                 </div>
                 <span role="cell">
                   <Badge variant="outline" className={`tournament-status ${row.status}`}>
-                    {row.status === 'draft' ? '草稿' : '已启动'}
+                    {row.status === 'draft' ? '草稿' : row.status === 'completed' ? '已完赛' : '已启动'}
                   </Badge>
                 </span>
                 <span role="cell">{row.participant_count} 人</span>

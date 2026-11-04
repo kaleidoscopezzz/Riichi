@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\Riichi\backend\verification\migration_check.py", line 78, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "D:\Riichi\backend\verification\migration_check.py", line 54, in main
+    columns[table]=[col.name for col in connection.introspection.get_table_description(c,table)]
+                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "D:\Riichi\backend\.venv\Lib\site-packages\django\db\backends\sqlite3\introspection.py", line 97, in get_table_description
+    collations = self._get_column_collations(cursor, table_name)
+  File "D:\Riichi\backend\.venv\Lib\site-packages\django\db\backends\sqlite3\introspection.py", line 439, in _get_column_collations
+    column_name = tokens[0].strip('"')
+                  ~~~~~~^^^
+IndexError: list index out of range

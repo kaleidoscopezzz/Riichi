@@ -91,7 +91,7 @@ export function DashboardPage() {
           </div>
           <div className="hero-note">
             <span className="tiny-dot" />
-            基础工作空间已就绪，赛事功能将逐步开放
+            完整赛事工作流已就绪，所有结果均来自真实对局
           </div>
         </div>
         <TableIllustration />
@@ -151,7 +151,7 @@ export function DashboardPage() {
             <Flag size={19} className="gold-text" />
           </div>
           <p className="foundation-description">
-            账号、选手、赛事配置与首轮分桌已开放。设备分配可追溯，成绩、后续轮次与排名等待后续阶段。
+            从真实选手与规则出发，固定选桌、逐轮计分与重排，决出唯一冠军。
           </p>
           <div className="phase-row">
             <span className="phase-icon complete">
@@ -162,7 +162,7 @@ export function DashboardPage() {
               <p>统一界面 · 页面导航 · 服务连接</p>
             </div>
             <Badge variant="outline" className="phase-badge">
-              当前阶段
+              已开放
             </Badge>
           </div>
           <div className="phase-row">
@@ -173,7 +173,7 @@ export function DashboardPage() {
               <h3>成绩与后续轮次</h3>
               <p>成绩确认 · 累计计分 · 后续分桌</p>
             </div>
-            <span className="upcoming-label">后续规划</span>
+            <span className="upcoming-label">已开放</span>
           </div>
           <div className="foundation-bottom">
             <LayoutGrid size={14} />

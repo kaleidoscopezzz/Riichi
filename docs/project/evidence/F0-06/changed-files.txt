@@ -1,0 +1,89 @@
+ M AGENTS.md
+ M README.md
+ M backend/machines/models.py
+ M backend/machines/services.py
+ M backend/machines/tests.py
+ M backend/tournaments/models.py
+ M backend/tournaments/round_serializers.py
+ M backend/tournaments/round_services.py
+ M backend/tournaments/round_views.py
+ M backend/tournaments/serializers.py
+ M backend/tournaments/table_urls.py
+ M backend/tournaments/tests_rounds.py
+ M backend/tournaments/urls.py
+ M docs/F0-06-functional-spec.md
+ M docs/architecture.md
+ M docs/project/baselines.md
+ M docs/requirements.md
+ M docs/roadmap.md
+ M frontend/src/components/round-action.tsx
+ M frontend/src/components/tournament-editor.tsx
+ M frontend/src/components/tournament-round-summary.tsx
+ M frontend/src/layouts/app-layout.tsx
+ M frontend/src/pages/dashboard.tsx
+ M frontend/src/pages/machines.test.tsx
+ M frontend/src/pages/machines.tsx
+ M frontend/src/pages/placeholder.tsx
+ M frontend/src/pages/rounds.test.tsx
+ M frontend/src/pages/rounds.tsx
+ M frontend/src/pages/settings.tsx
+ M frontend/src/pages/tournaments.tsx
+ M frontend/src/services/rounds.ts
+ M frontend/src/services/tournaments.ts
+ M frontend/src/styles/globals.css
+?? backend/machines/migrations/0003_remove_mahjongmachine_machine_active_capacity_slot.py
+?? backend/tournaments/competition_services.py
+?? backend/tournaments/competition_views.py
+?? backend/tournaments/legacy_test_fixture.py
+?? backend/tournaments/migrations/0003_lotteryrecord_tableresult_and_more.py
+?? backend/tournaments/migrations/0004_legacy_compatibility.py
+?? backend/tournaments/scoring.py
+?? backend/tournaments/tests_competition.py
+?? backend/verification/__init__.py
+?? backend/verification/http_check.py
+?? backend/verification/migration_check.py
+?? backend/verification/seed_qa.py
+?? backend/verification/settings.py
+?? docs/project/F0-06-verification.md
+?? docs/project/evidence/F0-06/backend-complete.txt
+?? docs/project/evidence/F0-06/backend-final.txt
+?? docs/project/evidence/F0-06/backend-first-run.txt
+?? docs/project/evidence/F0-06/backend-full.txt
+?? docs/project/evidence/F0-06/backend-regression-initial.txt
+?? docs/project/evidence/F0-06/backend-second-run.txt
+?? docs/project/evidence/F0-06/browser-checks.txt
+?? docs/project/evidence/F0-06/browser-completed.txt
+?? docs/project/evidence/F0-06/browser-round4.txt
+?? docs/project/evidence/F0-06/build-complete.txt
+?? docs/project/evidence/F0-06/build-final.txt
+?? docs/project/evidence/F0-06/changed-files.txt
+?? docs/project/evidence/F0-06/check-final.txt
+?? docs/project/evidence/F0-06/completed-desktop-dark.png
+?? docs/project/evidence/F0-06/completed-mobile320-dark.png
+?? docs/project/evidence/F0-06/completed-mobile390-light.png
+?? docs/project/evidence/F0-06/document-checks.json
+?? docs/project/evidence/F0-06/file-sqlite-complete.txt
+?? docs/project/evidence/F0-06/file-sqlite-concurrency.txt
+?? docs/project/evidence/F0-06/file-sqlite-final.txt
+?? docs/project/evidence/F0-06/frontend-complete.txt
+?? docs/project/evidence/F0-06/frontend-final.txt
+?? docs/project/evidence/F0-06/frontend-regression-initial.txt
+?? docs/project/evidence/F0-06/frontend-second-run.txt
+?? docs/project/evidence/F0-06/git-final.txt
+?? docs/project/evidence/F0-06/history-mobile320-light.png
+?? docs/project/evidence/F0-06/http-final.txt
+?? docs/project/evidence/F0-06/http-workflow.txt
+?? docs/project/evidence/F0-06/makemigrations-final.txt
+?? docs/project/evidence/F0-06/migrate-final.txt
+?? docs/project/evidence/F0-06/migration-compatibility-final.txt
+?? docs/project/evidence/F0-06/migration-compatibility-v3.txt
+?? docs/project/evidence/F0-06/migration-compatibility.txt
+?? docs/project/evidence/F0-06/npm-audit.json
+?? docs/project/evidence/F0-06/preflight.txt
+?? docs/project/evidence/F0-06/qa-migrate.txt
+?? docs/project/evidence/F0-06/security-and-protection.json
+?? docs/project/evidence/F0-06/typecheck-final.txt
+?? frontend/src/components/competition-action.tsx
+?? frontend/src/components/competition-standings.tsx
+?? frontend/src/services/competition.test.ts
+?? frontend/src/services/competition.ts

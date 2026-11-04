@@ -1,0 +1,53 @@
+HEAD 5f31891b4ae3a589057e7054758abb08ca42ec72
+F0-05 resolved commit 41929da1e53f8bb481beb4ea3bc31b65f9ee86ff
+## main...origin/main
+ M AGENTS.md
+ M README.md
+ M backend/machines/models.py
+ M backend/machines/services.py
+ M backend/machines/tests.py
+ M backend/tournaments/models.py
+ M backend/tournaments/round_serializers.py
+ M backend/tournaments/round_services.py
+ M backend/tournaments/round_views.py
+ M backend/tournaments/serializers.py
+ M backend/tournaments/table_urls.py
+ M backend/tournaments/tests_rounds.py
+ M backend/tournaments/urls.py
+ M docs/F0-06-functional-spec.md
+ M docs/architecture.md
+ M docs/project/baselines.md
+ M docs/requirements.md
+ M docs/roadmap.md
+ M frontend/src/components/round-action.tsx
+ M frontend/src/components/tournament-editor.tsx
+ M frontend/src/components/tournament-round-summary.tsx
+ M frontend/src/layouts/app-layout.tsx
+ M frontend/src/pages/dashboard.tsx
+ M frontend/src/pages/machines.test.tsx
+ M frontend/src/pages/machines.tsx
+ M frontend/src/pages/placeholder.tsx
+ M frontend/src/pages/rounds.test.tsx
+ M frontend/src/pages/rounds.tsx
+ M frontend/src/pages/settings.tsx
+ M frontend/src/pages/tournaments.tsx
+ M frontend/src/services/rounds.ts
+ M frontend/src/services/tournaments.ts
+ M frontend/src/styles/globals.css
+?? backend/machines/migrations/0003_remove_mahjongmachine_machine_active_capacity_slot.py
+?? backend/tournaments/competition_services.py
+?? backend/tournaments/competition_views.py
+?? backend/tournaments/legacy_test_fixture.py
+?? backend/tournaments/migrations/0003_lotteryrecord_tableresult_and_more.py
+?? backend/tournaments/migrations/0004_legacy_compatibility.py
+?? backend/tournaments/scoring.py
+?? backend/tournaments/tests_competition.py
+?? backend/verification/
+?? docs/project/F0-06-verification.md
+?? docs/project/evidence/F0-06/
+?? frontend/src/components/competition-action.tsx
+?? frontend/src/components/competition-standings.tsx
+?? frontend/src/services/competition.test.ts
+?? frontend/src/services/competition.ts
+
+No staged/deleted files; no commit/tag/push; historical reports and Owner DB unchanged.

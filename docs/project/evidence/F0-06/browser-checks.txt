@@ -1,0 +1,10 @@
+PASS: UI created 16-player / 6-round tournament #2 from registered QA players.
+PASS: explicit A=002 B=003 C=005 D=007, 24 table results entered and confirmed through UI.
+PASS: negative/zero partial draft persisted through reload; invalid sum blocked confirmation.
+PASS: rounds 2-6 generated through UI; winds rerandomized; fixed tables retained.
+PASS: all 16 performance metrics equal, recorded complete public-draw order, separately confirmed; unique QA champion player16.
+PASS: finish confirmation, completed result survives reload, all 4 mappings released.
+PASS: desktop 1440x1000 dark, mobile 390x844 light, 320x740 dark; document width <= viewport; history dialog within viewport.
+PASS: Escape closes panel, focus restored to history trigger. Browser console warning/error list empty.
+NOTE: datetime-local automation fill required keyboard ArrowUp/ArrowDown to trigger native change event; no application bypass used.
+All players/results/draw records are isolated QA data, not production events.

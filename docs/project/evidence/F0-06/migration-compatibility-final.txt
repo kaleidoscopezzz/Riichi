@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\Riichi\backend\verification\migration_check.py", line 79, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "D:\Riichi\backend\verification\migration_check.py", line 62, in main
+    assert c.fetchall()==before[table],table+' historical column drift'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: tournaments_tournament historical column drift

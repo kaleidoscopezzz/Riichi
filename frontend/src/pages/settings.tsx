@@ -63,7 +63,7 @@ export function SettingsPage() {
           </div>
           <div>
             <dt>当前阶段</dt>
-            <dd>F0-05 首轮分桌与设备分配</dd>
+            <dd>F0-06 完整赛事运行与精确计分</dd>
           </div>
           <div>
             <dt>服务接口</dt>
@@ -71,7 +71,7 @@ export function SettingsPage() {
           </div>
         </dl>
         <p className="settings-note">
-          账号、设备、赛事配置与首轮分桌已开放；成绩、后续轮次和冠军判定仍在后续规划中。
+          已支持完整个人赛：选桌、成绩确认、精确积分、后续重排、公开抽签及完赛自动释放。
         </p>
       </section>
       <HealthStatus />

@@ -1,0 +1,56 @@
+Creating test database for alias 'default' ('D:\Riichi\backend\.verification\f0-06\concurrency-final.sqlite3')...
+
+Destroying old test database for alias 'default' ('D:\Riichi\backend\.verification\f0-06\concurrency-final.sqlite3')...
+
+Found 12 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: common, corsheaders, rest_framework, staticfiles
+  Apply all migrations: accounts, auth, contenttypes, machines, players, sessions, tournaments
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying machines.0001_initial... OK
+  Applying machines.0002_mahjongmachine_machine_number_digits_only... OK
+  Applying machines.0003_remove_mahjongmachine_machine_active_capacity_slot... OK
+  Applying players.0001_initial... OK
+  Applying sessions.0001_initial... OK
+  Applying tournaments.0001_initial... OK
+  Applying tournaments.0002_tournamentround_roundtable_roundseat_and_more... OK
+  Applying tournaments.0003_lotteryrecord_tableresult_and_more... OK
+test_confirmation_vs_finish (tournaments.tests_competition.CompetitionConcurrencyTests.test_confirmation_vs_finish) ... ok
+test_confirmation_vs_next_round (tournaments.tests_competition.CompetitionConcurrencyTests.test_confirmation_vs_next_round) ... ok
+test_duplicate_confirm_next_finish (tournaments.tests_competition.CompetitionConcurrencyTests.test_duplicate_confirm_next_finish) ... ok
+test_finish_competes_with_reuse (tournaments.tests_competition.CompetitionConcurrencyTests.test_finish_competes_with_reuse) ... ok
+test_replacement_competes_with_selection (tournaments.tests_competition.CompetitionConcurrencyTests.test_replacement_competes_with_selection) ... ok
+test_same_round_and_cross_tournament_selection (tournaments.tests_competition.CompetitionConcurrencyTests.test_same_round_and_cross_tournament_selection) ... ok
+test_state_change_vs_selection (tournaments.tests_competition.CompetitionConcurrencyTests.test_state_change_vs_selection) ... ok
+test_different_tournaments_compete_for_same_pool (tournaments.tests_rounds.ConcurrentRoundTests.test_different_tournaments_compete_for_same_pool) ... ok
+test_generation_vs_state_changes (tournaments.tests_rounds.ConcurrentRoundTests.test_generation_vs_state_changes) ... ok
+test_reassign_vs_generation_and_release (tournaments.tests_rounds.ConcurrentRoundTests.test_reassign_vs_generation_and_release) ... ok
+test_same_tournament_concurrent_generation (tournaments.tests_rounds.ConcurrentRoundTests.test_same_tournament_concurrent_generation) ... ok
+test_concurrent_creation_preserves_number_uniqueness (machines.tests.ConcurrentMachineTests.test_concurrent_creation_preserves_number_uniqueness) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 8.184s
+
+OK
+Destroying test database for alias 'default' ('D:\Riichi\backend\.verification\f0-06\concurrency-final.sqlite3')...
+
+  Applying tournaments.0004_legacy_compatibility... OK
+System check identified no issues (0 silenced).

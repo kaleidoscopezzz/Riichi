@@ -7,7 +7,9 @@ from rest_framework.views import APIView
 from machines.models import MahjongMachine
 from .models import Tournament, TournamentRound, RoundTable, RoundSeat, MachineAllocation
 from .round_serializers import GenerateRoundSerializer, ReassignSerializer, ReleaseSerializer, RoundSerializer, TableSerializer, AllocationSerializer
-from .round_services import generate_first_round, change_allocation
+from .round_services import change_allocation
+from .competition_services import generate, occupied_ids
+from .models import TournamentMachineReservation
 
 
 def tables_query():
@@ -36,7 +38,7 @@ class RoundListView(APIView):
     def post(self, request, pk):
         serializer = GenerateRoundSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        row = generate_first_round(pk, request.user, serializer.validated_data["round_number"])
+        row = generate(pk, request.user, serializer.validated_data["round_number"], machine_ids=serializer.validated_data.get("machine_ids"))
         return Response({"data": RoundSerializer(rounds_query().get(pk=row.pk)).data}, status=201)
 
 
@@ -88,10 +90,13 @@ class MachineResourceView(APIView):
 
     def get(self, request):
         active = {a.machine_id: a for a in MachineAllocation.objects.filter(status="active").select_related("table__round__tournament")}
+        reservations = {r.machine_id: r for r in TournamentMachineReservation.objects.filter(status="active").select_related("table__tournament")}
+        occupied = occupied_ids()
         results = []
         for machine in MahjongMachine.objects.exclude(status="retired"):
             allocation = active.get(machine.pk)
             results.append({"machine_id": machine.pk, "machine_no": machine.machine_no, "name": machine.name, "status": machine.status,
-                "assignable": machine.status == "available" and allocation is None,
+                "reservation": {"tournament_id": reservations[machine.pk].table.tournament_id, "tournament_name": reservations[machine.pk].table.tournament.name, "ordinal": reservations[machine.pk].table.ordinal} if machine.pk in reservations else None,
+                "assignable": machine.status == "available" and machine.pk not in occupied,
                 "active_allocation": {"id": allocation.pk, "table_id": allocation.table_id, "table_number": allocation.table.table_number, "round_number": allocation.table.round.round_number, "tournament_id": allocation.table.round.tournament_id, "tournament_name": allocation.table.round.tournament.name} if allocation else None})
         return Response({"data": {"results": results}}, headers={"Cache-Control": "no-store"})

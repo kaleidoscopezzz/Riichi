@@ -163,12 +163,12 @@ describe('设备管理工作台', () => {
       ),
     )
   })
-  it('容量已满时禁用创建，并解释维护停用也占容量', async () => {
+  it('超过四台仍可创建，单场最多选择四张物理桌', async () => {
     list.mockResolvedValue(page([machine], 4))
     render(<MachinesPage />)
-    await screen.findByText('现役容量已满')
-    expect(screen.getByRole('button', { name: '新建设备' }).hasAttribute('disabled')).toBe(true)
-    expect(screen.getByText('维护中与停用设备同样占用容量')).toBeTruthy()
+    await screen.findByText('可登记多张物理桌，单场最多选择四张')
+    expect(screen.getByRole('button', { name: '新建设备' }).hasAttribute('disabled')).toBe(false)
+    expect(screen.queryByText('现役容量已满')).toBeNull()
   })
   it('退役需要明确确认，取消不会发送请求', async () => {
     render(<MachinesPage />)

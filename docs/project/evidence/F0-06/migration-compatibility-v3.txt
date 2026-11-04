@@ -1,0 +1,23 @@
+{
+  "result": "PASS",
+  "states_after_migration": {
+    "F0-04_started": "unselected",
+    "F0-05_valid": "fixed",
+    "F0-05_partial": "review_required",
+    "F0-05_released": "review_required"
+  },
+  "historical_rows": {
+    "machines_mahjongmachine": 5,
+    "tournaments_tournament": 4,
+    "tournaments_tournamentparticipant": 24,
+    "tournaments_tournamentround": 3,
+    "tournaments_roundtable": 5,
+    "tournaments_roundseat": 20,
+    "tournaments_machineallocation": 5
+  },
+  "all_original_columns_unchanged": true,
+  "snapshot_sha256": "2cfd11c95067bc833552e5ab2b368f3f9336a7a64fdf4d074ed195d020fbf23f",
+  "new_machines_created": 4,
+  "valid_inherited_reservations": 3,
+  "legacy_partial_and_released_review": "PASS"
+}

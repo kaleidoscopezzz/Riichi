@@ -1,4 +1,5 @@
 import { api } from './api'
+import type { Result } from './competition'
 
 export type Allocation = {
   id: number
@@ -27,6 +28,8 @@ export type RoundTable = {
   round_number: number
   tournament_id: number
   table_number: number
+  result?: Result
+  machine_snapshot?: { machine_id?: number; machine_no?: string }
   seats: RoundSeat[]
   active_allocation: Allocation | null
   allocation_history: Allocation[]
@@ -60,8 +63,11 @@ export const fetchRounds = (id: number, signal?: AbortSignal) =>
   api<{ results: TournamentRound[] }>(`/tournaments/${id}/rounds/`, { signal })
 export const fetchResources = (signal?: AbortSignal) =>
   api<{ results: MachineResource[] }>('/machine-resources/', { signal })
-export const generateRound = (id: number) =>
-  api<TournamentRound>(`/tournaments/${id}/rounds/`, { method: 'POST', body: { round_number: 1 } })
+export const generateRound = (id: number, round_number = 1, machine_ids?: number[]) =>
+  api<TournamentRound>(`/tournaments/${id}/rounds/`, {
+    method: 'POST',
+    body: { round_number, ...(machine_ids ? { machine_ids } : {}) },
+  })
 export const fetchTable = (id: number) => api<RoundTable>(`/round-tables/${id}/`)
 export const fetchAllocationHistory = (id: number) =>
   api<{ results: Allocation[] }>(`/round-tables/${id}/machine/history/`)

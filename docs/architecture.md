@@ -1,101 +1,75 @@
-# Riichi 架构与F0-06兼容设计
+# Riichi 架构与 F0-06 兼容实现
 
-状态：F0-05正式CLOSED / PASS；当前D0-01仅修订文档，F0-06未启动。已实现事实与未来设计在下文分开说明。业务详细规则只在[F0-06功能规范](F0-06-functional-spec.md)维护，范围见[requirements](requirements.md)。
+状态：F0-01～F0-05正式CLOSED / PASS；D0-01正式CLOSED / PASS，文档Commit `5f31891b4ae3a589057e7054758abb08ca42ec72`。F0-06为已实现、未提交的完整候选，待Planner独立验收，未建立正式基线。业务规则以[统一功能规范](F0-06-functional-spec.md)为准，实际验证见[交付报告](project/F0-06-verification.md)。
 
-## 技术与模块（当前事实）
+## 技术与模块（当前实现）
 
-前后端分离、模块化单体。Python3.13/Django5.2 LTS/DRF、React/TypeScript/Vite、Tailwind/shadcn/ui/Lucide；SQLite开发，PostgreSQL仅预留驱动/配置。PostgreSQL实连并发与生产部署仍UNVERIFIED，不因已有锁代码或文档方案改为已验证。
+前后端分离、模块化单体。Python 3.13 / Django 5.2 LTS / DRF；React / TypeScript / Vite / Tailwind / shadcn/ui / Lucide；SQLite开发，PostgreSQL配置与驱动预留。没有新基础设施或依赖。
 
-| 目录/模块 | 当前职责 |
+| 模块 | 职责 |
 | --- | --- |
-| backend/config | base/local/production设置、URL、WSGI/ASGI；环境变量与安全配置 |
-| backend/common | 匿名GET /api/v1/health/、统一JSON错误和API中间件 |
-| backend/accounts | AbstractUser、官方密码校验、原子注册/档案创建、Session/CSRF |
-| backend/players | PlayerProfile、一对一身份边界、本人昵称、管理员搜索分页 |
-| backend/machines | 物理设备台账、capacity_slot四台容量、状态/退役、共同设备池锁 |
-| backend/tournaments | Tournament/Participant及首轮Round/Table/Seat/Allocation；规则配置与冻结、分配历史 |
-| frontend/src/layouts、pages、components、services、styles | 布局路由、页面交互、shadcn基础组件、统一Cookie/CSRF请求、Riichi Premium主题 |
-| docs/project | 基线制度及F0-01～05原始报告/证据，历史快照不可改写 |
+| backend/config、common | 环境配置、匿名health、统一data/error JSON与中间件 |
+| backend/accounts、players | AbstractUser、OneToOne选手档案、原子注册、Session/CSRF、本人资料/管理员列表 |
+| backend/machines | 物理桌台账、现役编号唯一、退役终态、共用资源池锁；不限制店内四台 |
+| backend/tournaments | 独立赛事、冻结规则/名单、固定选桌、轮次/四风、成绩/计分/累计/冠军/公开抽签/完赛 |
+| tournaments/scoring.py | v1策略校验、Fraction计分及无损JSON转换 |
+| tournaments/competition_services.py | 比赛事务、资源桥接/复核、排名、连续轮次、抽签和完赛 |
+| tournaments/competition_views.py | 严格输入、IsAdminUser、DRF Session/CSRF及响应，不在View计算分值 |
+| backend/verification | 独立QA迁移比较、文件SQLite测试设置、真实HTTP与QA初始化工具 |
+| frontend/src/pages/rounds.tsx | 比赛工作台数据读取、轮次浏览、固定桌/成绩状态与流程入口 |
+| frontend/src/components/competition-action、competition-standings | shadcn Sheet操作确认与表单、真实累计/最终榜、精确值说明 |
+| frontend/src/services/competition.ts | 类型化API及仅用于显示的BigInt小数近似；不排序或累计权威分值 |
+| docs/project/evidence | 分阶段不可覆盖的原始验证、失败日志、HTTP/浏览器证据 |
 
-当前主要页面为/dashboard、/tournaments、/tournaments/:id/rounds、/players、/machines、/profile、/settings和公开/login、/register。分桌工作台仅首轮与轮次级设备管理，没有成绩/累计榜/冠军页面。
+主要路由保留/dashboard、/tournaments、/tournaments/:id/rounds、/players、/machines、/profile、/settings及公开/login、/register。比赛工作台包含成绩、累计榜、公开抽签、完赛与历史查询，不另设复杂调度控制台。
 
-开发由Vite同源/api代理到Django。认证使用HttpOnly Session Cookie，前端写请求初始化当前CSRF，凭据不写localStorage或日志；注册/登录/退出显式csrf_protect，DRF写请求沿用SessionAuthentication校验。全部管理接口在服务端IsAdminUser，健康接口匿名。
+Vite同源/api代理到Django；HttpOnly Session Cookie，前端写前取当前CSRF，密码/会话/Token不写localStorage或日志。注册/登录/退出显式csrf_protect；业务服务端IsAdminUser，DRF写请求校验Session/CSRF。成功data，错误error(code/message/fields)；health保留原契约。无全局CORS，生产需独立密钥、HTTPS、安全Cookie及登录限流。
 
-成功响应为data，失败为error(code/message/fields)，健康接口保持原有独立契约。健康只表示存活，不代表生产数据库就绪。配置来自.env/环境变量，来源显式限定，无全局CORS；正式环境必须独立密钥、HTTPS与安全Cookie。
+## 领域与持久化
 
-## F0-05现有实体和事务（当前事实）
-
-| 实体 | 已实现关系与约束 |
+| 实体 | 实现和约束 |
 | --- | --- |
-| User / PlayerProfile | AbstractUser在accounts/0001_initial；OneToOne档案，用户名和昵称分别保存 |
-| MahjongMachine | 稳定id、三位machine_no、名称/位置/说明、四种基本状态；capacity_slot唯一且非退役必须占1～4槽 |
-| Tournament | 数字规则、Uma JSON十进制字符串、draft/started、创建者与时间、内部revision；尚无策略版本或completed |
-| TournamentParticipant | User业务档案FK、(tournament,player)唯一、启动昵称快照 |
-| TournamentRound | Tournament FK；(tournament,round_number)唯一、CHECK 1～6；服务仅允许生成1 |
-| RoundTable | Round FK、每轮table_number 1～4唯一，是轮次逻辑桌，不是赛事级稳定A～D桌位 |
-| RoundSeat | Round/Table/Participant FK；每桌四风唯一、每人每轮唯一；跨表归属由clean/服务审计 |
-| MachineAllocation | RoundTable与稳定machineId FK PROTECT；active machine/table条件唯一；released具有释放时间/管理员、保留编号快照 |
+| MahjongMachine | 原ID/编号/状态/历史保留；capacity_slot为nullable只读legacy列，旧值及唯一索引保留，新设备NULL；现役三位编号唯一、状态/名称CHECK仍有效 |
+| Tournament | draft/started/completed，数字规则/Uma字符串、两个策略ID/rules_version/rules_source；revision、首轮序列/来源、资源兼容状态/审计、冠军FK、完成管理员/时间及final_snapshot |
+| TournamentParticipant | 关联PlayerProfile；赛事内player唯一、启动时昵称快照，完赛仍用快照 |
+| TournamentTable | 全赛事稳定逻辑桌ordinal 1～4/A～D；赛事内ordinal唯一，范围CHECK |
+| TournamentMachineReservation | active/released、稳定machineId、编号快照、操作者/时间/原因、可空OneToOne legacy_allocation；active机器和逻辑桌分别条件唯一、释放审计CHECK |
+| TournamentRound | 1～6且赛事轮号唯一；generation_snapshot保存规则、来源成绩版本、排序输入、首轮顺序引用 |
+| RoundTable | 保留原ID/table_number，新增可空TournamentTable FK和生成时machine_snapshot；故障替换不改旧快照 |
+| RoundSeat | 原Round/Table/Participant FK、桌内四风唯一、轮内选手唯一；全员及跨FK归属由服务验证 |
+| MachineAllocation | 原轮次级表和全部FK/历史保留，原active条件唯一及release审计CHECK保留；新轮不复制active旧分配 |
+| TableResult | 每桌OneToOne；draft/confirmed、version、points JSON（participant ID→有符号整数/空值）、scores、规则快照、录入/确认管理员及时间；确认状态CHECK |
+| LotteryRecord | 赛事、来源成绩版本、组员、完整顺序、方式/过程/实际抽签时间、记录/确认管理员与时间、规则版本 |
 
-当前MahjongMachine的available/maintenance/disabled均占四台容量，retired只读释放容量。新增设备服务仍依次尝试四个槽；只改文档或数据库约束并不能消除服务代码的四台限制。
+成绩请求只引用本桌既有participant ID，不接受换座、权威积分或冠军字段。草稿允许缺项/空值；确认必须四人整数、总和4×开局且版本匹配。原始点数范围为±(2^53−1)，保证JSON到浏览器均为精确整数；超范围明确400，不截断。结果确认后无修改/撤销入口。默认未存成绩version=0，首次成功写入为1，之后成功写入递增。
 
-Tournament草稿编辑与启动先条件UPDATE父行revision，事务内校验数字配置/名单、写昵称快照与started_at；started规则和名单不可编辑。Uma只做精确字符串校验，Oka用Decimal推导，没有实际半庄计分。
+所有权威奖励、基础分、累计和比较采用Fraction，从整数或精确Uma十进制字符串构造。JSON和数据库保存规范化`{"numerator":"50","denominator":"3"}`，分子/正分母均为字符串，不经float或有限精度舍入。v1只接受`split_rank_bonus_v1` / `performance_v1` / rules_version=1，未知版本拒绝计算；不执行动态表达式。
 
-当前首轮SystemRandom.shuffle一次，四人一组四风，按机器编号升序从available且无active分配的池选择，全轮原子写入。资源不足/重复生成拒绝，不覆盖已有RoundTable/RoundSeat。后续轮次明确返回不可执行；设备释放不改变Tournament.started，也不代表成绩确认。
+累计来自已确认结果；metric按总分、第一次数、第二次数、逆序单场积分比较。后续分桌才追加首轮持久化顺序，组内重新随机四风。最终完全同分各组必须公开抽签、保存后另行确认；不能以ID/首轮顺序暗定名次。完赛final_snapshot冻结全体结果、唯一冠军、规则和来源版本、抽签引用及操作审计，读取不重算历史。
 
-当前设备状态变更、生成、调整、释放共用machines.locking.lock_machine_pool：SQLite先无值变化UPDATE取得写预留，PostgreSQL按稳定PK顺序锁物理池；之后生成再锁赛事/写子记录。条件唯一约束额外防双占；跨表四人完整性不是数据库CHECK。内存/文件SQLite历史验证见原报告；PostgreSQL未实测。
+## 事务与资源互斥
 
-## F0-06目标架构（设计建议，尚未实现）
+所有新写入统一使用**物理池稳定PK→赛事revision写锁→子记录**。SQLite先no-op UPDATE取得写事务；PostgreSQL按PK select_for_update。成绩也用同一顺序，避免确认/生成/完赛反序死锁。保留唯一/CHECK兜底，跨表归属、四人完整性和新旧占用互斥属于服务事务检查，不冒称普通CHECK能跨FK保证。
 
-核心仍留在tournaments模块，新增职责清晰的成绩、规则策略、累计/排名、完赛与抽签服务；无需微服务、任务队列或动态公式引擎。物理资源从“每轮分配中心”简化为“赛事选桌与占用”，正常轮次只重排选手和四风。
+`occupied_ids`取Reservation active与MachineAllocation active并集，设备维护/停用/退役也检查两者；只使用已锁池中的机器。新首轮必须提交恰好人数/4个不重复machine_ids，按管理员预览顺序映射A～D，预留/序列/轮桌座原子提交。后续不再选桌、释放或复制active旧分配。
 
-| 建议实体/扩展 | 职责与约束方向 |
-| --- | --- |
-| Tournament新增规则/完赛字段 | score_tie_policy、champion_tiebreak_policy、rules_version及赋值来源；目标completed/完成时间/冠军引用，启动冻结与完赛快照 |
-| TournamentTable（赛事稳定逻辑桌） | Tournament FK、ordinal 1～4/显示A～D唯一；不复用某轮RoundTable主键充当全赛事桌位 |
-| TournamentMachineReservation（赛事预留） | 稳定逻辑桌与machineId、active/released、预留/释放/替换审计；active machine与active赛事桌位分别唯一 |
-| RoundTable扩展 | 可空FK连接赛事稳定桌位及生成时映射/预留版本，保留现有id/table_number；历史和当前替换映射分别展示 |
-| TableResult / SeatResult（命名待实现确认） | 每桌一份当前成绩与四人条目，draft/confirmed、版本、有符号整数终局点数（含负数/零）、共享名次、无损有理数结果和规则快照、录入/确认审计；唯一约束防重复 |
-| LotteryRecord / FinalStanding（命名待实现确认） | 公开抽签组/过程/完整顺序及管理员确认；完赛最终排序、唯一冠军、规则/结果版本快照 |
+故障替换要求空闲可用目标和原因，结束旧预留、建立新预留；有legacy引用时只在真实替换/完赛写旧释放审计。旧单轮释放/调整接口发现赛事固定桌位即409拒绝，不能绕过预留约束。所有旧历史GET接口继续可读；ID空间不混用。
 
-新模式需显式选桌、确认A～D映射，选桌数量为人数/4，可用且无他场预留；新首轮与预留原子落库。后续每轮RoundTable引用同一赛事桌位，不释放预留再抢设备。故障替换新建预留历史版本，后续沿用新设备，不改旧轮次映射快照或座次。
+下一轮须连续、上一轮每桌全部确认且全员完整，重复/跳轮/草稿返回409；保存生成输入后原子写轮次/座次。完赛重新检查所有配置轮次、全部已确认成绩、来源版本、抽签及唯一冠军；同一事务保存completed/快照并仅释放本场预留及需结束的本场旧active。失败整体回滚；网络失败或409不会自动重放写请求。
 
-MachineAllocation保留原表、FK和历史，不把旧记录伪装成赛事级预留。新模式以赛事Reservation为资源权威；新轮次通过赛事桌位/预留映射查询当前设备，不能为每轮复制相互冲突的active MachineAllocation，也不能捏造released记录表示从未发生的释放。序列化明确返回resource_mode与reservation来源，原历史allocation查询保持可追溯，不能拿预留ID冒充旧allocation ID。
+## 兼容与迁移（已实现，QA验证）
 
-策略注册表按冻结标识/版本计算，不执行用户表达式；每场仅支持已批准预设。TBD-001/002均RESOLVED，详细公式和决胜链只见[统一规范](F0-06-functional-spec.md)。后端采用Fraction等精确有理数完成计分、累计和排名；Decimal/字符串可精确解析输入，不能先经float或有限精度除法再转换。数据库无损保存整数分子/正整数分母或等价精确表示及规则版本；展示近似值不参与比较，不以SQLite NUMERIC或字符串字典序代替精确排序。
+1. 开发前只读检查Owner库迁移图及SHA256，SQLite backup到忽略目录；不迁移Owner库。所有验证在独立QA库及副本。
+2. 新增machines/0003仅移除machine_active_capacity_slot容量CHECK，保留旧列/值/主键。create_machine同步移除四槽循环，UI移除四台上限。原0001/0002不改。
+3. 新增tournaments/0003扩展字段及实体，保留原始轮桌座/分配表。0004回填`legacy_default_backfill:0004`规则来源及迁移时间，不修改任何旧列（包含updated_at）、数字配置、名单或座次。
+4. F0-04已启动无首轮保持unselected，按新选桌流程接续。F0-05按旧桌号及东南西北恢复first_round_order，order_source=legacy_table_wind_v1，不重抽也不用记录ID。
+5. 原active全部有效时建立稳定A～D及OneToOne legacy Reservation桥接，resource_state=fixed，直接继承。桥接的created_at表示升级接入时间，source/legacy FK及原分配时间明确可追溯，不伪造历史手动选桌。
+6. 部分/全部released、机器异常或结构不完整标review_required，不恢复released、不自动抢回旧桌；仍有效的active同时桥接以保护资源池。管理员显式说明并补选空闲映射；全部配置轮次已存在且无需实体对局可确认historical_only，补历史成绩后正常完赛，不临时抢占物理桌。
+7. 源码升级期间必须停止旧进程写入；数据库不能以跨表普通CHECK阻止旧二进制直接写表。当前所有对外资源写入统一检查新旧占用，保留旧接口保护，未桥接active也参与互斥。
+8. 带数据QA比较所有旧列、数量、稳定ID/关系/座次/历史，验证有效继承、partial/released复核及新旧互斥。原始日志及迁移失败/修复证据见交付报告。0004不可逆，避免倒退到无桥接保护；回退须停写并按部署备份方案处理，不fake/删库。
 
-正式确认须验证四个终局点数均为整数（允许负数和零）且总和等于4×赛事开局点数；异常可保存草稿，不能绕过确认校验。后续分桌依次比较已确认累计积分、第一名次数、第二名次数、从最近已确认轮向前的逐轮积分，完全相同使用首轮持久化随机序列。旧首轮序列从既有逻辑桌号及东南西北顺序无损还原，不能以记录ID替代或重新随机；新轮四风另行随机并持久化。冠军全同仍公开抽签，禁止使用首轮分桌兜底。
+## 历史边界与验证限制
 
-累计从已确认结果派生，可重建的缓存不作为真相源；下一轮保存来源结果版本，前轮未全确认、源版本变化或重复轮次均拒绝。最终结果在明确完赛事务保存，不随策略升级静默重算；公开抽签必须显式确认，不能后台静默决定冠军。
+F0-05当时是最多四台、轮次级自动选机、仅首轮、无成绩/冠军；原报告/失败证据与历史Tag保留。旧自动生成器仅在`legacy_test_fixture.py`供历史数据回归构造，运行时路由/服务不引用；正常入口只接受显式选桌。与新需求冲突的旧断言已逐项更新并补回归，有效旧权限/数据约束/历史测试继续执行。
 
-### 事务与权限目标
-
-资源相关操作统一“物理桌稳定PK顺序→赛事→赛事桌位/预留→结果或最终快照”的锁顺序，沿用当前简单池锁亦可，不能因店内超过四张便引入复杂调度系统。SQLite须先取得写事务；PostgreSQL有序行锁加条件唯一约束，实际行为另测，不声称方案已通过。
-
-成绩草稿/确认和下一轮生成共同保护赛事及结果版本；不需要资源锁的纯成绩事务不能在持有反序锁后再调用会拿资源锁的完赛逻辑。建议正式完赛作为独立明确操作：重新校验全部轮次、确认成绩、决胜/抽签、唯一冠军，原子保存最终结果并释放仅属于本赛事的预留及需结束的旧active分配。失败全部回滚，不能先完赛后异步释放。
-
-新模式禁止用旧单轮release绕过赛事预留；保留故障替换的明确审计接口，日常不要求人工释放。旧模式接口须与Reservation同事务协调，不能在新旧两套表各自独立判断空闲。所有新API继续管理员Session、CSRF、严格字段和统一错误，不允许客户端提交权威积分或冠军。
-
-## 兼容与迁移（设计建议，尚未执行）
-
-本D0-01只写方案。下面是F0-06在同一任务内实施、在真实F0-05副本上验证的新增迁移/服务升级步骤，不是后续独立功能阶段。
-
-1. **预检与备份**：覆盖F0-04已启动未分桌及F0-05已生成分桌两类赛事，记录库版本、迁移图、machineId/轮桌座/分配行数及关联。检测重复active、跨表异常、缺失快照、部分释放等情况，出具问题清单，不删数据修平。上线升级期间暂停旧资源写入，避免旧进程绕过新预留表。
-2. **先扩展结构**：新增规则标识/版本及来源字段、赛事桌位/Reservation、结果/抽签/最终快照结构；RoundTable仅新增可空关联。保留所有旧主键、原数字参数、外键、0001/0002迁移、现有桌号/四风及历史审计。
-3. **回填规则版本**：为旧赛事赋split_rank_bonus_v1/performance_v1/rules_version=1，记录legacy_default_backfill和迁移来源，不伪造历史管理员选择。赋值不修改已冻结数字规则或生成座次，不声称此前已有成绩/冠军。
-4. **桥接旧占用**：以现存active MachineAllocation建立一一可追溯Reservation镜像/legacy引用，数据库active machine唯一，新旧占用统一互斥；released旧记录只保留历史，不重新变active。旧轮table_number对应赛事A～D桌位，保留原RoundTable/RoundSeat，并明确映射继承自旧记录，不伪造历史手动选桌。按首轮已保存桌号升序及每桌东南西北还原原始随机序列，记录来源/完整性校验，不以ID排列替代、不重排首轮。
-5. **按最终决策接续**：F0-04已启动未分桌赛事经新流程选桌后生成首轮并持久化随机序列；F0-05已有首轮保持不变。原占用全部有效、数量与桌次完整且无跨赛事冲突时，直接继承固定桌位，不额外要求人工采纳。部分/全部已释放或其他异常占用必须管理员复核，显示旧座次及历史；需要后续实体对局时确认当前可用固定映射，不得自动抢回已被他场占用的旧桌。若不再需要后续实体对局，复核后处理历史成绩及正常完赛，只释放本场仍有效预留，不为补记录临时占新桌。需复核的记录未处理前不得自动接续或虚构完赛。
-6. **解除容量依赖**：新增迁移移除machine_active_capacity_slot这一“非退役必须占1～4槽”CHECK；capacity_slot可暂留为nullable只读legacy列，原1～4值保留，唯一约束即使保留也不能要求新设备非空。同步改造create_machine四槽重试及界面容量逻辑，新设备不再分槽；继续保留状态、编号唯一、稳定machineId和退役历史保护。不得只改前端或让新服务仍卡在四槽算法。本阶段不实际执行此迁移。
-7. **切换资源权威**：新建赛事默认固定选桌模式；旧记录有清晰legacy_round_v1来源/兼容状态。所有旧调整/释放及新预留/替换/完赛共用锁和Reservation权威，跨模式独占。设备维护/停用/退役保护同时检查赛事预留和未桥接的旧active记录，不能因新轮次不创建旧allocation便误判为空闲。旧模式仍可审计原释放记录；继承或复核确认固定映射后，旧单轮release不能释放赛事预留。需要结束的旧active行只能在真实替换/完赛等经确认操作中写合法释放审计，不能迁移时篡改其历史状态。
-8. **验证后收紧**：核对前后ID、旧字段、行数/关系、编号快照、分桌哈希及首轮随机序列；验证新增非空字段/唯一约束，仅有问题的记录进入管理员复核。新旧模式查询完整，旧历史始终可读。保留备份及失败证据；不通过删除新旧表或重放随机结果解决失败。
-
-赛事规则冻结与资源兼容接续分别审计：接续物理桌不是修改开局点数/Uma/名单。故障替换时旧轮次可查询生成时物理桌及替换历史，当前桌位显示新预留；不能只显示最新设备让过去历史失真。
-
-### 回归与部署风险
-
-必须覆盖“F0-04已启动未分桌、F0-05全有效占用直接继承、部分released、全released、改编号/退役/编号复用、被另一赛事占用”等副本场景，验证新旧资源互斥和首轮序列不变。Planner已允许修改与新需求冲突的旧测试断言，例如四台上限或后续轮次拒绝；须逐项记录规则差异并补新需求回归，保留全部仍有效的旧测试及历史验收证据，不能删除失败用例冒充回归。
-
-物理池扩大后的锁范围、有理数无损存储/比较、数据回填及事务重入须在F0-06实测。PostgreSQL迁移/并发、真实部署/HTTPS和公网安全目前均未验证。五项最终决策由[统一规范决策表](F0-06-functional-spec.md#13-planner最终决策与启动门禁)维护，已不再是业务开放问题；具体字段/API名称仍为实现设计，不冒充已经完成。
-
-## 审查与开发门禁
-
-D0-01仅修改Markdown，保存历史事实；F0-06完整范围和验收见统一规范。Planner批准、Owner推送文档Commit、远程内容核验一致之前不得编码或迁移。F0-06之后仅集成测试、部署、安全加固与发布验收，微信/团体赛仍不纳入V1.0。
+文件SQLite并发、故障回滚、真实HTTP及16人6轮浏览器闭环的实际结果以交付报告为准。PostgreSQL实连迁移/并发、生产HTTPS部署及公网安全仍 **UNVERIFIED**；不将有序锁设计当成生产验证通过。F0-06后仅集成测试、部署、安全加固、发布验收；微信/团体赛不属V1.0。

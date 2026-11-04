@@ -108,7 +108,6 @@ export function MachinesPage() {
       setOpening(null)
     }
   }
-  const full = !!data && data.summary.active >= 4
   return (
     <div className="machine-workspace">
       <section className="machine-overview">
@@ -124,7 +123,7 @@ export function MachinesPage() {
             setEditor({})
             setSuccess('')
           }}
-          disabled={loading || !!error || full || opening !== null}
+          disabled={loading || !!error || opening !== null}
         >
           <Plus size={17} />
           新建设备
@@ -146,11 +145,10 @@ export function MachinesPage() {
             </div>
             <p>
               {data && !loading && !error ? data.summary[key] : '—'}
-              {key === 'active' && <small> / 4 台</small>}
             </p>
             <span>
               {key === 'active'
-                ? '维护中与停用设备同样占用容量'
+                ? '可登记多张物理桌，单场最多选择四张'
                 : key === 'available'
                   ? '设备可用，不代表当前未被占用'
                   : key === 'maintenance'
@@ -160,15 +158,6 @@ export function MachinesPage() {
           </Card>
         ))}
       </div>
-      {full && !loading && !error && (
-        <div className="capacity-notice" role="status">
-          <Grid2X2 size={18} />
-          <div>
-            <strong>现役容量已满</strong>
-            <p>当前已管理 4 台现役设备。退役一台后，可新增替代设备。</p>
-          </div>
-        </div>
-      )}
       <FormFeedback success={success} />
       <section className="settings-panel machine-list" ref={listPanel} tabIndex={-1}>
         <div className="section-heading">

@@ -1,0 +1,4 @@
+Owner database SHA256: c4738a1eada032c19a2f9e33f2dcb555a961f1457321b5bd2ebccd92ffa3a2c9
+Original DB read only; migrations pending tournaments.0001 and .0002. QA uses copies only.
+HEAD 5f31891b4ae3a589057e7054758abb08ca42ec72
+F0-05 commit 41929da1e53f8bb481beb4ea3bc31b65f9ee86ff

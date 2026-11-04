@@ -1,0 +1,3056 @@
+
+> riichi-frontend@0.1.0 test
+> vitest run --reporter=dot
+
+
+ RUN  v4.1.12 D:/Riichi/frontend
+
+(node:7164) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:45556) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:48912) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+················x·······x···x·······x················xxxxxxxxxxxx
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 16 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/machines.test.tsx > 设备管理工作台 > 容量已满时禁用创建，并解释维护停用也占容量
+TestingLibraryElementError: Unable to find an element with the text: 现役容量已满. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body
+  style=""
+>
+  <div>
+    <div
+      class="machine-workspace"
+    >
+      <section
+        class="machine-overview"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            PHYSICAL RESOURCES / 设备资源
+          </span>
+          <h2>
+            每一台设备，都有清晰的归属。
+          </h2>
+          <p>
+            维护物理设备台账，为下一场对局做好准备。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="default"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-plus"
+            fill="none"
+            height="17"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="17"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          新建设备
+        </button>
+      </section>
+      <div
+        class="machine-stats"
+      >
+        <div
+          class="flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm machine-stat stat-active"
+          data-slot="card"
+        >
+          <div>
+            <span>
+              现役设备
+            </span>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-grid-2x2 lucide-grid-2-x-2"
+              fill="none"
+              height="18"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 3v18"
+              />
+              <path
+                d="M3 12h18"
+              />
+              <rect
+                height="18"
+                rx="2"
+                width="18"
+                x="3"
+                y="3"
+              />
+            </svg>
+          </div>
+          <p>
+            4
+          </p>
+          <span>
+            可登记多张物理桌，单场最多选择四张
+          </span>
+        </div>
+        <div
+          class="flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm machine-stat stat-available"
+          data-slot="card"
+        >
+          <div>
+            <span>
+              当前可用
+            </span>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-check"
+              fill="none"
+              height="18"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20 6 9 17l-5-5"
+              />
+            </svg>
+          </div>
+          <p>
+            4
+          </p>
+          <span>
+            设备可用，不代表当前未被占用
+          </span>
+        </div>
+        <div
+          class="flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm machine-stat stat-maintenance"
+          data-slot="card"
+        >
+          <div>
+            <span>
+              维护中
+            </span>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-wrench"
+              fill="none"
+              height="18"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"
+              />
+            </svg>
+          </div>
+          <p>
+            0
+          </p>
+          <span>
+            [0...
+
+Ignored nodes: comments, script, style
+<body
+  style=""
+>
+  <div>
+    <div
+      class="machine-workspace"
+    >
+      <section
+        class="machine-overview"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            PHYSICAL RESOURCES / 设备资源
+          </span>
+          <h2>
+            每一台设备，都有清晰的归属。
+          </h2>
+          <p>
+            维护物理设备台账，为下一场对局做好准备。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="default"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-plus"
+            fill="none"
+            height="17"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="17"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5 12h14"
+            />
+            <path
+              d="M12 5v14"
+            />
+          </svg>
+          新建设备
+        </button>
+      </section>
+      <div
+        class="machine-stats"
+      >
+        <div
+          class="flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm machine-stat stat-active"
+          data-slot="card"
+        >
+          <div>
+            <span>
+              现役设备
+            </span>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-grid-2x2 lucide-grid-2-x-2"
+              fill="none"
+              height="18"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 3v18"
+              />
+              <path
+                d="M3 12h18"
+              />
+              <rect
+                height="18"
+                rx="2"
+                width="18"
+                x="3"
+                y="3"
+              />
+            </svg>
+          </div>
+          <p>
+            4
+          </p>
+          <span>
+            可登记多张物理桌，单场最多选择四张
+          </span>
+        </div>
+        <div
+          class="flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm machine-stat stat-available"
+          data-slot="card"
+        >
+          <div>
+            <span>
+              当前可用
+            </span>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-check"
+              fill="none"
+              height="18"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20 6 9 17l-5-5"
+              />
+            </svg>
+          </div>
+          <p>
+            4
+          </p>
+          <span>
+            设备可用，不代表当前未被占用
+          </span>
+        </div>
+        <div
+          class="flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm machine-stat stat-maintenance"
+          data-slot="card"
+        >
+          <div>
+            <span>
+              维护中
+            </span>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-wrench"
+              fill="none"
+              height="18"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"
+              />
+            </svg>
+          </div>
+          <p>
+            0
+          </p>
+          <span>
+            [0...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/machines.test.tsx:169:18
+    167|     list.mockResolvedValue(page([machine], 4))
+    168|     render(<MachinesPage />)
+    169|     await screen.findByText('现役容量已满')
+       |                  ^
+    170|     expect(screen.getByRole('button', { name: '新建设备' }).hasAttribute('…
+    171|     expect(screen.getByText('维护中与停用设备同样占用容量')).toBeTruthy()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/16]⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 生成请求未结束时禁用重复确认
+TestingLibraryElementError: Unable to find role="button" and name "生成第一轮分桌"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/rounds.test.tsx:202:35
+    200|     show()
+    201|     const user = userEvent.setup()
+    202|     await user.click(await screen.findByRole('button', { name: '生成第一轮分…
+       |                                   ^
+    203|     await user.click(await screen.findByRole('button', { name: '确认生成首轮…
+    204|     expect(screen.getByRole('button', { name: '正在提交…' }).hasAttribute(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/16]⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 加载持久化座次和真实设备，区分状态与占用
+TestingLibraryElementError: Unable to find an element with the text: 逻辑桌 1. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/rounds.test.tsx:213:18
+    211|     show()
+    212|     expect(screen.getByRole('status').textContent).toContain('正在读取')
+    213|     await screen.findByText('逻辑桌 1')
+       |                  ^
+    214|     for (const name of ['快照选手1', '快照选手2', '快照选手3', '快照选手4'])
+    215|       expect(screen.getByText(name)).toBeTruthy()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/16]⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 4人显示正确所需桌数与设备数
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 8人显示正确所需桌数与设备数
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 12人显示正确所需桌数与设备数
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 16人显示正确所需桌数与设备数
+TestingLibraryElementError: Unable to find role="button" and name "生成第一轮分桌"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/rounds.test.tsx:232:35
+    230|     show()
+    231|     const user = userEvent.setup()
+    232|     await user.click(await screen.findByRole('button', { name: '生成第一轮分…
+       |                                   ^
+    233|     await screen.findByRole('dialog')
+    234|     expect(screen.getByText(`${size / 4} 桌 / ${size / 4} 台`)).toBeTrut…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/16]⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 草稿不提供生成入口
+TestingLibraryElementError: Unable to find an element with the text: 赛事尚未启动. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/rounds.test.tsx:244:18
+    242|     vi.mocked(fetchRounds).mockResolvedValue({ results: [] })
+    243|     show()
+    244|     await screen.findByText('赛事尚未启动')
+       |                  ^
+    245|     expect(screen.queryByRole('button', { name: '生成第一轮分桌' })).toBeNull…
+    246|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/16]⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 生成先确认，取消不写入，确认后从API恢复分桌
+TestingLibraryElementError: Unable to find role="button" and name "生成第一轮分桌"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/rounds.test.tsx:251:35
+    249|     show()
+    250|     const user = userEvent.setup()
+    251|     await user.click(await screen.findByRole('button', { name: '生成第一轮分…
+       |                                   ^
+    252|     await user.click(await screen.findByRole('button', { name: '取消' }))
+    253|     expect(generateRound).not.toHaveBeenCalled()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/16]⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 资源不足显示原因，禁止确认部分生成
+TestingLibraryElementError: Unable to find role="button" and name "生成第一轮分桌"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/rounds.test.tsx:268:35
+    266|     show()
+    267|     const user = userEvent.setup()
+    268|     await user.click(await screen.findByRole('button', { name: '生成第一轮分…
+       |                                   ^
+    269|     await screen.findByRole('dialog')
+    270|     expect(screen.getByRole('button', { name: '确认生成首轮' }).hasAttribute…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/16]⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 调整设备先选空闲目标并明确确认
+TestingLibraryElementError: Unable to find role="button" and name "调整第1桌设备"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/rounds.test.tsx:277:35
+    275|     show()
+    276|     const user = userEvent.setup()
+    277|     await user.click(await screen.findByRole('button', { name: '调整第1桌设…
+       |                                   ^
+    278|     await screen.findByRole('dialog')
+    279|     expect(reassignMachine).not.toHaveBeenCalled()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/16]⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 占用历史读取API，保留稳定machineId和分配快照
+TestingLibraryElementError: Unable to find role="button" and name "查看第1桌设备历史"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/rounds.test.tsx:301:35
+    299|     show()
+    300|     const user = userEvent.setup()
+    301|     await user.click(await screen.findByRole('button', { name: '查看第1桌设…
+       |                                   ^
+    302|     await screen.findByText('历史释放')
+    303|     expect(fetchAllocationHistory).toHaveBeenCalledWith(20)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/16]⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 释放确认与原因，成功后座次保留且没有重新开启按钮
+TestingLibraryElementError: Unable to find role="button" and name "释放第1桌设备"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/rounds.test.tsx:316:35
+    314|     show()
+    315|     const user = userEvent.setup()
+    316|     await user.click(await screen.findByRole('button', { name: '释放第1桌设…
+       |                                   ^
+    317|     await screen.findByRole('dialog')
+    318|     expect(screen.getByText(/本阶段不支持重新开启/)).toBeTruthy()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/16]⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 409冲突显示，不自动重放写入
+TestingLibraryElementError: Unable to find role="button" and name "调整第1桌设备"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/rounds.test.tsx:333:35
+    331|     show()
+    332|     const user = userEvent.setup()
+    333|     await user.click(await screen.findByRole('button', { name: '调整第1桌设…
+       |                                   ^
+    334|     await user.selectOptions(await screen.findByLabelText('目标空闲设备'), '…
+    335|     await user.click(screen.getByRole('button', { name: '确认调整设备' }))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/16]⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > 刷新恢复同一座次，不重新随机；失败后可重试
+TestingLibraryElementError: Unable to find an element with the text: 逻辑桌 1. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/rounds.test.tsx:344:18
+    342|     const user = userEvent.setup()
+    343|     await user.click(await screen.findByRole('button', { name: '重新加载工作…
+    344|     await screen.findByText('逻辑桌 1')
+       |                  ^
+    345|     await user.click(screen.getByRole('button', { name: '刷新工作台' }))
+    346|     await screen.findByText('快照选手1')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/16]⎯
+
+ FAIL  src/pages/rounds.test.tsx > 首轮分桌工作台 > Sheet Escape关闭，普通用户及匿名访问被阻止
+TestingLibraryElementError: Unable to find role="button" and name "查看第1桌设备历史"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="competition-workspace"
+    >
+      <a
+        class="back-link"
+        data-discover="true"
+        href="/tournaments"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-left"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m12 19-7-7 7-7"
+          />
+          <path
+            d="M19 12H5"
+          />
+        </svg>
+         返回赛事管理
+      </a>
+      <section
+        class="competition-hero"
+        tabindex="-1"
+      >
+        <div>
+          <span
+            class="eyebrow"
+          >
+            TOURNAMENT / 比赛工作台
+          </span>
+          <h2>
+            赛事运行
+          </h2>
+          <p>
+            记录每一场对局，让每一分都有依据。
+          </p>
+        </div>
+        <button
+          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3"
+          data-size="default"
+          data-slot="button"
+          data-variant="outline"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-refresh-cw"
+            fill="none"
+            height="16"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+            />
+            <path
+              d="M21 3v5h-5"
+            />
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            />
+            <path
+              d="M8 16H3v5"
+            />
+          </svg>
+           刷新工作台
+        </button>
+      </section>
+      <div
+        class="form-feedback error"
+        role="alert"
+      >
+        <p>
+          无法连接服务，请检查网络后重试。
+        </p>
+      </div>
+      <button
+        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3"
+        data-size="default"
+        data-slot="button"
+        data-variant="default"
+      >
+        重新加载工作台
+      </button>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/rounds.test.tsx:352:35
+    350|     const page = show()
+    351|     const user = userEvent.setup()
+    352|     await user.click(await screen.findByRole('button', { name: '查看第1桌设…
+       |                                   ^
+    353|     await screen.findByRole('dialog')
+    354|     await user.keyboard('{Escape}')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/16]⎯
+
+
+ Test Files  2 failed | 4 passed (6)
+      Tests  16 failed | 49 passed (65)
+   Start at  11:08:47
+   Duration  17.73s (transform 729ms, setup 0ms, import 3.40s, tests 26.66s, environment 5.36s)
+

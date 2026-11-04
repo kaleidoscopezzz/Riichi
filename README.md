@@ -2,7 +2,7 @@
 
 **轻量级四人立直麻将个人赛事管理系统**，帮助麻将馆管理员快速创建赛事、安排选手、录入成绩、重排座次并决出冠军；物理桌是辅助资源。
 
-当前可运行正式基线为 **F0-05（CLOSED / PASS）**，已实现账号、选手、设备、赛事配置/启动、首轮随机及轮次级设备分配/释放。成绩、计分、后续轮次、冠军和赛事级固定选桌尚未实现。当前任务 **D0-01仅修订Markdown**；F0-06未启动，将在一个任务中完成V1.0全部剩余核心功能。
+正式代码基线为 **F0-05（CLOSED / PASS）**；D0-01文档已CLOSED / PASS（Commit `5f31891b4ae3a589057e7054758abb08ca42ec72`）。本工作区已实现 **F0-06完整核心候选**：账号/选手、独立赛事、固定选桌、1～6轮成绩确认与精确计分、累计排名、后续重排、公开抽签、唯一冠军、正式完赛及自动释放。候选尚未提交，等待Planner独立验收，无F0-06正式基线。
 
 Riichi Premium 界面以深海军蓝、石墨黑和中性色为基础，提供仪表盘、赛事管理、选手管理、麻将机管理和系统设置五个基础页面。仪表盘展示欢迎信息、功能入口与实际后端连接状态，不包含虚构赛事统计。
 
@@ -93,7 +93,7 @@ npm run test
 npm run build
 ```
 
-上述为复现命令，不代表每项已执行；以 [F0-01 实际验证报告](docs/project/F0-01-verification.md) 为准。生产构建输出到 `frontend/dist/`，开发服务器不能替代生产部署。
+上述为复现命令；本轮实际执行及失败/未验证事项以 [F0-06交付报告](docs/project/F0-06-verification.md) 为准，F0-01等旧报告只证明当时版本。生产构建输出到 `frontend/dist/`，开发服务器不能替代生产部署。
 
 ## 配置与安全
 
@@ -117,11 +117,11 @@ npm run build
 - [架构与目录](docs/architecture.md)
 - [基线管理](docs/project/baselines.md)
 - [开发约束](AGENTS.md)
-- [F0-06完整功能规范（目标，最终决策已落实）](docs/F0-06-functional-spec.md)
+- [F0-06完整功能规范（已实现候选，规则已确认）](docs/F0-06-functional-spec.md)
 
 账号、选手、赛事配置/启动与首轮已实现。成绩、精确计分、累计榜、后续分桌、最终冠军/公开抽签和完赛自动释放统一纳入F0-06，不拆F0-07/F0-08。微信、团体赛仍为未来候选，不纳入V1.0。
 
-当前正式基线 `baseline/F0-05`，Commit `41929da1e53f8bb481beb4ea3bc31b65f9ee86ff`，Branch main，Planner CLOSED / PASS；F0-01～05历史基线/报告均保留。D0-01不commit/tag/push；只有Planner批准文档、Owner推送文档Commit、远程内容核验一致后，才允许启动F0-06。
+正式代码基线 `baseline/F0-05`，Commit `41929da1e53f8bb481beb4ea3bc31b65f9ee86ff`，Branch main，Planner CLOSED / PASS；F0-01～05历史基线/报告均保留。D0-01门禁已由Owner确认完成并授权F0-06；本次候选不commit/tag/push，等待Planner审查。
 
 ## F0-02 账号系统使用（已验收）
 
@@ -168,33 +168,42 @@ API：GET/POST /api/v1/machines/，GET/PATCH /api/v1/machines/{id}/，POST /api/
 
 API（均需管理员Session，所有写请求带CSRF）：GET/POST `/api/v1/tournaments/`；GET/PATCH `/api/v1/tournaments/{id}/`；PUT `/api/v1/tournaments/{id}/participants/`；POST `/api/v1/tournaments/{id}/start/`。列表支持search/status/page。点数为整数、Uma用精确十进制字符串传递，oka只读。
 
-F0-04当时的迁移、测试、HTTP/浏览器及数据库状态见 [原始交付报告](docs/project/F0-04-verification.md)，保留历史快照。当前本地迁移状态应由使用者通过showmigrations实查；D0-01未检查或修改数据库。PostgreSQL与公网部署仍未验证。
+F0-04当时的迁移、测试、HTTP/浏览器及数据库状态见 [原始交付报告](docs/project/F0-04-verification.md)，保留历史快照。当前本地迁移状态应由使用者通过showmigrations实查；当时D0-01未检查或修改数据库。PostgreSQL与公网部署仍未验证。
 
-## F0-05 首轮分桌与物理设备
+## F0-05 首轮分桌与物理设备（历史交付边界）
 
 仍使用上方PowerShell命令：在backend执行showmigrations、migrate（无fake/重置），按需createsuperuser；启动Django及Vite后访问http://127.0.0.1:5173。管理员从已启动赛事详情进入“分桌工作台”(`/tournaments/{id}/rounds`)。
 
 先在设备页登记真实可用设备，再确认生成第一轮。系统随机安排东南西北座次，按编号升序分配空闲available设备，资源不足整轮拒绝。刷新不重新随机，生成后无任意座次编辑。工作台可查看跨赛事占用，确认调整设备、释放或查看审计历史。
 
-active占用的设备不能维护/停用/退役；先确认实体使用已结束并释放。释放不等于成绩确认或轮次结束，不支持重新开启已释放桌。第二轮及以上当前明确拒绝，等待未来已确认成绩与累计积分。
+active占用的设备不能维护/停用/退役；先确认实体使用已结束并释放。释放不等于成绩确认或轮次结束，不支持重新开启已释放桌。F0-05当时第二轮及以上明确拒绝，等待未来已确认成绩与累计积分。
 
 API：GET/POST `/api/v1/tournaments/{id}/rounds/`（生成体`{"round_number":1}`），GET `/api/v1/tournaments/{id}/rounds/1/`，GET `/api/v1/round-tables/{id}/`、`.../machine/history/`，POST `.../machine/reassign/`（`{"machine_id":3}`）、`.../machine/release/`（`{"reason":"实体使用结束"}`），GET `/api/v1/machine-resources/`。全部限管理员Session，写请求必须携带当前CSRF。
 
-F0-05已正式验收，上述是当前代码行为；[原始交付报告](docs/project/F0-05-verification.md)保留当时QA与迁移记录。历史失败证据不修改，D0-01不重跑功能测试、不迁移或改依赖，也不把历史结果冒称本轮通过。
+F0-05已正式验收，上述是F0-05当时行为；[原始交付报告](docs/project/F0-05-verification.md)保留当时QA与迁移记录。历史失败证据不修改；F0-06验证另行留档，不把历史结果冒称本轮通过。
 
-## D0-01与F0-06目标
+## F0-06 完整个人赛工作流（候选）
 
-F0-05当前仍最多4台非退役设备、轮次级MachineAllocation、仅首轮生成；尚未改成新目标。
+管理员从赛事详情进入分桌工作台，完成：创建草稿/选择已注册选手→启动冻结→明确选择人数/4张真实物理桌并确认A～D→首轮随机→逐桌录入/保存草稿/正式确认→查看累计榜→生成下一轮→最后一轮公开抽签（如需）→二次确认正式完赛→查看唯一冠军及只读档案。换轮不重选或释放物理桌；故障换桌需原因和确认。
 
-F0-06目标为店内可登记5张或更多物理桌，单赛事首轮前显式选择1～4张并固定A～D映射，后续只重排选手/分组/四风，正式完赛自动释放。故障替换保留简化审计，不作为日常换轮步骤。新增迁移须安全解除capacity_slot容量依赖，保留machineId、旧分桌和设备历史，见[非破坏性兼容设计](docs/architecture.md#兼容与迁移设计建议尚未执行)。本任务没有执行这些改造。
+店内可以登记超过四张桌，单场最多四张。原始终局点数为整数，允许负数与零，范围±(2^53−1)；确认总和必须四倍赛事开局点数，异常只可存草稿。确认后锁定，未确认草稿不计分。积分以Fraction计算，分子/分母字符串无损保存，前端小数只作展示。TBD-001/002及OP-01～05均RESOLVED，详见统一规范。
 
-TBD-001/002均为**RESOLVED**，已确认采用`split_rank_bonus_v1`与`performance_v1`。Planner五项最终决策已落实，详细规则、公开抽签、条件零和、完整流程及验收统一见[F0-06规范](docs/F0-06-functional-spec.md)：
+旧F0-04已启动无分桌走新选桌流程；F0-05有效占用完整自动继承，released/异常需管理员复核。不重排首轮、不改旧ID或历史。无后续实体对局且全部配置轮次已存在，可复核为仅补历史成绩模式。新增迁移解除容量CHECK并建立桥接，旧单轮释放不能绕过赛事预留。见[兼容实现](docs/architecture.md#兼容与迁移已实现qa验证)。
 
-- 终局点数允许负数/零，四人均为整数；正式确认总和必须4×开局，异常可存草稿但不能跳过校验。
-- 后续分桌按累计分、第一/第二次数、逆序逐轮积分，完全相同按首轮持久化随机顺序；新轮四风重新随机。冠军全同仍公开抽签，不使用首轮兜底。
-- F0-04已启动未分桌及F0-05已有分桌均须兼容；旧占用全部有效时继承固定桌位，已释放/异常需管理员复核。保留首轮与历史，新旧资源统一互斥。
-- Fraction等精确有理数为权威计分与排名、无损存储；Decimal/字符串仅作精确输入解析，前端近似展示不排序，禁止浮点累计。允许修改冲突的旧测试断言，保留有效旧测试和全部历史验收证据，补齐新需求回归。
+迁移前先停旧服务写入、备份并在副本运行迁移/核验。**本轮未迁移Owner的backend/db.sqlite3**，只在独立QA库与副本验证；正式使用者须自行确认备份后按上文showmigrations/migrate正常升级。不得fake、删库或重置。
 
-上述为F0-06目标，当前代码尚未实现；不做任意公式编辑器，不静默升级或重算历史。
+本轮独立QA复现示例（PowerShell，新的数据库名，仍需有效本地.env）：
 
-F0-06是最后一次核心功能开发，须一次交付成绩到冠军完整闭环；之后仅集成测试、部署、安全加固及发布验收。D0-01完成后停止，等待Planner文档审查与Owner文档提交/远程核验。
+```powershell
+Set-Location D:\Riichi\backend
+$env:DATABASE_URL = 'sqlite:///D:/Riichi/backend/.verification/my-f006-qa.sqlite3'
+.\.venv\Scripts\python.exe manage.py migrate --noinput
+.\.venv\Scripts\python.exe manage.py check
+.\.venv\Scripts\python.exe manage.py makemigrations --check --dry-run
+.\.venv\Scripts\python.exe manage.py test
+# 管理员仅通过交互命令创建，不提供默认密码
+.\.venv\Scripts\python.exe manage.py createsuperuser
+.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000 --noreload
+```
+
+前端仍运行npm run dev，访问http://127.0.0.1:5173，API前缀/api/v1。完整API契约、测试数量、文件SQLite并发/历史迁移及真实HTTP/UI证据见[F0-06报告](docs/project/F0-06-verification.md)。本次没有新增依赖或修改锁文件。PostgreSQL实连迁移/并发、HTTPS部署及公网安全仍UNVERIFIED，不等同已上线。F0-06之后仅集成测试、部署、安全加固、发布验收；不开发微信/团体赛，不拆新核心功能阶段。

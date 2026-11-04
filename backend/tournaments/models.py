@@ -10,6 +10,7 @@ class Tournament(models.Model):
     class Status(models.TextChoices):
         DRAFT = "draft", "草稿"
         STARTED = "started", "已启动"
+        COMPLETED = "completed", "已完赛"
 
     name = models.CharField(max_length=120)
     description = models.TextField(max_length=3000, blank=True)
@@ -23,13 +24,25 @@ class Tournament(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     started_at = models.DateTimeField(null=True, blank=True)
     revision = models.PositiveIntegerField(default=0, editable=False)
+    score_tie_policy = models.CharField(max_length=40, default="split_rank_bonus_v1")
+    champion_tiebreak_policy = models.CharField(max_length=40, default="performance_v1")
+    rules_version = models.PositiveSmallIntegerField(default=1)
+    rules_source = models.CharField(max_length=80, default="created_v1")
+    first_round_order = models.JSONField(blank=True, default=list)
+    order_source = models.CharField(max_length=80, blank=True)
+    resource_state = models.CharField(max_length=24, default="unselected")
+    compatibility_audit = models.JSONField(blank=True, default=dict)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="completed_tournaments")
+    champion = models.ForeignKey("TournamentParticipant", null=True, blank=True, on_delete=models.PROTECT, related_name="championships")
+    final_snapshot = models.JSONField(blank=True, default=dict)
 
     class Meta:
         ordering = ["-created_at", "-id"]
         constraints = [
             models.CheckConstraint(condition=Q(round_count__gte=1, round_count__lte=6), name="tournament_round_range"),
             models.CheckConstraint(condition=Q(starting_points__gte=1, starting_points__lte=2147483647, return_points__gte=1, return_points__lte=2147483647), name="tournament_positive_points"),
-            models.CheckConstraint(condition=Q(status="draft", started_at__isnull=True) | Q(status="started", started_at__isnull=False), name="tournament_lifecycle"),
+            models.CheckConstraint(condition=Q(status="draft", started_at__isnull=True, completed_at__isnull=True, champion__isnull=True) | Q(status="started", started_at__isnull=False, completed_at__isnull=True, champion__isnull=True) | Q(status="completed", started_at__isnull=False, completed_at__isnull=False, completed_by__isnull=False, champion__isnull=False), name="tournament_lifecycle"),
             models.CheckConstraint(condition=Q(name__regex=r"\S"), name="tournament_name_nonblank"),
         ]
 
@@ -55,6 +68,7 @@ class TournamentRound(models.Model):
     generated_at = models.DateTimeField(auto_now_add=True)
     generated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="generated_rounds")
     created_at = models.DateTimeField(auto_now_add=True)
+    generation_snapshot = models.JSONField(blank=True, default=dict)
 
     class Meta:
         ordering = ["round_number"]
@@ -68,6 +82,8 @@ class RoundTable(models.Model):
     round = models.ForeignKey(TournamentRound, on_delete=models.PROTECT, related_name="tables")
     table_number = models.PositiveSmallIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+    tournament_table = models.ForeignKey("TournamentTable", null=True, blank=True, on_delete=models.PROTECT, related_name="round_tables")
+    machine_snapshot = models.JSONField(blank=True, default=dict)
 
     class Meta:
         ordering = ["table_number"]
@@ -127,3 +143,66 @@ class MachineAllocation(models.Model):
             models.UniqueConstraint(fields=["table"], condition=Q(status="active"), name="unique_active_table"),
             models.CheckConstraint(condition=Q(status="active", released_at__isnull=True, released_by__isnull=True, release_reason="") | Q(status="released", released_at__isnull=False, released_by__isnull=False), name="allocation_release_state"),
         ]
+
+
+class TournamentTable(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.PROTECT, related_name='fixed_tables')
+    ordinal = models.PositiveSmallIntegerField()
+
+    class Meta:
+        ordering = ['ordinal']
+        constraints = [models.UniqueConstraint(fields=['tournament', 'ordinal'], name='unique_fixed_table'), models.CheckConstraint(condition=Q(ordinal__gte=1, ordinal__lte=4), name='fixed_table_range')]
+
+
+class TournamentMachineReservation(models.Model):
+    table = models.ForeignKey(TournamentTable, on_delete=models.PROTECT, related_name='reservations')
+    machine = models.ForeignKey('machines.MahjongMachine', on_delete=models.PROTECT, related_name='reservations')
+    legacy_allocation = models.OneToOneField(MachineAllocation, null=True, blank=True, on_delete=models.PROTECT, related_name='reservation_bridge')
+    status = models.CharField(max_length=8, default='active')
+    source = models.CharField(max_length=40, default='explicit_selection_v1')
+    machine_no_snapshot = models.CharField(max_length=3)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='table_reservations')
+    created_at = models.DateTimeField(auto_now_add=True)
+    released_at = models.DateTimeField(null=True, blank=True)
+    released_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name='reservation_releases')
+    reason = models.CharField(max_length=500, blank=True)
+
+    class Meta:
+        ordering = ['id']
+        constraints = [
+            models.UniqueConstraint(fields=['machine'], condition=Q(status='active'), name='unique_reserved_machine'),
+            models.UniqueConstraint(fields=['table'], condition=Q(status='active'), name='unique_reserved_table'),
+            models.CheckConstraint(condition=Q(status='active', released_at__isnull=True, released_by__isnull=True) | Q(status='released', released_at__isnull=False, released_by__isnull=False), name='reservation_release_state'),
+        ]
+
+
+class TableResult(models.Model):
+    table = models.OneToOneField(RoundTable, on_delete=models.PROTECT, related_name='result')
+    status = models.CharField(max_length=10, default='draft')
+    version = models.PositiveIntegerField(default=1)
+    # Existing participant IDs -> signed integer points or null. Validated by service.
+    points = models.JSONField(blank=True, default=dict)
+    scores = models.JSONField(blank=True, default=list)
+    rule_snapshot = models.JSONField(blank=True, default=dict)
+    edited_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='edited_results')
+    edited_at = models.DateTimeField(auto_now=True)
+    confirmed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name='confirmed_results')
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [models.CheckConstraint(condition=Q(status='draft', confirmed_at__isnull=True, confirmed_by__isnull=True) | Q(status='confirmed', confirmed_at__isnull=False, confirmed_by__isnull=False), name='result_confirmation_state')]
+
+
+class LotteryRecord(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.PROTECT, related_name='lotteries')
+    source_versions = models.JSONField()
+    members = models.JSONField()
+    order = models.JSONField()
+    method = models.CharField(max_length=200)
+    description = models.CharField(max_length=2000)
+    drawn_at = models.DateTimeField()
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='recorded_lotteries')
+    created_at = models.DateTimeField(auto_now_add=True)
+    confirmed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT, related_name='confirmed_lotteries')
+    confirmed_at = models.DateTimeField(null=True)
+    rules_version = models.PositiveSmallIntegerField(default=1)

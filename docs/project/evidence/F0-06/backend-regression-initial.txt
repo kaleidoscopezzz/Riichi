@@ -1,0 +1,81 @@
+Creating test database for alias 'default'...
+
+.........................F....FFFF................F.F....................
+======================================================================
+FAIL: test_four_active_and_capacity_released_by_retirement (machines.tests.MachineApiTests.test_four_active_and_capacity_released_by_retirement)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\machines\tests.py", line 70, in test_four_active_and_capacity_released_by_retirement
+    self.assertEqual(fifth.status_code, 409)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 201 != 409
+
+======================================================================
+FAIL: test_direct_fifth_active_cannot_bypass_capacity (machines.tests.MachineConstraintTests.test_direct_fifth_active_cannot_bypass_capacity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\machines\tests.py", line 151, in test_direct_fifth_active_cannot_bypass_capacity
+    with self.assertRaises(IntegrityError), transaction.atomic():
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: IntegrityError not raised
+
+======================================================================
+FAIL: test_invalid_rows_rejected_without_serializer (machines.tests.MachineConstraintTests.test_invalid_rows_rejected_without_serializer) (values={'capacity_slot': None})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\machines\tests.py", line 136, in test_invalid_rows_rejected_without_serializer
+    with self.subTest(values=values), self.assertRaises(IntegrityError), transaction.atomic():
+                                      ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: IntegrityError not raised
+
+======================================================================
+FAIL: test_invalid_rows_rejected_without_serializer (machines.tests.MachineConstraintTests.test_invalid_rows_rejected_without_serializer) (values={'status': 'retired', 'capacity_slot': 1})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\machines\tests.py", line 136, in test_invalid_rows_rejected_without_serializer
+    with self.subTest(values=values), self.assertRaises(IntegrityError), transaction.atomic():
+                                      ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: IntegrityError not raised
+
+======================================================================
+FAIL: test_unique_slots_and_active_numbers (machines.tests.MachineConstraintTests.test_unique_slots_and_active_numbers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\machines\tests.py", line 142, in test_unique_slots_and_active_numbers
+    with self.assertRaises(IntegrityError), transaction.atomic():
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: IntegrityError not raised
+
+======================================================================
+FAIL: test_draft_later_invalid_and_client_seating_rejected (tournaments.tests_rounds.RoundTests.test_draft_later_invalid_and_client_seating_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\tournaments\tests_rounds.py", line 85, in test_draft_later_invalid_and_client_seating_rejected
+    self.assertEqual((response.status_code, response.json()["error"]["code"]), (409, "later_round_unavailable"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Tuples differ: (409, 'round_not_next') != (409, 'later_round_unavailable')
+
+First differing element 1:
+'round_not_next'
+'later_round_unavailable'
+
+- (409, 'round_not_next')
++ (409, 'later_round_unavailable')
+
+======================================================================
+FAIL: test_four_sizes_complete_seats_and_ordered_machine_assignment (tournaments.tests_rounds.RoundTests.test_four_sizes_complete_seats_and_ordered_machine_assignment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\backend\tournaments\tests_rounds.py", line 50, in test_four_sizes_complete_seats_and_ordered_machine_assignment
+    self.assertEqual(result.status_code, 201, result.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 400 != 201 : b'{"error":{"code":"invalid","message":"\xe8\xbe\x93\xe5\x85\xa5\xe4\xbf\xa1\xe6\x81\xaf\xe6\x9c\x89\xe8\xaf\xaf\xef\xbc\x8c\xe8\xaf\xb7\xe6\xa3\x80\xe6\x9f\xa5\xe8\xa1\xa8\xe5\x8d\x95\xe3\x80\x82","fields":{"machine_ids":["\xe9\xa1\xbb\xe6\x98\x8e\xe7\xa1\xae\xe9\x80\x89\xe6\x8b\xa9\xe5\xb9\xb6\xe7\xa1\xae\xe8\xae\xa4\xe7\x89\xa9\xe7\x90\x86\xe6\xa1\x8cA\xef\xbd\x9eD\xe3\x80\x82"]}}}'
+
+----------------------------------------------------------------------
+Ran 72 tests in 6.358s
+
+FAILED (failures=7)
+Destroying test database for alias 'default'...
+
+Found 72 test(s).
+System check identified no issues (0 silenced).

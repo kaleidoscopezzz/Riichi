@@ -60,15 +60,14 @@ class MachineApiTests(TestCase):
             self.assertEqual(self.create(**values).status_code, 400)
         self.assertEqual(self.write(data=[]).status_code, 400)
 
-    def test_four_active_and_capacity_released_by_retirement(self):
+    def test_more_than_four_active_and_number_reuse_after_retirement(self):
         items = []
         for number, state in [("101", "available"), ("202", "maintenance"), ("303", "disabled"), ("999", "available")]:
             response = self.create(number, status=state)
             self.assertEqual(response.status_code, 201)
             items.append(response.json()["data"])
         fifth = self.create("555")
-        self.assertEqual(fifth.status_code, 409)
-        self.assertEqual(fifth.json()["error"]["code"], "machine_capacity_full")
+        self.assertEqual(fifth.status_code, 201)
         original = items[1]
         self.assertEqual(self.write(f'{original["id"]}/retire/').status_code, 200)
         replacement = self.create("202")
@@ -78,7 +77,7 @@ class MachineApiTests(TestCase):
         self.assertEqual(historical.status, "retired")
         self.assertIsNone(historical.capacity_slot)
         self.assertEqual(historical.name, original["name"])
-        self.assertEqual(MahjongMachine.objects.exclude(status="retired").count(), 4)
+        self.assertEqual(MahjongMachine.objects.exclude(status="retired").count(), 5)
 
     def test_state_transitions_and_terminal_state(self):
         pk = self.create().json()["data"]["id"]
@@ -132,28 +131,28 @@ class MachineApiTests(TestCase):
 
 class MachineConstraintTests(TestCase):
     def test_invalid_rows_rejected_without_serializer(self):
-        for values in [{"capacity_slot": None}, {"capacity_slot": 0}, {"capacity_slot": 5}, {"status": "unknown"}, {"machine_no": "1"}, {"machine_no": "ABC"}, {"machine_no": "100\n"}, {"name": "  "}, {"status": "retired", "capacity_slot": 1}]:
+        for values in [{"status": "unknown"}, {"machine_no": "1"}, {"machine_no": "ABC"}, {"machine_no": "100\n"}, {"name": "  "}]:
             with self.subTest(values=values), self.assertRaises(IntegrityError), transaction.atomic():
                 MahjongMachine.objects.create(**({"name": "约束验证", "machine_no": "100", "capacity_slot": 1} | values))
 
     def test_unique_slots_and_active_numbers(self):
-        create_machine({"machine_no": "100", "name": "设备"})
+        MahjongMachine.objects.create(machine_no="100", name="设备", capacity_slot=1)
         for values in [{"machine_no": "101", "capacity_slot": 1}, {"machine_no": "100", "capacity_slot": 2}]:
             with self.assertRaises(IntegrityError), transaction.atomic():
                 MahjongMachine.objects.create(name="重复", **values)
         for _ in range(2):
             MahjongMachine.objects.create(machine_no="100", name="历史设备", status="retired")
 
-    def test_direct_fifth_active_cannot_bypass_capacity(self):
-        for number in range(4):
-            create_machine({"machine_no": f"{number:03}", "name": "设备"})
-        for slot in [None, 1, 2, 3, 4, 5]:
-            with self.assertRaises(IntegrityError), transaction.atomic():
-                MahjongMachine.objects.create(machine_no="999", name="第五台", capacity_slot=slot)
+    def test_direct_more_than_four_with_null_legacy_slots(self):
+        for number in range(8):
+            row = create_machine({"machine_no": f"{number:03}", "name": "设备"})
+            self.assertIsNone(row.capacity_slot)
+        self.assertEqual(MahjongMachine.objects.count(), 8)
+
 
 
 class ConcurrentMachineTests(TransactionTestCase):
-    def test_concurrent_creation_never_exceeds_capacity(self):
+    def test_concurrent_creation_preserves_number_uniqueness(self):
         barrier = Barrier(8)
 
         def worker(number):
@@ -169,8 +168,8 @@ class ConcurrentMachineTests(TransactionTestCase):
 
         with ThreadPoolExecutor(max_workers=8) as pool:
             results = list(pool.map(worker, range(8)))
-        self.assertTrue(set(results) <= {"created", "machine_busy", "machine_capacity_full"})
+        self.assertTrue(set(results) <= {"created", "machine_busy"})
         count = MahjongMachine.objects.exclude(status="retired").count()
         self.assertGreater(count, 0)
-        self.assertLessEqual(count, 4)
+        self.assertLessEqual(count, 8)
         self.assertEqual(count, results.count("created"))

@@ -17,7 +17,7 @@ export type Tournament = {
   return_points: number
   uma: string[]
   oka: string
-  status: 'draft' | 'started'
+  status: 'draft' | 'started' | 'completed'
   created_by: number
   created_at: string
   updated_at: string
