@@ -1,0 +1,7 @@
+ Container riichi-docker-qa-20261105-db-1 Running
+ Container riichi-docker-qa-20261105-db-1 Waiting
+ Container riichi-docker-qa-20261105-db-1 Healthy
+目标 Compose 数据库：riichi_qa；应用角色：riichi
+ Container riichi-docker-qa-20261105-api-run-8f7b58117ace Creating
+ Container riichi-docker-qa-20261105-api-run-8f7b58117ace Error response from daemon: invalid mount path: 'mode=1777' mount path must be absolute
+Error response from daemon: invalid mount path: 'mode=1777' mount path must be absolute

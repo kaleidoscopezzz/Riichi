@@ -1,0 +1,6 @@
+ Container riichi-docker-qa-70dc16bc-db-1 Restarting
+ Container riichi-docker-qa-70dc16bc-api-1 Restarting
+ Container riichi-docker-qa-70dc16bc-nginx-1 Restarting
+ Container riichi-docker-qa-70dc16bc-db-1 Started
+ Container riichi-docker-qa-70dc16bc-nginx-1 Started
+ Container riichi-docker-qa-70dc16bc-api-1 Started

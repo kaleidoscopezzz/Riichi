@@ -1,0 +1,109 @@
+
+> riichi-frontend@0.1.0 typecheck
+> tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json
+
+
+> riichi-frontend@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 /app
+
+ ✓ src/pages/accounts.test.tsx (9 tests) 2614ms
+     ✓ 匿名访问受保护路由跳转登录页  364ms
+     ✓ 登录失败显示反馈并允许重试  542ms
+     ✓ 通过me恢复管理员会话与管理菜单  418ms
+     ✓ 管理员显示选手菜单并查询真实接口  472ms
+ ✓ src/components/ui/select.test.tsx (7 tests) 3219ms
+     ✓ 真实应用 listbox Portal 展开，鼠标选择并恢复触发器焦点  845ms
+     ✓ 方向键跳过禁用项、Enter 选中、Escape 关闭且不改变值  742ms
+     ✓ 全部选项仍向调用方传空字符串，不泄漏内部映射值  333ms
+     ✓ 长文字和大量动态选项仍使用同一菜单与完整可访问名称  694ms
+     ✓ Sheet 内首次 Escape 只关闭下拉，第二次关闭 Sheet  339ms
+ ✓ src/services/competition.test.ts (4 tests) 62ms
+ ✓ src/services/health.test.ts (8 tests) 87ms
+ ✓ src/services/api.test.ts (2 tests) 57ms
+ ✓ src/pages/players.test.tsx (9 tests) 5779ms
+     ✓ 真实列表不展示内部用户名，支持搜索和分页  1258ms
+     ✓ 新建只发送昵称，保存成功刷新真实数据  634ms
+     ✓ 编辑前取最新详情，保留稳定ID  692ms
+     ✓ 删除需确认，取消不写入，删除有明确body  611ms
+     ✓ 有引用只提供归档，说明历史保护并可恢复  1198ms
+     ✓ 400错误保留反馈不自动重放写入  425ms
+     ✓ 403错误保留反馈不自动重放写入  337ms
+     ✓ 404错误保留反馈不自动重放写入  366ms
+ ✓ src/pages/machines.test.tsx (15 tests) 6716ms
+     ✓ 读取真实API契约并显示加载与设备列表  896ms
+     ✓ 新建表单拒绝编号和空白名称  1354ms
+     ✓ 新建设备成功，刷新列表并恢复按钮焦点  847ms
+     ✓ 先获取设备详情，再编辑资料和状态  1330ms
+     ✓ 退役需要明确确认，取消不会发送请求  642ms
+     ✓ 编号名称搜索与状态筛选重置分页  549ms
+ ✓ src/pages/tournaments.test.tsx (12 tests) 6971ms
+     ✓ API加载状态、真实列表及搜索分页  1753ms
+     ✓ 创建表单校验、精确Oka和原子草稿提交  1881ms
+     ✓ 选手分页搜索、去重和已选移除  1469ms
+     ✓ 编辑草稿将配置及名单放在同一请求  523ms
+     ✓ 启动需要确认，取消不写API；成功冻结  477ms
+ ✓ src/components/player-picker.test.tsx (8 tests) 7378ms
+     ✓ 保留草稿昵称快照与ID；禁用时不查询或变更名单  1223ms
+     ✓ 键盘向上导航、ARIA活动项和Tab离开后焦点不被抢回  456ms
+     ✓ 中文组合输入不请求或选择；结束后才搜索，方向键/Enter选择并保留焦点  1404ms
+     ✓ 同名不同ID、重复点击、连续4/8/12/16人、满员和移除；不显示内部用户名  3281ms
+     ✓ Sheet内选择/Escape不关闭表单，Enter不保存；提交只带选中ID  421ms
+ ✓ src/pages/rounds.test.tsx (20 tests) 7852ms
+     ✓ 旧分配历史只读保留稳定ID、编号快照和释放审计  1136ms
+     ✓ 8人显示正确选桌数量  383ms
+     ✓ 16人显示正确选桌数量  347ms
+     ✓ 首轮必须显式选桌，预览二次确认，取消不写入  1409ms
+     ✓ 生成请求未完成时禁止重复提交  653ms
+     ✓ 支持部分草稿、负数零、异常总和阻止确认  558ms
+     ✓ 总和正确后二次确认，后端权威计分  595ms
+     ✓ 故障换桌必须空闲目标和原因，历史可查  343ms
+     ✓ 最终全同公开抽签，记录后二次确认才能完赛  877ms
+
+ Test Files  10 passed (10)
+      Tests  94 passed (94)
+   Start at  08:07:43
+   Duration  10.88s (transform 3.50s, setup 390ms, import 12.12s, tests 40.73s, environment 6.93s)
+
+
+> riichi-frontend@0.1.0 build
+> npm run typecheck && vite build
+
+
+> riichi-frontend@0.1.0 typecheck
+> tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 2197 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.65 kB │ gzip:   0.43 kB
+dist/assets/index-DsR3pxg3.css  100.96 kB │ gzip:  18.48 kB
+dist/assets/index-BsCxUZZ0.js   494.49 kB │ gzip: 153.49 kB
+
+✓ built in 555ms
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {},
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "dependencies": {
+      "prod": 90,
+      "dev": 158,
+      "optional": 45,
+      "peer": 13,
+      "peerOptional": 0,
+      "total": 247
+    }
+  }
+}

@@ -1,0 +1,3 @@
+目标 Compose 数据库：riichi_qa；应用角色：riichi
+将执行备份中的 SQL 到新库 riichi_qa_restore_9fdd4e24；仅可使用自己信任的备份。当前业务库保持不变。
+需要人工确认，请输入 RESTORE riichi_qa_restore_9fdd4e24：pg_restore: error: input file does not appear to be a valid archive (too short?)

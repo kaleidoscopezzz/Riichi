@@ -1,0 +1,18 @@
+{
+  "result": "PASS",
+  "http_redirect": 308,
+  "assets": [
+    {
+      "path": "/assets/index-BlIHhwSg.js",
+      "status": 200,
+      "mime": "application/javascript",
+      "bytes": 494491
+    },
+    {
+      "path": "/assets/index-BxqalVXw.css",
+      "status": 200,
+      "mime": "text/css",
+      "bytes": 87738
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+Unable to find image 'koalaman/shellcheck:v0.11.0' locally
+v0.11.0: Pulling from koalaman/shellcheck
+88824a3837c1: Pulling fs layer
+957cfdbf2dcf: Pulling fs layer
+5a8d38890d2e: Download complete
+957cfdbf2dcf: Download complete
+957cfdbf2dcf: Pull complete
+88824a3837c1: Download complete
+88824a3837c1: Pull complete
+Digest: sha256:61862eba1fcf09a484ebcc6feea46f1782532571a34ed51fedf90dd25f925a8d
+Status: Downloaded newer image for koalaman/shellcheck:v0.11.0
+
+In /mnt/lib.sh line 5:
+PROJECT_ROOT="$(cd -- "$DEPLOY_DIR/.." && pwd)"
+^----------^ SC2034 (warning): PROJECT_ROOT appears unused. Verify use (or export if used externally).
+
+
+In /mnt/lib.sh line 18:
+    DB_NAME="$(compose exec -T db sh -eu -c 'printf "%s" "$POSTGRES_DB"' </dev/null)"
+                                            ^--------------------------^ SC2016 (info): Expressions don't expand in single quotes, use double quotes for that.
+
+
+In /mnt/lib.sh line 19:
+    DB_ROLE="$(compose exec -T db sh -eu -c 'printf "%s" "$RIICHI_DB_USER"' </dev/null)"
+                                            ^-----------------------------^ SC2016 (info): Expressions don't expand in single quotes, use double quotes for that.
+
+
+In /mnt/backup.sh line 20:
+compose exec -T db sh -eu -c 'exec pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --format=custom --compress=6 --no-owner --no-privileges' </dev/null > "$temporary"
+                             ^-- SC2016 (info): Expressions don't expand in single quotes, use double quotes for that.
+
+
+In /mnt/restore.sh line 13:
+exists="$(compose exec -T db sh -eu -c 'psql -X -U "$POSTGRES_USER" -d postgres -At -v ON_ERROR_STOP=1 -c "SELECT datname FROM pg_database"' </dev/null)"
+                                       ^-- SC2016 (info): Expressions don't expand in single quotes, use double quotes for that.
+
+
+In /mnt/restore.sh line 20:
+compose exec -T db sh -eu -c 'exec createdb -U "$POSTGRES_USER" -O "$RIICHI_DB_USER" "$1"' sh "$target"
+                             ^-- SC2016 (info): Expressions don't expand in single quotes, use double quotes for that.
+
+
+In /mnt/restore.sh line 21:
+if ! compose exec -T db sh -eu -c 'exec pg_restore -U "$POSTGRES_USER" --role="$RIICHI_DB_USER" --dbname="$1" --no-owner --no-privileges --exit-on-error --single-transaction' sh "$target" < "$archive"; then
+                                  ^-- SC2016 (info): Expressions don't expand in single quotes, use double quotes for that.
+
+
+In /mnt/nginx/start.sh line 8:
+envsubst '${SERVER_NAME} ${HSTS_SECONDS}' < /etc/nginx/riichi.conf.template > /tmp/riichi.conf
+         ^-- SC2016 (info): Expressions don't expand in single quotes, use double quotes for that.
+
+For more information:
+  https://www.shellcheck.net/wiki/SC2034 -- PROJECT_ROOT appears unused. Veri...
+  https://www.shellcheck.net/wiki/SC2016 -- Expressions don't expand in singl...

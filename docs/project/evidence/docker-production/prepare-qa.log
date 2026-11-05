@@ -1,0 +1,2 @@
+QA prepared: .verification/docker-qa-70dc16bc
+Set RIICHI_ENV_FILE to that directory's .env; ports 18080/18443 must be free.

@@ -34,6 +34,15 @@ htmlcov/
 *.sqlite3-wal
 *.sqlite-shm
 *.sqlite3-shm
+*.db
+*.dump
+credentials.json
+*.pem
+*.key
+*.p12
+*.pfx
+deploy/certs/
+deploy/backups/
 
 # Frontend generated output and test artifacts
 dist/

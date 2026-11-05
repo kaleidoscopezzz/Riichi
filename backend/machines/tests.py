@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from threading import Barrier
 
 from django.contrib.auth import get_user_model
-from django.db import IntegrityError, close_old_connections, transaction
+from django.db import DataError, IntegrityError, close_old_connections, connection, transaction
 from django.test import Client, TestCase, TransactionTestCase
 
 from .models import MahjongMachine
@@ -132,7 +132,10 @@ class MachineApiTests(TestCase):
 class MachineConstraintTests(TestCase):
     def test_invalid_rows_rejected_without_serializer(self):
         for values in [{"status": "unknown"}, {"machine_no": "1"}, {"machine_no": "ABC"}, {"machine_no": "100\n"}, {"name": "  "}]:
-            with self.subTest(values=values), self.assertRaises(IntegrityError), transaction.atomic():
+            # PostgreSQL enforces varchar(3) before CHECK evaluation; SQLite
+            # rejects the same overlong value through the digits-only CHECK.
+            expected = DataError if connection.vendor == "postgresql" and len(values.get("machine_no", "")) > 3 else IntegrityError
+            with self.subTest(values=values), self.assertRaises(expected), transaction.atomic():
                 MahjongMachine.objects.create(**({"name": "约束验证", "machine_no": "100", "capacity_slot": 1} | values))
 
     def test_unique_slots_and_active_numbers(self):

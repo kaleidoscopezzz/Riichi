@@ -1,0 +1,4 @@
+# Production-only additions; local Windows dependencies remain unchanged.
+-r requirements.txt
+gunicorn==26.2.0
+packaging==26.3

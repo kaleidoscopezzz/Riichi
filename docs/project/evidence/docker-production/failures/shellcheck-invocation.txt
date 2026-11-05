@@ -1,0 +1,3 @@
+Recorded tool output from the first ShellCheck invocation (host glob expanded before Docker):
+zsh:1: no matches found: /mnt/*.sh
+Corrected by passing explicit container paths. Final ShellCheck returned 0.

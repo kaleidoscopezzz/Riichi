@@ -1,0 +1,11 @@
+ Container riichi-docker-qa-70dc16bc-api-run-906c70eb3f04 Creating
+ Container riichi-docker-qa-70dc16bc-api-run-906c70eb3f04 Created
+Found 112 test(s).
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+................................................................................................................
+----------------------------------------------------------------------
+Ran 112 tests in 18.144s
+
+OK
+Destroying test database for alias 'default'...

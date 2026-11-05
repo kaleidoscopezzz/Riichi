@@ -1,0 +1,7 @@
+3.13.18 (main, Oct 28 2026, 02:25:58) [GCC 12.2.0]
+aarch64
+{'Django': '5.2.18', 'djangorestframework': '3.18.3', 'psycopg': '3.3.6', 'gunicorn': '26.2.0', 'packaging': '26.3'}
+No broken requirements found.
+v22.23.4
+Docker client=29.8.2; engine=29.8.2; server=linux/arm64
+Docker Compose version v5.5.1

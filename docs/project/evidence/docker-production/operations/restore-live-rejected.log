@@ -1,0 +1,2 @@
+目标 Compose 数据库：riichi_qa；应用角色：riichi
+拒绝目标。必须为新的 riichi_qa_restore_... 验证库，禁止覆盖当前库。

@@ -1,0 +1,63 @@
+{
+  "result": "PASS",
+  "checks": {
+    "manifest-before": "PASS",
+    "status-arbitrary-cwd": "PASS",
+    "migrate-eof": "EXPECTED_REJECTION",
+    "migrate-wrong-confirmation": "EXPECTED_REJECTION",
+    "backup-unwritable": "EXPECTED_REJECTION",
+    "backup-concurrent-1": "PASS",
+    "backup-concurrent-0": "PASS",
+    "restore-live-rejected": "EXPECTED_REJECTION",
+    "restore-unsafe-name": "EXPECTED_REJECTION",
+    "restore-eof": "EXPECTED_REJECTION",
+    "restore-wrong-confirmation": "EXPECTED_REJECTION",
+    "restore-corrupt": "EXPECTED_REJECTION",
+    "restore-success": "PASS",
+    "restore-existing-rejected": "EXPECTED_REJECTION",
+    "manifest-restored": "PASS",
+    "restart": "PASS",
+    "wait-after-restart": "PASS",
+    "manifest-restarted": "PASS",
+    "recreate": "PASS",
+    "manifest-recreated": "PASS",
+    "db-stop-for-failure": "PASS",
+    "backup-db-unavailable": "EXPECTED_REJECTION",
+    "db-restart": "PASS",
+    "manifest-after-failure": "PASS",
+    "id-api": "PASS",
+    "id-nginx": "PASS",
+    "id-db": "PASS",
+    "app-role": "PASS"
+  },
+  "canonical_counts_hashes_fk_integrity": "equal before/restore/restart/recreate/failure",
+  "concurrent_backups": 2,
+  "services": {
+    "api": {
+      "published_ports": [],
+      "networks": [
+        "riichi-docker-qa-70dc16bc_data",
+        "riichi-docker-qa-70dc16bc_web"
+      ],
+      "user": "10001:10001"
+    },
+    "nginx": {
+      "published_ports": [
+        "8080/tcp",
+        "8443/tcp"
+      ],
+      "networks": [
+        "riichi-docker-qa-70dc16bc_edge",
+        "riichi-docker-qa-70dc16bc_web"
+      ],
+      "user": "101:101"
+    },
+    "db": {
+      "published_ports": [],
+      "networks": [
+        "riichi-docker-qa-70dc16bc_data"
+      ],
+      "user": ""
+    }
+  }
+}

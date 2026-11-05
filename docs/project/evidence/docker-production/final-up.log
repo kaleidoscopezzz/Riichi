@@ -1,0 +1,28 @@
+启动服务；不会执行数据库迁移或初始化管理员。
+ Container riichi-docker-qa-70dc16bc-db-1 Running
+ Network riichi-docker-qa-70dc16bc_edge Creating
+ Network riichi-docker-qa-70dc16bc_edge Creating
+ Container riichi-docker-qa-70dc16bc-api-1 Creating
+ Network riichi-docker-qa-70dc16bc_edge Created
+ Network riichi-docker-qa-70dc16bc_edge Created
+ Container riichi-docker-qa-70dc16bc-api-1 Created
+ Container riichi-docker-qa-70dc16bc-nginx-1 Creating
+ Container riichi-docker-qa-70dc16bc-nginx-1 Created
+ Container riichi-docker-qa-70dc16bc-db-1 Waiting
+ Container riichi-docker-qa-70dc16bc-db-1 Healthy
+ Container riichi-docker-qa-70dc16bc-api-1 Starting
+ Container riichi-docker-qa-70dc16bc-api-1 Started
+ Container riichi-docker-qa-70dc16bc-api-1 Waiting
+ Container riichi-docker-qa-70dc16bc-api-1 Healthy
+ Container riichi-docker-qa-70dc16bc-nginx-1 Starting
+ Container riichi-docker-qa-70dc16bc-nginx-1 Started
+ Container riichi-docker-qa-70dc16bc-nginx-1 Waiting
+ Container riichi-docker-qa-70dc16bc-db-1 Waiting
+ Container riichi-docker-qa-70dc16bc-api-1 Waiting
+ Container riichi-docker-qa-70dc16bc-api-1 Healthy
+ Container riichi-docker-qa-70dc16bc-db-1 Healthy
+ Container riichi-docker-qa-70dc16bc-nginx-1 Healthy
+NAME                                IMAGE                                                                                             COMMAND                  SERVICE   CREATED          STATUS                    PORTS
+riichi-docker-qa-70dc16bc-api-1     riichi-api:docker-qa-70dc16bc                                                                     "gunicorn config.wsg…"   api       12 seconds ago   Up 12 seconds (healthy)   8000/tcp
+riichi-docker-qa-70dc16bc-db-1      postgres:17.11-bookworm@sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5   "docker-entrypoint.s…"   db        30 seconds ago   Up 30 seconds (healthy)   5432/tcp
+riichi-docker-qa-70dc16bc-nginx-1   riichi-nginx:docker-qa-70dc16bc                                                                   "/usr/local/bin/riic…"   nginx     12 seconds ago   Up 5 seconds (healthy)    127.0.0.1:18080->8080/tcp, 127.0.0.1:18443->8443/tcp

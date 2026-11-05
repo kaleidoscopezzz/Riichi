@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "${REPO}/deploy/tests/verify_operations.py", line 111, in <module>
+    main()
+    ~~~~^^
+  File "${REPO}/deploy/tests/verify_operations.py", line 67, in main
+    invoke("restore-eof", base_restore + [target], expected=1)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${REPO}/deploy/tests/verify_operations.py", line 35, in invoke
+    result = subprocess.run(command, input=input, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env or environment, cwd=cwd or root, timeout=240)
+  File "${HOST_TOOLS}/Cellar/python@3.13/3.13.12_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 556, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOST_TOOLS}/Cellar/python@3.13/3.13.12_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 1222, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${HOST_TOOLS}/Cellar/python@3.13/3.13.12_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 2199, in _communicate
+    stderr = self._translate_newlines(stderr,
+                                      self.stderr.encoding,
+                                      self.stderr.errors)
+  File "${HOST_TOOLS}/Cellar/python@3.13/3.13.12_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/subprocess.py", line 1099, in _translate_newlines
+    data = data.decode(encoding, errors)
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xef in position 63: invalid continuation byte

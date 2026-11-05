@@ -1,0 +1,4 @@
+NAME                                IMAGE                                                                                             COMMAND                  SERVICE   CREATED         STATUS                   PORTS
+riichi-docker-qa-20261105-api-1     sha256:4483ce1da8f446f129538dfbf53e8fd6fcdec3044fa894cb841a083ed514b72d                           "gunicorn config.wsg…"   api       4 minutes ago   Up 4 minutes (healthy)   8000/tcp
+riichi-docker-qa-20261105-db-1      postgres:17.11-bookworm@sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5   "docker-entrypoint.s…"   db        9 minutes ago   Up 9 minutes (healthy)   5432/tcp
+riichi-docker-qa-20261105-nginx-1   riichi-nginx:docker-qa-20261105                                                                   "/usr/local/bin/riic…"   nginx     4 minutes ago   Up 3 minutes (healthy)   127.0.0.1:18080->8080/tcp, 127.0.0.1:18443->8443/tcp
