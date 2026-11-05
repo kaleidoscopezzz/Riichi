@@ -1,0 +1,5 @@
+环境检查通过：Python 3.13.18；Node / npm 符合 package.json。
+现有依赖满足锁定版本，跳过安装。
+启动失败：配置/数据库检查失败（OperationalError）：请检查本地配置、依赖及数据库连接。
+
+exit=1; seconds=8.47

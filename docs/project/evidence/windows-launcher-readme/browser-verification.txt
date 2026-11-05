@@ -1,0 +1,4 @@
+PASS: start.bat invoked default Chrome and opened http://127.0.0.1:5173/login, title 管理员登录 · Riichi. Existing input values were not read, changed or submitted.
+PASS: original SVG banner, local stack badges, two real product screenshots loaded in a local static preview on light and dark page backgrounds. Header HTML copied from README; this is a material/header preview, not a claim of full GitHub Markdown rendering.
+UNVERIFIED: remote GitHub rendering before Owner commit/push.
+Final dark preview: brand-dark-final.png. Earlier brand-dark.png captured an incomplete SVG paint frame; raw image retained. Reopened preview, checked computed image styles/loading, and visually confirmed banner text, logo, wind tiles and badges on dark background.

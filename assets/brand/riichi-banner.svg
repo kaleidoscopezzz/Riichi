@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="340" viewBox="0 0 1280 340" role="img" aria-labelledby="title desc">
+  <title id="title">Riichi — 从容开赛，专注每场对局</title>
+  <desc id="desc">深海军蓝与金色的原创 Riichi 标识，配以东南西北四张风牌。面向雀庄的个人赛事管理系统。</desc>
+  <rect width="1280" height="340" rx="20" fill="#10151e"/>
+  <rect x="1" y="1" width="1278" height="338" rx="19" fill="none" stroke="#2c3441"/>
+  <g transform="translate(68 68)">
+    <rect width="72" height="88" rx="13" fill="none" stroke="#ceb782" stroke-width="1.5"/>
+    <rect x="7" y="7" width="58" height="74" rx="9" fill="none" stroke="#ceb782" opacity=".2"/>
+    <text x="36" y="63" fill="#ceb782" font-family="Georgia,serif" font-size="58" text-anchor="middle">R</text>
+  </g>
+  <text x="164" y="131" fill="#f0f1f4" font-family="Georgia,serif" font-size="78" letter-spacing="-2">Riichi</text>
+  <text x="168" y="158" fill="#99a3b2" font-family="Arial,sans-serif" font-size="12" letter-spacing="4">TOURNAMENT WORKSPACE</text>
+  <text x="68" y="230" fill="#e5e8ed" font-family="sans-serif" font-size="29" letter-spacing="3">从容开赛，专注每场对局。</text>
+  <text x="69" y="273" fill="#99a3b2" font-family="sans-serif" font-size="16" letter-spacing="2">四人立直麻将 · 雀庄个人赛事管理</text>
+  <path d="M838 69v205" stroke="#2c3441"/>
+  <g fill="#161d29" stroke="#46505f" stroke-width="1.2">
+    <rect x="893" y="105" width="58" height="86" rx="9"/>
+    <rect x="962" y="105" width="58" height="86" rx="9"/>
+    <rect x="1031" y="105" width="58" height="86" rx="9"/>
+    <rect x="1100" y="105" width="58" height="86" rx="9"/>
+  </g>
+  <g fill="#ceb782" font-family="serif" font-size="28" text-anchor="middle">
+    <text x="922" y="160">東</text><text x="991" y="160">南</text>
+    <text x="1060" y="160">西</text><text x="1129" y="160">北</text>
+  </g>
+  <text x="1026" y="236" fill="#99a3b2" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" letter-spacing="3">FOUR SEATS. ONE CHAMPION.</text>
+</svg>

@@ -1,6 +1,7 @@
 # Project-local runtimes and dependency caches
 .tools/
 .cache/
+.runtime/
 .venv/
 venv/
 .python/

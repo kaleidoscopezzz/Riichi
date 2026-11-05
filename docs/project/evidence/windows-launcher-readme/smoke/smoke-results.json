@@ -1,0 +1,116 @@
+[
+  {
+    "case": "daily-start",
+    "exit": 0,
+    "seconds": 7.82,
+    "result": "PASS"
+  },
+  {
+    "case": "repeat-start",
+    "exit": 0,
+    "seconds": 0.73,
+    "result": "PASS"
+  },
+  {
+    "case": "normal-stop",
+    "exit": 0,
+    "seconds": 0.68,
+    "result": "PASS"
+  },
+  {
+    "case": "no-running-services",
+    "exit": 0,
+    "seconds": 0.44,
+    "result": "PASS"
+  },
+  {
+    "case": "exited-process",
+    "exit": 0,
+    "seconds": 0.53,
+    "result": "PASS"
+  },
+  {
+    "case": "port-8000-occupied",
+    "exit": 1,
+    "seconds": 0.5,
+    "result": "PASS"
+  },
+  {
+    "case": "port-5173-occupied",
+    "exit": 1,
+    "seconds": 0.49,
+    "result": "PASS"
+  },
+  {
+    "case": "missing-node",
+    "exit": 1,
+    "seconds": 0.51,
+    "result": "PASS"
+  },
+  {
+    "case": "missing-npm",
+    "exit": 1,
+    "seconds": 0.54,
+    "result": "PASS"
+  },
+  {
+    "case": "missing-python",
+    "exit": 1,
+    "seconds": 0.57,
+    "result": "PASS"
+  },
+  {
+    "case": "pending-migrations-no-consent",
+    "exit": 1,
+    "seconds": 2.96,
+    "result": "PASS"
+  },
+  {
+    "case": "pending-migrations-cancel",
+    "exit": 1,
+    "seconds": 2.9,
+    "result": "PASS"
+  },
+  {
+    "case": "pending-migrations-confirm",
+    "exit": 0,
+    "seconds": 9.4,
+    "result": "PASS"
+  },
+  {
+    "case": "migration-case-stop",
+    "exit": 0,
+    "seconds": 0.96,
+    "result": "PASS"
+  },
+  {
+    "case": "database-unavailable",
+    "exit": 1,
+    "seconds": 132.96,
+    "result": "PASS"
+  },
+  {
+    "case": "backend-exits",
+    "exit": 1,
+    "seconds": 5.89,
+    "result": "PASS"
+  },
+  {
+    "case": "frontend-exits",
+    "exit": 1,
+    "seconds": 8.07,
+    "result": "PASS"
+  },
+  {
+    "case": "pid-reuse-refused",
+    "exit": 1,
+    "seconds": 0.49,
+    "result": "PASS"
+  },
+  {
+    "case": "unrelated-command-refused",
+    "exit": 1,
+    "seconds": 0.69,
+    "result": "PASS"
+  }
+]

@@ -1,0 +1,55 @@
+{
+  "head": "c9d7bb87d4c8badb33513a38a147c9a24807c924",
+  "branch": "feature/windows-launcher-readme",
+  "local_main": "c9d7bb87d4c8badb33513a38a147c9a24807c924",
+  "remote_main": "c9d7bb87d4c8badb33513a38a147c9a24807c924",
+  "modified": 5,
+  "added": 96,
+  "total": 101,
+  "staged": [],
+  "deleted": [],
+  "backend_frontend_historical_evidence_changes": [],
+  "owner_db_sha256": "C4738A1EADA032C19A2F9E33F2DCB555A961F1457321B5BD2EBCCD92FFA3A2C9",
+  "owner_db_unchanged": true,
+  "readme_absolute_path_hits": [],
+  "readme_external_images": [],
+  "broken_local_links": [],
+  "known_secret_literal_hits": [],
+  "private_key_token_pattern_hits": [],
+  "ignore_checks": {
+    ".runtime/launcher/state.json": true,
+    ".runtime/launcher/anything/backend.log": true,
+    ".cache/launcher/tmp.dll": true,
+    ".cache/npm/logs/test": true,
+    ".verification/launcher/中文 路径/Riichi/backend/.env": true,
+    "backend/.env": true,
+    "backend/db.sqlite3": true,
+    "backend/db.sqlite3-journal": true,
+    "backend/.venv/Scripts/python.exe": true,
+    "frontend/node_modules/.package-lock.json": true,
+    "frontend/dist/index.html": true
+  },
+  "encoding_checks": {
+    "scripts/common.ps1": true,
+    "scripts/run.ps1": true,
+    "scripts/start.ps1": true,
+    "scripts/stop.ps1": true,
+    "start.bat": true,
+    "stop.bat": true
+  },
+  "valid_svg": [
+    "assets/brand/riichi-banner.svg",
+    "assets/brand/stack.svg"
+  ],
+  "screenshot_provenance": {
+    "assets/screenshots/workspace-dark.png": "docs/project/evidence/UAT-FIX-01/select/tournament-filter-1440-dark-position-final.png",
+    "assets/screenshots/tournaments-light.png": "docs/project/evidence/UAT-FIX-01/select/final-tournaments-1440-light.png"
+  },
+  "diff_check_exit": 0,
+  "git_writes_performed": false,
+  "limits": [
+    "Exact-known-secret and heuristic scan, not proof against every unknown credential.",
+    "Remote GitHub rendering, Owner DB migration/admin, successful PostgreSQL connection, other OS/user profiles unverified."
+  ],
+  "result": "PASS"
+}

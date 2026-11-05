@@ -1,0 +1,7 @@
+环境检查通过：Python 3.13.18；Node / npm 符合 package.json。
+现有依赖满足锁定版本，跳过安装。
+目标数据库：default / sqlite3 / backend/launcher-unmigrated-493cad380e574d55896e385e31a26737.sqlite3
+待执行迁移：首次初始化（现有迁移）
+请先确认目标数据库及备份。只有明确同意才执行已有迁移；不会清库、重建或伪造状态。
+CANCEL
+启动失败：用户取消，未继续执行。

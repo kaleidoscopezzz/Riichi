@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="650" height="34" viewBox="0 0 650 34" role="img" aria-label="Python 3.13, Django 5.2 LTS, React 19, TypeScript 5.9">
+  <g fill="#161d29" stroke="#384253">
+    <rect x="1" y="1" width="140" height="32" rx="6"/>
+    <rect x="153" y="1" width="174" height="32" rx="6"/>
+    <rect x="339" y="1" width="131" height="32" rx="6"/>
+    <rect x="482" y="1" width="167" height="32" rx="6"/>
+  </g>
+  <g font-family="Arial,sans-serif" font-size="12" text-anchor="middle">
+    <text x="71" y="21" fill="#e7eaf0">Python <tspan fill="#ceb782">3.13</tspan></text>
+    <text x="240" y="21" fill="#e7eaf0">Django <tspan fill="#ceb782">5.2 LTS</tspan></text>
+    <text x="405" y="21" fill="#e7eaf0">React <tspan fill="#ceb782">19</tspan></text>
+    <text x="565" y="21" fill="#e7eaf0">TypeScript <tspan fill="#ceb782">5.9</tspan></text>
+  </g>
+</svg>

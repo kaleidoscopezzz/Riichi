@@ -4,7 +4,7 @@
 
 Riichi定位为**轻量级四人立直麻将个人赛事管理系统**，帮助管理员快速组织比赛、录入成绩、重排座次并决出冠军；设备调度不是产品主线。需求以[requirements](docs/requirements.md)为总览，F0-06详细规则以[统一功能规范](docs/F0-06-functional-spec.md)为准，技术与兼容设计见[architecture](docs/architecture.md)。
 
-当前任务 **UAT-FIX-01：Owner人工验收整改**。起点main/HEAD `b9e83bb0c8e31ab660b37e7e0a46c1f0bb424e65`，F0-06已通过Planner源码/测试证据审查，Owner人工验收整改中，暂不建立baseline/F0-06。只处理列表对齐、老板维护选手、UI操作规范与安全admin初始化，不重新开发赛事核心，不新增F0-07/F0-08。
+当前任务 **README品牌化与Windows一键启动**，只改善仓库呈现、本地环境准备和受控进程启停，不修改赛事/计分规则、API或数据库模型。已核对UAT-FIX-01提交 `c9d7bb87d4c8badb33513a38a147c9a24807c924` 在远程main，本地main及Owner准备的 `feature/windows-launcher-readme` 均指向该提交，工作区起点干净。沿用该任务分支，不自行merge或建立新基线。
 
 F0-01～F0-05保持CLOSED / PASS，D0-01文档Commit `5f31891b4ae3a589057e7054758abb08ca42ec72`。F0-05正式代码基线解引用为`41929da1e53f8bb481beb4ea3bc31b65f9ee86ff`。所有历史迁移/报告/证据与Tag保留。Owner提交UAT候选、Planner独立复核、Owner再次人工验收通过后才能建立最终F0-06基线。
 
@@ -58,6 +58,14 @@ UAT交付继续回归F0-06完整4人1轮、8/12人多轮、16人6轮，覆盖负
 
 ## Git与停止限制
 
-- 保持main，UAT-FIX-01不执行git commit、tag、push，不改远端、历史或已有基线，不删除文件。
+- 当前任务保持Owner准备的feature/windows-launcher-readme分支，不执行git commit、tag、push或merge，不改远端、历史、既有基线与验收证据。
 - Owner负责Git提交/推送/Tag，Planner负责独立源码验收及双端核验。自检不替代外部验收。
 - UAT-FIX-01新报告须列四项整改、文件/API契约、模型/迁移兼容、计分/冠军、真实HTTP/UI闭环、自动化/文件SQLite并发/回滚、旧断言变更、失败证据、UNVERIFIED和Git状态；完成停止，等待Planner。
+
+## Windows启动器与README
+
+- README只放产品介绍、真实界面、简洁启动与文档入口，禁止本机绝对路径、账号密码、历史工作日志及虚构部署/许可证/CI/覆盖率。品牌与图片存仓库、相对引用。
+- 启动器逻辑在scripts，bat只作入口；根目录从脚本位置推导，兼容Windows PowerShell5.1、中文/空格路径，无管理员要求，无全局安装。PowerShell脚本UTF-8 BOM、bat CRLF。
+- 沿用环境及本地设置；缺少配置可经确认生成随机本地密钥，禁止覆盖已有.env或默认管理员密码。迁移前只读核对真实库与迁移图，必须明确确认后正常migrate；验证仅在隔离副本/QA库进行。
+- 仅管理启动器创建的进程树。使用Windows Job Object收束子进程，停止前校验目录/运行ID/命令行/PID/创建时间/可执行路径，并在同一内核句柄复验；严禁按python.exe/node.exe名称终止。端口占用与PID身份不符均拒绝抢占/误杀。状态、日志、临时文件与依赖缓存留在忽略目录。
+- 交付须保存真实Windows首次/重复/停止、中文空格、缺工具/端口/服务/迁移/DB故障及PID复用测试证据，保留失败记录；完整Django与前端回归、源码范围/密钥/忽略/diff检查。未实测的平台或部署标UNVERIFIED。

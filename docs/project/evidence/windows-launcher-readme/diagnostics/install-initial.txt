@@ -1,0 +1,52 @@
+环境检查通过：Python 3.13.18；Node / npm 符合 package.json。
+首次使用或依赖已变化：将在项目内准备虚拟环境与锁定依赖，可能需要联网。不会改数据库。
+PREPARE
+Collecting asgiref==3.13.0 (from -r D:\Riichi\.verification\launcher\中文 路径\Riichi\backend\requirements.txt (line 1))
+  Downloading asgiref-3.13.0-py3-none-any.whl.metadata (12 kB)
+Collecting Django==5.2.18 (from -r D:\Riichi\.verification\launcher\中文 路径\Riichi\backend\requirements.txt (line 2))
+  Downloading django-5.2.18-py3-none-any.whl.metadata (4.1 kB)
+Collecting django-cors-headers==4.9.0 (from -r D:\Riichi\.verification\launcher\中文 路径\Riichi\backend\requirements.txt (line 3))
+  Downloading django_cors_headers-4.9.0-py3-none-any.whl.metadata (16 kB)
+Collecting django-environ==0.14.0 (from -r D:\Riichi\.verification\launcher\中文 路径\Riichi\backend\requirements.txt (line 4))
+  Downloading django_environ-0.14.0-py3-none-any.whl.metadata (12 kB)
+Collecting djangorestframework==3.18.3 (from -r D:\Riichi\.verification\launcher\中文 路径\Riichi\backend\requirements.txt (line 5))
+  Downloading djangorestframework-3.18.3-py3-none-any.whl.metadata (7.8 kB)
+Collecting psycopg==3.3.6 (from -r D:\Riichi\.verification\launcher\中文 路径\Riichi\backend\requirements.txt (line 6))
+  Downloading psycopg-3.3.6-py3-none-any.whl.metadata (4.4 kB)
+Collecting psycopg-binary==3.3.6 (from -r D:\Riichi\.verification\launcher\中文 路径\Riichi\backend\requirements.txt (line 7))
+  Downloading psycopg_binary-3.3.6-cp313-cp313-win_amd64.whl.metadata (2.8 kB)
+Collecting sqlparse==0.6.1 (from -r D:\Riichi\.verification\launcher\中文 路径\Riichi\backend\requirements.txt (line 8))
+  Downloading sqlparse-0.6.1-py3-none-any.whl.metadata (6.9 kB)
+Collecting tzdata==2026.6 (from -r D:\Riichi\.verification\launcher\中文 路径\Riichi\backend\requirements.txt (line 9))
+  Downloading tzdata-2026.6-py2.py3-none-any.whl.metadata (1.4 kB)
+Downloading asgiref-3.13.0-py3-none-any.whl (27 kB)
+Downloading django-5.2.18-py3-none-any.whl (8.3 MB)
+   ---------------------------------------- 8.3/8.3 MB 874.9 kB/s  0:00:10
+Downloading django_cors_headers-4.9.0-py3-none-any.whl (12 kB)
+Downloading django_environ-0.14.0-py3-none-any.whl (20 kB)
+Downloading djangorestframework-3.18.3-py3-none-any.whl (903 kB)
+   ---------------------------------------- 904.0/904.0 kB 1.5 MB/s  0:00:00
+Downloading psycopg-3.3.6-py3-none-any.whl (215 kB)
+Downloading psycopg_binary-3.3.6-cp313-cp313-win_amd64.whl (3.7 MB)
+   ---------------------------------------- 3.7/3.7 MB 1.8 MB/s  0:00:01
+Downloading sqlparse-0.6.1-py3-none-any.whl (51 kB)
+Downloading tzdata-2026.6-py2.py3-none-any.whl (348 kB)
+Installing collected packages: tzdata, sqlparse, psycopg-binary, django-environ, asgiref, psycopg, Django, djangorestframework, django-cors-headers
+
+Successfully installed Django-5.2.18 asgiref-3.13.0 django-cors-headers-4.9.0 django-environ-0.14.0 djangorestframework-3.18.3 psycopg-3.3.6 psycopg-binary-3.3.6 sqlparse-0.6.1 tzdata-2026.6
+
+added 206 packages, and audited 213 packages in 12s
+
+33 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+启动失败：The term 'Get-FileHash' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+
+[notice] A new release of pip is available: 26.2.2 -> 26.3
+[notice] To update, run: D:\Riichi\.verification\launcher\中文 路径\Riichi\backend\.venv\Scripts\python.exe -m pip install --upgrade pip
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

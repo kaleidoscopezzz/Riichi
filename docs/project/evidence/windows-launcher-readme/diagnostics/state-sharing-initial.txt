@@ -1,0 +1,7 @@
+环境检查通过：Python 3.13.18；Node / npm 符合 package.json。
+现有依赖满足锁定版本，跳过安装。
+目标数据库：default / sqlite3 / backend/db.sqlite3
+尚无有效管理员。请另开终端进入 backend，交互运行：.\.venv\Scripts\python.exe manage.py init_admin（没有默认密码）。
+进程状态：starting
+进程状态：backend
+启动失败：The process cannot access the file 'D:\Riichi\.verification\launcher\中文 路径\Riichi\.runtime\launcher\state.json' because it is being used by another process.

@@ -1,0 +1,41 @@
+环境检查通过：Python 3.13.18；Node / npm 符合 package.json。
+现有依赖满足锁定版本，跳过安装。
+目标数据库：default / sqlite3 / backend/launcher-unmigrated-493cad380e574d55896e385e31a26737.sqlite3
+待执行迁移：首次初始化（现有迁移）
+请先确认目标数据库及备份。只有明确同意才执行已有迁移；不会清库、重建或伪造状态。
+MIGRATE
+Operations to perform:
+  Apply all migrations: accounts, auth, contenttypes, machines, players, sessions, tournaments
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying machines.0001_initial... OK
+  Applying machines.0002_mahjongmachine_machine_number_digits_only... OK
+  Applying machines.0003_remove_mahjongmachine_machine_active_capacity_slot... OK
+  Applying players.0001_initial... OK
+  Applying sessions.0001_initial... OK
+  Applying tournaments.0001_initial... OK
+  Applying tournaments.0002_tournamentround_roundtable_roundseat_and_more... OK
+  Applying tournaments.0003_lotteryrecord_tableresult_and_more... OK
+  Applying tournaments.0004_legacy_compatibility... OK
+尚无有效管理员。请另开终端进入 backend，交互运行：.\.venv\Scripts\python.exe manage.py init_admin（没有默认密码）。
+进程状态：starting
+进程状态：backend
+进程状态：frontend
+进程状态：ready
+后端 PID 13956：http://127.0.0.1:8000/api/v1/health/
+前端 PID 36376：http://127.0.0.1:5173
+Riichi 已就绪。关闭本窗口不停止服务；退出时双击 stop.bat。

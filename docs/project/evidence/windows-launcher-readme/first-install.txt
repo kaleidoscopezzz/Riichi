@@ -1,0 +1,92 @@
+环境检查通过：Python 3.13.18；Node / npm 符合 package.json。
+首次使用或依赖已变化：将在项目内准备虚拟环境与锁定依赖，可能需要联网。不会改数据库。
+PREPARE
+Collecting asgiref==3.13.0 (from -r D:\Riichi\.verification\launcher\首次 安装\Riichi\backend\requirements.txt (line 1))
+  Downloading asgiref-3.13.0-py3-none-any.whl.metadata (12 kB)
+Collecting Django==5.2.18 (from -r D:\Riichi\.verification\launcher\首次 安装\Riichi\backend\requirements.txt (line 2))
+  Downloading django-5.2.18-py3-none-any.whl.metadata (4.1 kB)
+Collecting django-cors-headers==4.9.0 (from -r D:\Riichi\.verification\launcher\首次 安装\Riichi\backend\requirements.txt (line 3))
+  Downloading django_cors_headers-4.9.0-py3-none-any.whl.metadata (16 kB)
+Collecting django-environ==0.14.0 (from -r D:\Riichi\.verification\launcher\首次 安装\Riichi\backend\requirements.txt (line 4))
+  Downloading django_environ-0.14.0-py3-none-any.whl.metadata (12 kB)
+Collecting djangorestframework==3.18.3 (from -r D:\Riichi\.verification\launcher\首次 安装\Riichi\backend\requirements.txt (line 5))
+  Downloading djangorestframework-3.18.3-py3-none-any.whl.metadata (7.8 kB)
+Collecting psycopg==3.3.6 (from -r D:\Riichi\.verification\launcher\首次 安装\Riichi\backend\requirements.txt (line 6))
+  Downloading psycopg-3.3.6-py3-none-any.whl.metadata (4.4 kB)
+Collecting psycopg-binary==3.3.6 (from -r D:\Riichi\.verification\launcher\首次 安装\Riichi\backend\requirements.txt (line 7))
+  Downloading psycopg_binary-3.3.6-cp313-cp313-win_amd64.whl.metadata (2.8 kB)
+Collecting sqlparse==0.6.1 (from -r D:\Riichi\.verification\launcher\首次 安装\Riichi\backend\requirements.txt (line 8))
+  Downloading sqlparse-0.6.1-py3-none-any.whl.metadata (6.9 kB)
+Collecting tzdata==2026.6 (from -r D:\Riichi\.verification\launcher\首次 安装\Riichi\backend\requirements.txt (line 9))
+  Downloading tzdata-2026.6-py2.py3-none-any.whl.metadata (1.4 kB)
+Downloading asgiref-3.13.0-py3-none-any.whl (27 kB)
+Downloading django-5.2.18-py3-none-any.whl (8.3 MB)
+   ---------------------------------------- 8.3/8.3 MB 720.8 kB/s  0:00:13
+Downloading django_cors_headers-4.9.0-py3-none-any.whl (12 kB)
+Downloading django_environ-0.14.0-py3-none-any.whl (20 kB)
+Downloading djangorestframework-3.18.3-py3-none-any.whl (903 kB)
+   ---------------------------------------- 904.0/904.0 kB 1.5 MB/s  0:00:01
+Downloading psycopg-3.3.6-py3-none-any.whl (215 kB)
+Downloading psycopg_binary-3.3.6-cp313-cp313-win_amd64.whl (3.7 MB)
+   ---------------------------------------- 3.7/3.7 MB 1.1 MB/s  0:00:03
+Downloading sqlparse-0.6.1-py3-none-any.whl (51 kB)
+Downloading tzdata-2026.6-py2.py3-none-any.whl (348 kB)
+Installing collected packages: tzdata, sqlparse, psycopg-binary, django-environ, asgiref, psycopg, Django, djangorestframework, django-cors-headers
+
+Successfully installed Django-5.2.18 asgiref-3.13.0 django-cors-headers-4.9.0 django-environ-0.14.0 djangorestframework-3.18.3 psycopg-3.3.6 psycopg-binary-3.3.6 sqlparse-0.6.1 tzdata-2026.6
+
+added 206 packages, and audited 213 packages in 23s
+
+33 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+没有本地配置。将从 .env.example 创建仅本地使用的 .env，并生成随机密钥（不显示、不覆盖已有文件）。
+CONFIGURE
+目标数据库：default / sqlite3 / backend/db.sqlite3
+待执行迁移：首次初始化（现有迁移）
+请先确认目标数据库及备份。只有明确同意才执行已有迁移；不会清库、重建或伪造状态。
+MIGRATE
+Operations to perform:
+  Apply all migrations: accounts, auth, contenttypes, machines, players, sessions, tournaments
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying machines.0001_initial... OK
+  Applying machines.0002_mahjongmachine_machine_number_digits_only... OK
+  Applying machines.0003_remove_mahjongmachine_machine_active_capacity_slot... OK
+  Applying players.0001_initial... OK
+  Applying sessions.0001_initial... OK
+  Applying tournaments.0001_initial... OK
+  Applying tournaments.0002_tournamentround_roundtable_roundseat_and_more... OK
+  Applying tournaments.0003_lotteryrecord_tableresult_and_more... OK
+  Applying tournaments.0004_legacy_compatibility... OK
+尚无有效管理员。请另开终端进入 backend，交互运行：.\.venv\Scripts\python.exe manage.py init_admin（没有默认密码）。
+进程状态：starting
+进程状态：backend
+进程状态：frontend
+进程状态：ready
+后端 PID 22792：http://127.0.0.1:8000/api/v1/health/
+前端 PID 17368：http://127.0.0.1:5173
+Riichi 已就绪。关闭本窗口不停止服务；退出时双击 stop.bat。
+
+[notice] A new release of pip is available: 26.2.2 -> 26.3
+[notice] To update, run: D:\Riichi\.verification\launcher\首次 安装\Riichi\backend\.venv\Scripts\python.exe -m pip install --upgrade pip
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.2.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
+npm notice To update run: npm install -g npm@12.2.1
+npm notice

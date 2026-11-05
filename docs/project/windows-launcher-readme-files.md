@@ -1,0 +1,111 @@
+# README 与 Windows 启动器变更清单
+
+合计 101 个文件：修改 5，新增 96。M=修改，A=新增；全部未暂存。
+
+## 实现、文档与素材
+
+- M `.editorconfig`
+- M `.gitattributes`
+- M `.gitignore`
+- M `AGENTS.md`
+- M `README.md`
+- A `assets/brand/riichi-banner.svg`
+- A `assets/brand/stack.svg`
+- A `assets/screenshots/tournaments-light.png`
+- A `assets/screenshots/workspace-dark.png`
+- A `docs/local-development.md`
+- A `docs/project/windows-launcher-readme-files.md`
+- A `docs/project/windows-launcher-readme-verification.md`
+- A `scripts/LauncherProcess.cs`
+- A `scripts/check_frontend.cjs`
+- A `scripts/common.ps1`
+- A `scripts/launcher_probe.py`
+- A `scripts/run.ps1`
+- A `scripts/start.ps1`
+- A `scripts/stop.ps1`
+- A `scripts/tests/verify_launcher.py`
+- A `start.bat`
+- A `stop.bat`
+
+## 本轮原始验证证据
+
+- A `docs/project/evidence/windows-launcher-readme/audit.json`
+- A `docs/project/evidence/windows-launcher-readme/auto-browser.json`
+- A `docs/project/evidence/windows-launcher-readme/backend-check.txt`
+- A `docs/project/evidence/windows-launcher-readme/backend-tests.txt`
+- A `docs/project/evidence/windows-launcher-readme/batch-start-browser.txt`
+- A `docs/project/evidence/windows-launcher-readme/batch-stop.txt`
+- A `docs/project/evidence/windows-launcher-readme/brand-dark-final.png`
+- A `docs/project/evidence/windows-launcher-readme/brand-dark.png`
+- A `docs/project/evidence/windows-launcher-readme/brand-light.png`
+- A `docs/project/evidence/windows-launcher-readme/browser-verification.txt`
+- A `docs/project/evidence/windows-launcher-readme/build.txt`
+- A `docs/project/evidence/windows-launcher-readme/database-timeout-final.txt`
+- A `docs/project/evidence/windows-launcher-readme/diagnostics/exit-cleanup-race.txt`
+- A `docs/project/evidence/windows-launcher-readme/diagnostics/install-initial.txt`
+- A `docs/project/evidence/windows-launcher-readme/diagnostics/state-sharing-initial.txt`
+- A `docs/project/evidence/windows-launcher-readme/diff-check.txt`
+- A `docs/project/evidence/windows-launcher-readme/first-install.txt`
+- A `docs/project/evidence/windows-launcher-readme/git-status.txt`
+- A `docs/project/evidence/windows-launcher-readme/local-api-base.txt`
+- A `docs/project/evidence/windows-launcher-readme/migrations-check.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/backend-exits.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/daily-start.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/database-unavailable.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/exited-process.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/frontend-exits.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/migration-case-stop.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/missing-node.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/missing-npm.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/missing-python.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/no-running-services.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/normal-stop.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/pending-migrations-cancel.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/pending-migrations-confirm.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/pending-migrations-no-consent.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/pid-reuse-refused.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/port-5173-occupied.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/port-8000-occupied.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/repeat-start.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/smoke-results.json`
+- A `docs/project/evidence/windows-launcher-readme/smoke-complete/unrelated-command-refused.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/backend-exits.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/daily-start.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/database-unavailable.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/exited-process.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/frontend-exits.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/migration-case-stop.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/missing-node.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/missing-npm.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/missing-python.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/no-running-services.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/normal-stop.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/pending-migrations-cancel.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/pending-migrations-confirm.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/pending-migrations-no-consent.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/port-5173-occupied.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/port-8000-occupied.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke-final/repeat-start.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/backend-exits.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/daily-start.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/database-unavailable.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/exited-process.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/frontend-exits.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/migration-case-stop.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/missing-node.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/missing-npm.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/missing-python.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/no-running-services.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/normal-stop.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/pending-migrations-cancel.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/pending-migrations-confirm.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/pending-migrations-no-consent.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/pid-reuse-refused.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/port-5173-occupied.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/port-8000-occupied.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/repeat-start.txt`
+- A `docs/project/evidence/windows-launcher-readme/smoke/smoke-results.json`
+- A `docs/project/evidence/windows-launcher-readme/smoke/unrelated-command-refused.txt`
+- A `docs/project/evidence/windows-launcher-readme/typecheck.txt`
+- A `docs/project/evidence/windows-launcher-readme/vitest.txt`
+
