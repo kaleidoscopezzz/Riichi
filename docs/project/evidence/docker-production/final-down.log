@@ -1,0 +1,7 @@
+停止当前 Compose 服务，保留容器和数据卷。
+ Container riichi-docker-qa-70dc16bc-nginx-1 Stopping
+ Container riichi-docker-qa-70dc16bc-nginx-1 Stopped
+ Container riichi-docker-qa-70dc16bc-api-1 Stopping
+ Container riichi-docker-qa-70dc16bc-api-1 Stopped
+ Container riichi-docker-qa-70dc16bc-db-1 Stopping
+ Container riichi-docker-qa-70dc16bc-db-1 Stopped

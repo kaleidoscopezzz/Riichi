@@ -1,0 +1,2 @@
+目标 Compose 数据库：riichi_qa；应用角色：riichi
+2026-11-05T08:18:15Z 备份 SUCCESS；bytes=98840；${REPO}/.verification/docker-production/backups/riichi_qa_20261105T081815Z_.backup.c5gIDC.dump

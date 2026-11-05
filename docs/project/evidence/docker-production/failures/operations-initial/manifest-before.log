@@ -1,0 +1,106 @@
+{
+  "foreign_key_orphans": {
+    "auth.permission.content_type": 0,
+    "players.playerprofile.user": 0,
+    "tournaments.lotteryrecord.confirmed_by": 0,
+    "tournaments.lotteryrecord.created_by": 0,
+    "tournaments.lotteryrecord.tournament": 0,
+    "tournaments.machineallocation.allocated_by": 0,
+    "tournaments.machineallocation.machine": 0,
+    "tournaments.machineallocation.released_by": 0,
+    "tournaments.machineallocation.table": 0,
+    "tournaments.roundseat.participant": 0,
+    "tournaments.roundseat.round": 0,
+    "tournaments.roundseat.table": 0,
+    "tournaments.roundtable.round": 0,
+    "tournaments.roundtable.tournament_table": 0,
+    "tournaments.tableresult.confirmed_by": 0,
+    "tournaments.tableresult.edited_by": 0,
+    "tournaments.tableresult.table": 0,
+    "tournaments.tournament.champion": 0,
+    "tournaments.tournament.completed_by": 0,
+    "tournaments.tournament.created_by": 0,
+    "tournaments.tournamentmachinereservation.created_by": 0,
+    "tournaments.tournamentmachinereservation.legacy_allocation": 0,
+    "tournaments.tournamentmachinereservation.machine": 0,
+    "tournaments.tournamentmachinereservation.released_by": 0,
+    "tournaments.tournamentmachinereservation.table": 0,
+    "tournaments.tournamentparticipant.player": 0,
+    "tournaments.tournamentparticipant.tournament": 0,
+    "tournaments.tournamentround.generated_by": 0,
+    "tournaments.tournamentround.tournament": 0,
+    "tournaments.tournamenttable.tournament": 0
+  },
+  "models": {
+    "accounts.user": {
+      "count": 18,
+      "sha256": "83d90015a7bf311ae040fac418a120076abcafbae8abdbfb15d230f193177f4f"
+    },
+    "auth.group": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "auth.permission": {
+      "count": 68,
+      "sha256": "9757ba1f36e472def9bb4614a29280ea07d3b6b312a824ebb7092fda4a493109"
+    },
+    "contenttypes.contenttype": {
+      "count": 17,
+      "sha256": "f87e0ec04d6de84481379a6999300a8241233d092cd8e20fcb50258381dfcd63"
+    },
+    "machines.mahjongmachine": {
+      "count": 4,
+      "sha256": "2971add0a3b0fbe80d14b04cca1f318ef020143410e9dc15a66c6a0fdb345f9a"
+    },
+    "players.playerprofile": {
+      "count": 18,
+      "sha256": "fe3fc205befdb2976eea0c974c52dce1ce6da7e3a8e96d6de3d38b21f9c08ca0"
+    },
+    "sessions.session": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "tournaments.lotteryrecord": {
+      "count": 7,
+      "sha256": "9f7d66a5a80f47a7d52f6fb133ffe8df68ea31024e106f89e1f25e92086deaab"
+    },
+    "tournaments.machineallocation": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "tournaments.roundseat": {
+      "count": 148,
+      "sha256": "cc866ed9236f92d03c328539010e4a23c5756ef262ec8a205868b8e58ecaac7b"
+    },
+    "tournaments.roundtable": {
+      "count": 37,
+      "sha256": "0c9e36aeb5af148c155b0bf623a63cd4307467557bb563964780b0b11d9dacca"
+    },
+    "tournaments.tableresult": {
+      "count": 37,
+      "sha256": "e89fafa79e1c0afffadaf368cacc895156f0e51287a78f3231c86a8f834caa5d"
+    },
+    "tournaments.tournament": {
+      "count": 4,
+      "sha256": "7f9b59b15fbab37466ae082180bd881be9338a01eb77bac304e5671c3afa66d6"
+    },
+    "tournaments.tournamentmachinereservation": {
+      "count": 10,
+      "sha256": "2c6a19d99ce02fd00a10da9f10e4dab785564bdf08b041100a81ff54b59ea2e5"
+    },
+    "tournaments.tournamentparticipant": {
+      "count": 40,
+      "sha256": "7b72fc2bef3d9653536d99f4d5447526554accc16aa91fab98935a66347b68d0"
+    },
+    "tournaments.tournamentround": {
+      "count": 12,
+      "sha256": "2388520791f45a86147c6c1306b5da479e05d52f7a08b17cd9a0ccc4315b1fe7"
+    },
+    "tournaments.tournamenttable": {
+      "count": 10,
+      "sha256": "45b034e028193a61a4c108f149d2798bfcecdb46d6a649efb4c137fdb39dc1e8"
+    }
+  }
+}
+ Container riichi-docker-qa-20261105-api-run-71d7048e7367 Creating
+ Container riichi-docker-qa-20261105-api-run-71d7048e7367 Created

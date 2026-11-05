@@ -1,0 +1,7 @@
+# For `compose run --rm ... manage.py test` ONLY, on a fresh QA project.
+# Do not apply with `up`: it supplies the bootstrap role's CREATEDB privilege.
+services:
+  api:
+    environment:
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER:-riichi_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?Set QA bootstrap password}

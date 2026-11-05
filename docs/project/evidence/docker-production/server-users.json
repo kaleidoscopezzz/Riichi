@@ -1,0 +1,14 @@
+{
+  "result": "PASS",
+  "services": {
+    "api": {
+      "pid1_uid": "10001"
+    },
+    "nginx": {
+      "pid1_uid": "101"
+    },
+    "db": {
+      "pid1_uid": "999"
+    }
+  }
+}

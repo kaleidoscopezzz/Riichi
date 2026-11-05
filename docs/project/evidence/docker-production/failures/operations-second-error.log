@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "${REPO}/deploy/tests/verify_operations.py", line 111, in <module>
+    main()
+    ~~~~^^
+  File "${REPO}/deploy/tests/verify_operations.py", line 72, in main
+    invoke("restore-success", base_restore + [target], input=f"RESTORE {target}\n")
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "${REPO}/deploy/tests/verify_operations.py", line 37, in invoke
+    assert result.returncode == expected, (label, result.returncode, result.stderr[-500:])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('restore-success', 1, '${REPO}/deploy/restore.sh: line 19: target�: unbound variable\n')

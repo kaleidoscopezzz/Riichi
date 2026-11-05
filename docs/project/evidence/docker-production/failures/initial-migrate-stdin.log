@@ -1,0 +1,152 @@
+ Container riichi-docker-qa-20261105-db-1 Running
+ Container riichi-docker-qa-20261105-db-1 Waiting
+ Container riichi-docker-qa-20261105-db-1 Healthy
+目标 Compose 数据库：riichi_qa；应用角色：riichi
+ Container riichi-docker-qa-20261105-api-run-571f47cc45da Creating
+ Container riichi-docker-qa-20261105-api-run-571f47cc45da Created
+accounts
+ [ ] 0001_initial
+auth
+ [ ] 0001_initial
+ [ ] 0002_alter_permission_name_max_length
+ [ ] 0003_alter_user_email_max_length
+ [ ] 0004_alter_user_username_opts
+ [ ] 0005_alter_user_last_login_null
+ [ ] 0006_require_contenttypes_0002
+ [ ] 0007_alter_validators_add_error_messages
+ [ ] 0008_alter_user_username_max_length
+ [ ] 0009_alter_user_last_name_max_length
+ [ ] 0010_alter_group_name_max_length
+ [ ] 0011_update_proxy_permissions
+ [ ] 0012_alter_user_first_name_max_length
+contenttypes
+ [ ] 0001_initial
+ [ ] 0002_remove_content_type_name
+machines
+ [ ] 0001_initial
+ [ ] 0002_mahjongmachine_machine_number_digits_only
+ [ ] 0003_remove_mahjongmachine_machine_active_capacity_slot
+players
+ [ ] 0001_initial
+sessions
+ [ ] 0001_initial
+tournaments
+ [ ] 0001_initial
+ [ ] 0002_tournamentround_roundtable_roundseat_and_more
+ [ ] 0003_lotteryrecord_tableresult_and_more
+ [ ] 0004_legacy_compatibility
+目标 Compose 数据库：riichi_qa；应用角色：riichi
+2026-11-05T08:09:08Z 备份 SUCCESS；bytes=895；${REPO}/.verification/docker-production/backups/riichi_qa_20261105T080908Z_.backup.S5rpAM.dump
+ Container riichi-docker-qa-20261105-api-run-33bd19dc85c8 Creating
+ Container riichi-docker-qa-20261105-api-run-33bd19dc85c8 Created
+Planned operations:
+contenttypes.0001_initial
+    Create model ContentType
+    Alter unique_together for contenttype (1 constraint(s))
+contenttypes.0002_remove_content_type_name
+    Change Meta options on contenttype
+    Alter field name on contenttype
+    Raw Python operation
+    Remove field name from contenttype
+auth.0001_initial
+    Create model Permission
+    Create model Group
+    Create model User
+auth.0002_alter_permission_name_max_length
+    Alter field name on permission
+auth.0003_alter_user_email_max_length
+    Alter field email on user
+auth.0004_alter_user_username_opts
+    Alter field username on user
+auth.0005_alter_user_last_login_null
+    Alter field last_login on user
+auth.0006_require_contenttypes_0002
+auth.0007_alter_validators_add_error_messages
+    Alter field username on user
+auth.0008_alter_user_username_max_length
+    Alter field username on user
+auth.0009_alter_user_last_name_max_length
+    Alter field last_name on user
+auth.0010_alter_group_name_max_length
+    Alter field name on group
+auth.0011_update_proxy_permissions
+    Raw Python operation -> Update the content_type of proxy mo…
+auth.0012_alter_user_first_name_max_length
+    Alter field first_name on user
+accounts.0001_initial
+    Create model User
+machines.0001_initial
+    Create model MahjongMachine
+machines.0002_mahjongmachine_machine_number_digits_only
+    Create constraint machine_number_digits_only on model mahjongmachine
+machines.0003_remove_mahjongmachine_machine_active_capacity_slot
+    Remove constraint machine_active_capacity_slot from model mahjongmachine
+players.0001_initial
+    Create model PlayerProfile
+sessions.0001_initial
+    Create model Session
+tournaments.0001_initial
+    Create model Tournament
+    Create model TournamentParticipant
+    Create constraint tournament_round_range on model tournament
+    Create constraint tournament_positive_points on model tournament
+    Create constraint tournament_lifecycle on model tournament
+    Create constraint tournament_name_nonblank on model tournament
+    Create constraint unique_tournament_player on model tournamentparticipant
+tournaments.0002_tournamentround_roundtable_roundseat_and_more
+    Create model TournamentRound
+    Create model RoundTable
+    Create model RoundSeat
+    Create model MachineAllocation
+    Create constraint unique_tournament_round on model tournamentround
+    Create constraint round_number_range on model tournamentround
+    Create constraint unique_round_table on model roundtable
+    Create constraint table_number_range on model roundtable
+    Create constraint unique_table_wind on model roundseat
+    Create constraint unique_round_participant on model roundseat
+    Create constraint seat_wind_valid on model roundseat
+tournaments.0003_lotteryrecord_tableresult_and_more
+    Create model LotteryRecord
+    Create model TableResult
+    Create model TournamentMachineReservation
+    Create model TournamentTable
+    Remove constraint tournament_lifecycle from model tournament
+    Add field machine_snapshot to roundtable
+    Add field champion to tournament
+    Add field champion_tiebreak_policy to tournament
+    Add field compatibility_audit to tournament
+    Add field completed_at to tournament
+    Add field completed_by to tournament
+    Add field final_snapshot to tournament
+    Add field first_round_order to tournament
+    Add field order_source to tournament
+    Add field resource_state to tournament
+    Add field rules_source to tournament
+    Add field rules_version to tournament
+    Add field score_tie_policy to tournament
+    Add field generation_snapshot to tournamentround
+    Alter field status on tournament
+    Create constraint tournament_lifecycle on model tournament
+    Add field confirmed_by to lotteryrecord
+    Add field created_by to lotteryrecord
+    Add field tournament to lotteryrecord
+    Add field confirmed_by to tableresult
+    Add field edited_by to tableresult
+    Add field table to tableresult
+    Add field created_by to tournamentmachinereservation
+    Add field legacy_allocation to tournamentmachinereservation
+    Add field machine to tournamentmachinereservation
+    Add field released_by to tournamentmachinereservation
+    Add field tournament to tournamenttable
+    Add field table to tournamentmachinereservation
+    Add field tournament_table to roundtable
+    Create constraint result_confirmation_state on model tableresult
+    Create constraint unique_fixed_table on model tournamenttable
+    Create constraint fixed_table_range on model tournamenttable
+    Create constraint unique_reserved_machine on model tournamentmachinereservation
+    Create constraint unique_reserved_table on model tournamentmachinereservation
+    Create constraint reservation_release_state on model tournamentmachinereservation
+tournaments.0004_legacy_compatibility
+    Raw Python operation
+请核对备份成功、迁移计划、应用版本和目标；生产更新前须停止写入。
+需要人工确认，请输入 MIGRATE riichi_qa：未收到确认，取消。

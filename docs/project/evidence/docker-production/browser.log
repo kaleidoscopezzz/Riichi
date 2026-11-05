@@ -1,0 +1,4 @@
+CUA in-app browser attempted https://localhost:18443.
+Browser Use cannot open https://localhost:18443 in tab 1. Browser reported: net::ERR_CERT_AUTHORITY_INVALID
+No security interstitial was bypassed. Browser UI and real CA/domain acceptance: UNVERIFIED.
+HTTPS API tests used an explicitly trusted isolated CA and did not disable certificate validation.

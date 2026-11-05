@@ -1,0 +1,15 @@
+FROM python:3.13.18-slim-bookworm@sha256:281d39ff02e3b389401586134ff9e6572954687822a58055ec07a60ded4e0b7f
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    DJANGO_SETTINGS_MODULE=config.settings.production TZ=Asia/Shanghai
+WORKDIR /app/backend
+COPY backend/requirements*.txt ./
+RUN pip install --no-cache-dir -r requirements-production.txt \
+    && groupadd --gid 10001 riichi \
+    && useradd --uid 10001 --gid riichi --no-create-home riichi
+COPY --chown=10001:10001 backend/ ./
+COPY --chown=10001:10001 deploy/gunicorn.conf.py deploy/healthcheck.py /app/deploy/
+USER 10001:10001
+EXPOSE 8000
+HEALTHCHECK --interval=15s --timeout=10s --start-period=20s --retries=4 \
+    CMD ["python", "/app/deploy/healthcheck.py"]
+CMD ["gunicorn", "config.wsgi:application", "--config", "/app/deploy/gunicorn.conf.py"]

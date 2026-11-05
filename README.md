@@ -92,6 +92,8 @@
 
 使用[手动启动说明](docs/local-development.md#linux--macos手动运行)，分别运行 Django 与 Vite。
 
+Ubuntu 服务器生产部署请使用 [Linux Docker Compose 部署指南](docs/deployment-linux.md)。
+
 ## 使用流程
 
 1. 管理员登录，维护有效选手和可用物理桌。

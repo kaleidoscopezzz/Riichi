@@ -1,0 +1,2 @@
+目标 Compose 数据库：riichi_qa；应用角色：riichi
+${REPO}/deploy/restore.sh: line 19: target�: unbound variable

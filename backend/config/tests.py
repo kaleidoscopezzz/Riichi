@@ -17,6 +17,8 @@ class ProductionConfigurationTests(SimpleTestCase):
             "ALLOWED_HOSTS": "riichi.example",
             "DATABASE_URL": "postgresql://localhost/riichi",
             "CORS_ALLOWED_ORIGINS": "https://riichi.example",
+            "CSRF_TRUSTED_ORIGINS": "https://riichi.example",
+            "POSTGRES_DB": "",
             **overrides,
         })
         return subprocess.run(
@@ -60,3 +62,19 @@ class ProductionConfigurationTests(SimpleTestCase):
 
     def test_plain_http_cors_rejected(self):
         self.assert_rejected("must use HTTPS", CORS_ALLOWED_ORIGINS="http://riichi.example")
+
+    def test_unsafe_csrf_origins_rejected(self):
+        for origin in ("http://riichi.example", "https://*.example", "https://riichi.example/path", "https://user@riichi.example"):
+            with self.subTest(origin=origin):
+                self.assert_rejected("explicit HTTPS origins", CSRF_TRUSTED_ORIGINS=origin)
+
+    def test_invalid_session_and_hsts_rejected(self):
+        self.assert_rejected("positive", SESSION_COOKIE_AGE="0")
+        self.assert_rejected("non-negative", HSTS_SECONDS="-1")
+
+    def test_subdomain_wildcard_rejected(self):
+        self.assert_rejected("without subdomain wildcards", ALLOWED_HOSTS=".example")
+
+    def test_discrete_database_configuration(self):
+        result = self.import_production(POSTGRES_DB="riichi", POSTGRES_USER="app", POSTGRES_PASSWORD="qa-import-only", DATABASE_URL="sqlite:///:memory:")
+        self.assertEqual(result.returncode, 0, result.stderr)

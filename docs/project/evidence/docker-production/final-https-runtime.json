@@ -1,0 +1,28 @@
+{
+  "result": "PASS",
+  "https": "isolated self-signed CA verified",
+  "requests_including_csrf": 298,
+  "session_csrf_proxy_headers_spa_api404_rate_limit": "PASS",
+  "runs": [
+    {
+      "size": 4,
+      "rounds": 1,
+      "champion": 1
+    },
+    {
+      "size": 8,
+      "rounds": 3,
+      "champion": 11
+    },
+    {
+      "size": 12,
+      "rounds": 2,
+      "champion": 24
+    },
+    {
+      "size": 16,
+      "rounds": 6,
+      "champion": 33
+    }
+  ]
+}
