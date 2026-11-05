@@ -1,194 +1,19 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { Check, LockKeyhole, Search, X } from 'lucide-react'
+import { useState, type FormEvent } from 'react'
+import { LockKeyhole, X } from 'lucide-react'
 import { Button } from './ui/button'
 import { Select } from './ui/select'
 import { Badge } from './ui/badge'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet'
 import { FormFeedback } from './form-feedback'
 import {
-  findPlayers,
   legalSize,
   previewOka,
   saveTournament,
   startTournament,
-  type Page,
-  type Participant,
   type Tournament,
 } from '@/services/tournaments'
-import type { Player } from '@/services/api'
+import { PlayerPicker } from './player-picker'
 import { TournamentRoundSummary } from './tournament-round-summary'
-
-export function PlayerPicker({
-  selected,
-  change,
-  disabled,
-}: {
-  selected: Participant[]
-  change: (value: Participant[]) => void
-  disabled: boolean
-}) {
-  const [query, setQuery] = useState('')
-  const [search, setSearch] = useState('')
-  const [page, setPage] = useState(1)
-  const [data, setData] = useState<Page<Player & { is_active: boolean }> | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
-  const [retry, setRetry] = useState(0)
-  useEffect(() => {
-    const controller = new AbortController()
-    setLoading(true)
-    setError(null)
-    void findPlayers(page, search, controller.signal)
-      .then((value) => {
-        if (!controller.signal.aborted) setData(value)
-      })
-      .catch((e) => {
-        if (!controller.signal.aborted) setError(e)
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false)
-      })
-    return () => controller.abort()
-  }, [page, search, retry])
-  return (
-    <section className="participant-picker" aria-label="选择参赛选手">
-      <div className="tournament-section-heading">
-        <h3>参赛名单</h3>
-        <Badge variant="outline">已选 {selected.length} / 16 人</Badge>
-      </div>
-      <p className="field-hint">
-        草稿可暂留空；启动需要 4、8、12 或 16 人。由雀庄管理员维护有效选手。
-      </p>
-      <div className="selected-players" aria-label="已选人员">
-        {selected.length ? (
-          selected.map((p) => (
-            <button
-              type="button"
-              key={p.player_id}
-              disabled={disabled}
-              onClick={() => change(selected.filter((v) => v.player_id !== p.player_id))}
-              aria-label={`移除 ${p.display_name}`}
-            >
-              <span>{p.display_name}</span>
-              <X size={13} />
-            </button>
-          ))
-        ) : (
-          <span className="field-hint">尚未选择选手</span>
-        )}
-      </div>
-      <div className="machine-toolbar">
-        <div className="machine-search">
-          <Search size={16} />
-          <input
-            aria-label="搜索参赛选手"
-            placeholder="选手昵称"
-            value={query}
-            maxLength={150}
-            disabled={disabled}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                setSearch(query.trim())
-                setPage(1)
-              }
-            }}
-          />
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={disabled}
-          onClick={() => {
-            setSearch(query.trim())
-            setPage(1)
-          }}
-        >
-          查找选手
-        </Button>
-      </div>
-      <FormFeedback error={error} />
-      {loading ? (
-        <p role="status">正在加载有效选手…</p>
-      ) : error ? (
-        <Button type="button" variant="outline" onClick={() => setRetry((v) => v + 1)}>
-          重试选手查询
-        </Button>
-      ) : (
-        <div className="picker-results">
-          {data?.results.length ? (
-            data.results.map((p) => {
-              const checked = selected.some((v) => v.player_id === p.id)
-              return (
-                <button
-                  type="button"
-                  key={p.id}
-                  className={checked ? 'selected' : ''}
-                  aria-pressed={checked}
-                  disabled={disabled || !p.is_active || (!checked && selected.length >= 16)}
-                  onClick={() =>
-                    change(
-                      checked
-                        ? selected.filter((v) => v.player_id !== p.id)
-                        : [
-                            ...selected,
-                            {
-                              id: 0,
-                              player_id: p.id,
-                              display_name: p.nickname,
-                              username: p.username || '',
-                              is_active: p.is_active,
-                              display_name_snapshot: '',
-                            },
-                          ],
-                    )
-                  }
-                >
-                  <span>
-                    <strong>{p.nickname}</strong>
-                    <small>
-                      选手 #{p.id}
-                      {!p.is_active && ' · 已归档'}
-                    </small>
-                  </span>
-                  {checked ? <Check size={17} /> : <span className="picker-add">+</span>}
-                </button>
-              )
-            })
-          ) : (
-            <p className="field-hint">没有匹配的有效选手。</p>
-          )}
-        </div>
-      )}
-      {data && !loading && !error && (
-        <div className="pagination">
-          <span>
-            共 {data.count} 人 · 第 {page} 页
-          </span>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={disabled || !data.previous}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            上一页选手
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={disabled || !data.next}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            下一页选手
-          </Button>
-        </div>
-      )}
-    </section>
-  )
-}
 
 export function TournamentEditor({
   tournament,

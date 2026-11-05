@@ -4,7 +4,7 @@
 
 Riichi定位为**轻量级四人立直麻将个人赛事管理系统**，帮助管理员快速组织比赛、录入成绩、重排座次并决出冠军；设备调度不是产品主线。需求以[requirements](docs/requirements.md)为总览，F0-06详细规则以[统一功能规范](docs/F0-06-functional-spec.md)为准，技术与兼容设计见[architecture](docs/architecture.md)。
 
-当前任务 **README品牌化与Windows一键启动**，只改善仓库呈现、本地环境准备和受控进程启停，不修改赛事/计分规则、API或数据库模型。已核对UAT-FIX-01提交 `c9d7bb87d4c8badb33513a38a147c9a24807c924` 在远程main，本地main及Owner准备的 `feature/windows-launcher-readme` 均指向该提交，工作区起点干净。沿用该任务分支，不自行merge或建立新基线。
+当前任务 **Bugfix：选手搜索单层焦点与实时联想多选**。起点工作区干净，已核对远程main与本地HEAD为 `49febeb9b72dab8ebcc883bfbb8cdba62bedc0e8`；Owner已准备的 `bugfix/player-autocomplete-focus` 分支与最新origin/main一致，所有修改仅在该分支进行。本次仅改前端搜索样式、赛事草稿选手选择交互及相应验证，不修改后端API、计分/分桌/冻结规则、数据库模型或历史迁移。验证使用独立QA数据库，不写Owner数据库。
 
 F0-01～F0-05保持CLOSED / PASS，D0-01文档Commit `5f31891b4ae3a589057e7054758abb08ca42ec72`。F0-05正式代码基线解引用为`41929da1e53f8bb481beb4ea3bc31b65f9ee86ff`。所有历史迁移/报告/证据与Tag保留。Owner提交UAT候选、Planner独立复核、Owner再次人工验收通过后才能建立最终F0-06基线。
 
@@ -16,7 +16,7 @@ V1.0当前只供雀庄老板/管理员使用。公开注册关闭，普通用户
 - 配置、公共服务、accounts、players、machines、tournaments按现有边界组织，不引入微服务、Redis、Celery、任意公式编辑器或动态表达式执行。
 - 运行时、虚拟环境、依赖和缓存留在项目内；不得全局安装或改全局环境。稳定依赖锁随真正依赖变更维护；F0-06未新增依赖。
 - 简体中文、Riichi Premium、统一组件和反馈，桌面/手机、深浅主题、键盘与焦点、可读对比度。只展示真实API数据，不虚构赛事、选手、成绩或统计。
-- 全站业务下拉复用components/ui/select.tsx（Radix Select + Portal/Popper），禁止新增可交互的原生select或页面私有菜单；保持空值、禁用、严格校验与API参数，交互测试及深浅主题展开截图随UI变更验证。Radix内部aria-hidden表单桥接不属于原生业务菜单，不得为扫描结果删除其表单语义。
+- 全站单选业务下拉复用components/ui/select.tsx（Radix Select + Portal/Popper），禁止新增可交互的原生select或页面私有菜单；参赛名单多选联想统一使用components/player-picker.tsx（Radix Popover + Portal，combobox/listbox语义），按player_id去重，复用eligible分页API，保留取消/乱序/IME保护；保持空值、禁用、严格校验与API参数，交互测试及深浅主题展开截图随UI变更验证。Radix内部aria-hidden表单桥接不属于原生业务菜单，不得为扫描结果删除其表单语义。
 - 密钥、DEBUG、主机、数据库及来源走环境变量；不提交.env、数据库、依赖、构建和凭据，不开放全局CORS，不把开发配置当生产配置。
 - 先读相关实现再做授权范围修改，不擅改产品范围。技术设计选择不能改变已确认业务规则；新的业务分歧须另报Planner。
 
@@ -58,9 +58,9 @@ UAT交付继续回归F0-06完整4人1轮、8/12人多轮、16人6轮，覆盖负
 
 ## Git与停止限制
 
-- 当前任务保持Owner准备的feature/windows-launcher-readme分支，不执行git commit、tag、push或merge，不改远端、历史、既有基线与验收证据。
+- 当前任务保持bugfix/player-autocomplete-focus分支，不执行git commit、tag、push或merge，不改远端、历史、既有基线与验收证据。
 - Owner负责Git提交/推送/Tag，Planner负责独立源码验收及双端核验。自检不替代外部验收。
-- UAT-FIX-01新报告须列四项整改、文件/API契约、模型/迁移兼容、计分/冠军、真实HTTP/UI闭环、自动化/文件SQLite并发/回滚、旧断言变更、失败证据、UNVERIFIED和Git状态；完成停止，等待Planner。
+- 本次Bugfix报告须列修改文件、单层焦点扫描、debounce/取消/乱序/IME/分页/多选测试、草稿与真实API闭环、深浅主题320/390/1440px展开截图、Django回归、失败证据、UNVERIFIED和Git状态；完成停止，等待Owner验收。保留历史UAT报告和证据。
 
 ## Windows启动器与README
 

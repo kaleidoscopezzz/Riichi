@@ -188,25 +188,27 @@ describe('赛事工作台', () => {
     render(<TournamentsPage />)
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: '创建赛事' }))
-    await user.click(await screen.findByRole('button', { name: /选手1.*选手 #1/ }))
+    await user.click(screen.getByRole('combobox', { name: '搜索参赛选手' }))
+    await user.click(await screen.findByRole('option', { name: /选手1.*选手 #1/ }))
     expect(screen.getByText('已选 1 / 16 人')).toBeTruthy()
-    await user.click(screen.getByRole('button', { name: '下一页选手' }))
+    await user.click(screen.getByRole('button', { name: '加载更多选手' }))
     await waitFor(() =>
       expect(findPlayers).toHaveBeenLastCalledWith(2, '', expect.any(AbortSignal)),
     )
     await user.type(screen.getByLabelText('搜索参赛选手'), '选手1')
-    await user.click(screen.getByRole('button', { name: '查找选手' }))
     await waitFor(() =>
       expect(findPlayers).toHaveBeenLastCalledWith(1, '选手1', expect.any(AbortSignal)),
     )
-    await user.click(screen.getByRole('button', { name: /选手1.*选手 #1/ }))
+    await user.click(screen.getByRole('option', { name: /选手1.*选手 #1/ }))
+    expect(screen.getByText('已选 1 / 16 人')).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: '移除 选手1（选手 #1）' }))
     expect(screen.getByText('已选 0 / 16 人')).toBeTruthy()
   })
   it('编辑草稿将配置及名单放在同一请求', async () => {
     render(<TournamentsPage />)
     const user = await openDetail()
     await user.click(screen.getByRole('button', { name: '编辑草稿' }))
-    await user.click(screen.getByRole('button', { name: '移除 选手1' }))
+    await user.click(screen.getByRole('button', { name: '移除 选手1（选手 #1）' }))
     await user.click(screen.getByRole('button', { name: '保存草稿' }))
     await waitFor(() =>
       expect(saveTournament).toHaveBeenCalledWith(

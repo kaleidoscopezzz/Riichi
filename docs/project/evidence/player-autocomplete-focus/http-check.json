@@ -1,0 +1,28 @@
+{
+  "health": {
+    "status": "ok",
+    "service": "riichi-api",
+    "api_version": "v1"
+  },
+  "eligible": 26,
+  "page_sizes": [
+    20,
+    6
+  ],
+  "contains_match": [
+    [
+      4,
+      "王小明"
+    ],
+    [
+      3,
+      "小明"
+    ],
+    [
+      2,
+      "小明"
+    ]
+  ],
+  "archived_and_admin_excluded": true,
+  "internal_username_absent": true
+}

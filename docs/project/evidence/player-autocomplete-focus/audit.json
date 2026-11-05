@@ -1,0 +1,15 @@
+{
+  "branch": "bugfix/player-autocomplete-focus",
+  "head": "49febeb9b72dab8ebcc883bfbb8cdba62bedc0e8",
+  "origin_main": "49febeb9b72dab8ebcc883bfbb8cdba62bedc0e8",
+  "owner_db_sha256_before_and_after": "C4738A1EADA032C19A2F9E33F2DCB555A961F1457321B5BD2EBCCD92FFA3A2C9",
+  "backend_models_migrations_and_dependencies_unchanged": true,
+  "no_secret_patterns_in_changed_text": true,
+  "report_relative_links_exist": true,
+  "combobox_geometry_focus_cases": 7,
+  "other_search_focus_cases": 18,
+  "screenshots": 30,
+  "changed_files": 55,
+  "git_operations": "No commit/push/tag/merge",
+  "status": "Developer self-check PASS; awaiting Owner"
+}

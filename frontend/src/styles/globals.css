@@ -2391,19 +2391,120 @@ a:focus-visible {
   min-width: 180px;
   color: var(--muted);
 }
-.machine-search input {
+.machine-search input,
+.account-form .machine-search input {
   background: transparent;
   border: 0;
   min-width: 0;
+  min-height: 0;
+  border-radius: 0;
   width: 100%;
   padding: 12px 0;
   color: var(--foreground);
   font-size: 14px;
   outline: none;
 }
+.machine-search input:focus-visible,
+.account-form .machine-search input:focus-visible {
+  /* The shared icon/input surface owns the one visible focus ring. */
+  border: 0;
+  outline: none;
+  box-shadow: none;
+}
 .machine-search:focus-within {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
+}
+.player-combobox-search {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  height: 46px;
+  margin-top: 16px;
+}
+.player-combobox-search > svg {
+  flex-shrink: 0;
+}
+.player-combobox-popup {
+  z-index: 80;
+  width: var(--radix-popover-trigger-width);
+  max-width: calc(100vw - 24px);
+  max-height: min(400px, var(--radix-popover-content-available-height));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 16px 40px #0003;
+  padding: 6px;
+  font-size: 14px;
+}
+.player-combobox-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 58px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+.player-combobox-option > span:first-child {
+  min-width: 0;
+}
+.player-combobox-option strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-weight: 500;
+}
+.player-combobox-option small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 3px;
+}
+.player-combobox-option[data-active='true'],
+.player-combobox-option:not([aria-disabled='true']):hover {
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+}
+.player-combobox-option[aria-selected='true'] {
+  color: var(--gold);
+}
+.player-combobox-option[aria-disabled='true']:not([aria-selected='true']) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.player-combobox-selected {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.player-combobox-popup p {
+  padding: 10px 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.player-combobox-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 6px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.player-combobox-footer button,
+.player-combobox-feedback button {
+  min-height: 44px;
+}
+.player-combobox-hint {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-top: 12px;
 }
 .machine-toolbar > button {
   min-height: 44px;
@@ -2916,44 +3017,14 @@ a:focus-visible {
   background: var(--gold-wash);
   color: var(--gold);
   font-size: 13px;
+  max-width: 100%;
 }
-.picker-results {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  max-height: 300px;
-  overflow: auto;
-}
-.picker-results button {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  text-align: left;
-  gap: 8px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  min-width: 0;
-}
-.picker-results button.selected {
-  border-color: var(--gold);
-  background: var(--gold-wash);
-}
-.picker-results button > span:first-child {
-  display: grid;
-  gap: 3px;
+.selected-players button span {
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.picker-results button small {
-  color: var(--muted);
-  font-size: 12px;
-}
-.picker-results button:disabled {
-  opacity: 0.5;
-}
-.picker-results button:not(:disabled):hover {
-  border-color: var(--gold);
+.selected-players button svg {
+  flex-shrink: 0;
 }
 .tournament-summary {
   background: var(--gold-wash);
@@ -3070,9 +3141,6 @@ a:focus-visible {
   }
   .uma-fields {
     grid-template-columns: 1fr 1fr;
-  }
-  .picker-results {
-    grid-template-columns: 1fr;
   }
   .tournament-rules {
     grid-template-columns: 1fr;
