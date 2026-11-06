@@ -88,3 +88,7 @@ SQLite → PostgreSQL 真实数据迁移没有执行；操作手册提供包含�
 Git 安全检查执行 diff --check / status / diff --stat、忽略与密钥检查；记录见[证据](evidence/docker-production/security-and-git.log)。最终 Commit SHA、origin/infra/docker-production SHA、二者一致性和提交后 clean 状态由最终交付回复提供，避免将提交自身 SHA 写入自身导致自引用。禁止 Tag/merge main/强推，Owner/Planner 的独立验收未被本自检替代。
 
 操作顺序：配置 Owner 密钥/真实域名/证书 → config/build → 仅启动 db → migrate.sh 核对备份/计划并人工确认 → up.sh → 交互 init_admin → HTTPS 与业务验收 → 安排备份/监控。详见完整[部署手册](../deployment-linux.md)。验证完成后停止本次 QA 容器，保留卷、备份及失败数据供复核。
+
+## 后续追记：Caddy生产上线任务（2026-11-06）
+
+本报告保持PR #1候选、三服务Nginx终止TLS及自签隔离验证的原始快照。PR #1/#2已合入main `34d4cbdea89bba81a503f2b476f2e1d69de5d714`，后续生产任务改用Caddy作为唯一公网HTTPS入口。新架构、真实CA/续期和服务器验收以[当前操作手册](../deployment-linux.md)、[生产计划](production-launch-plan.md)与[生产验证](production-launch-verification.md)为准，不把本报告旧轮测试冒称新轮结果。

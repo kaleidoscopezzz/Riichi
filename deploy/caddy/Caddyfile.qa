@@ -1,0 +1,15 @@
+# Isolated loopback QA only. Production preflight must reject this filename.
+{
+    admin 127.0.0.1:2019
+    auto_https disable_redirects
+    skip_install_trust
+}
+import /etc/caddy/common.caddy
+http://{$SERVER_NAME}:80 {
+    redir https://{$SERVER_NAME}:{$HTTPS_PORT}{uri} 308
+}
+https://{$SERVER_NAME}:443 {
+    tls internal
+    import security_headers
+    import riichi_proxy
+}

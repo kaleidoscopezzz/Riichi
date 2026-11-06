@@ -1,10 +1,10 @@
 # Riichi 架构与 F0-06 兼容实现
 
-状态：F0-01～F0-05正式CLOSED / PASS；D0-01正式CLOSED / PASS，文档Commit `5f31891b4ae3a589057e7054758abb08ca42ec72`。F0-06候选 `b9e83bb0c8e31ab660b37e7e0a46c1f0bb424e65` 已通过Planner源码/测试证据审查；当前UAT-FIX-01整改，未建立正式基线。业务规则以[统一功能规范](F0-06-functional-spec.md)为准，实际验证见[交付报告](project/F0-06-verification.md)。
+状态：F0-01～F0-05、D0-01保持原正式验收记录。PR #1 Docker生产部署、PR #2审查修复及CI已合并，生产任务起点main为`34d4cbdea89bba81a503f2b476f2e1d69de5d714`；F0-06历史Tag不改判。业务规则以[统一功能规范](F0-06-functional-spec.md)为准；历史[F0-06交付](project/F0-06-verification.md)、[Docker验证](project/docker-production-verification.md)与[本轮生产验证](project/production-launch-verification.md)分别对应各自候选和环境。
 
 ## 技术与模块（当前实现）
 
-前后端分离、模块化单体。Python 3.13 / Django 5.2 LTS / DRF；React / TypeScript / Vite / Tailwind / shadcn/ui / Lucide；SQLite开发，PostgreSQL配置与驱动预留。没有新基础设施或依赖。
+前后端分离、模块化单体。Python 3.13 / Django 5.2 LTS / DRF；React / TypeScript / Vite / Tailwind / shadcn/ui / Lucide；SQLite开发，PostgreSQL生产。生产在既有Docker/Nginx/Gunicorn/PostgreSQL基础上增加Caddy；不引入Redis、Celery或微服务。
 
 | 模块 | 职责 |
 | --- | --- |
@@ -24,6 +24,26 @@
 主要路由保留/dashboard、/tournaments、/tournaments/:id/rounds、/players、/machines、/profile、/settings及公开/login、/register。比赛工作台包含成绩、累计榜、公开抽签、完赛与历史查询，不另设复杂调度控制台。
 
 Vite同源/api代理到Django；HttpOnly Session Cookie，前端写前取当前CSRF，密码/会话/Token不写localStorage或日志。关闭的注册端点及登录/退出继续显式csrf_protect；业务服务端IsAdminUser，DRF写请求校验Session/CSRF。成功data，错误error(code/message/fields)；health保留原契约。无全局CORS，生产需独立密钥、HTTPS、安全Cookie及登录限流。
+
+## 生产入口与代理信任
+
+```text
+浏览器 → Caddy :80/:443（HTTP跳转、Let's Encrypt、续期）
+                   ↓ 内部proxy网络，仅HTTP
+               Nginx :8080（React静态资源、API代理、登录限流）
+                   ↓ 内部web网络
+               Gunicorn / Django
+                   ↓ 内部data网络
+               PostgreSQL → postgres_data持久卷
+```
+
+只有Caddy发布宿主机端口并接入可出网的edge网络；proxy、web、data均为内部网络，Nginx不接data，数据库不接proxy/web。Nginx的8081只供容器健康探针。Caddy的`/data`及`/config`分别用命名卷持久化证书、ACME账户和状态，更新镜像不清卷；不得将卷内私钥放进Git或公开日志。真实域名、来源、密钥、数据库凭据仅存在部署机的私有`.env`。
+
+Caddy作为直接公网边缘，不信任客户端自带的代理头；向Nginx传递规范化的HTTPS来源和客户端IP。内部proxy子网与Caddy固定地址可配置，部署前检查与宿主机/现有Docker网络无冲突。Nginx只信任该精确Caddy地址：以原始TCP对端校验入口，再解析真实客户端地址，用规范化来源重写传给Django的`X-Forwarded-Proto`、`X-Forwarded-For`、`X-Real-IP`和Host。登录限流按验证后的客户端IP计数，不能按Caddy地址合并所有用户，也不能让公网头绕过限流。
+
+API不发布端口，仅在该受控拓扑启用`TRUST_PROXY_HEADERS`。Django保留HTTPS重定向、Secure/HttpOnly Session、Secure CSRF、明确主机/HTTPS来源，不启用全局CORS。Caddy不得经Host或客户端代理头选择不受控上游；非法Host、直接内部入口及伪造代理头在网络/代理层拒绝或覆盖。接入CDN或其他前置代理属于新的信任边界变更，须单独设计验证，不能扩大为信任任意私网或公网来源。
+
+公开health仍是liveness；容器API readiness还核对数据库连接与待迁移。首次建库、更新迁移、管理员初始化不在容器启动中自动执行。维护入口在升级期间返回受控503，备份/恢复/回滚按[生产操作手册](deployment-linux.md)执行；真实CA与续期证据见[本轮报告](project/production-launch-verification.md)，QA内部CA不替代生产验收。
 
 ## 领域与持久化
 
@@ -72,7 +92,7 @@ Vite同源/api代理到Django；HttpOnly Session Cookie，前端写前取当前C
 
 F0-05当时是最多四台、轮次级自动选机、仅首轮、无成绩/冠军；原报告/失败证据与历史Tag保留。旧自动生成器仅在`legacy_test_fixture.py`供历史数据回归构造，运行时路由/服务不引用；正常入口只接受显式选桌。与新需求冲突的旧断言已逐项更新并补回归，有效旧权限/数据约束/历史测试继续执行。
 
-文件SQLite并发、故障回滚、真实HTTP及16人6轮浏览器闭环的实际结果以交付报告为准。PostgreSQL实连迁移/并发、生产HTTPS部署及公网安全仍 **UNVERIFIED**；不将有序锁设计当成生产验证通过。F0-06后仅集成测试、部署、安全加固、发布验收；微信/团体赛不属V1.0。
+文件SQLite并发、故障回滚、真实HTTP及16人6轮浏览器闭环的实际结果以对应交付报告为准。PR #1报告已记录Linux ARM64容器PostgreSQL及自签HTTPS的隔离验证；本轮候选、真实域名CA、浏览器及生产服务器另见本轮验证报告，不将旧测试或有序锁设计当成生产验证通过。F0-06后仅集成测试、部署、安全加固、发布验收；微信/团体赛不属V1.0。
 
 ## UAT-FIX-01 账号与选手维护兼容
 

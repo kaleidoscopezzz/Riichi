@@ -1,0 +1,9 @@
+{
+    admin 127.0.0.1:2019
+}
+import /etc/caddy/common.caddy
+{$SERVER_NAME} {
+    import production_tls
+    import security_headers
+    import riichi_proxy
+}

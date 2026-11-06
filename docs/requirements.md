@@ -1,6 +1,6 @@
 # Riichi V1.0 需求基线
 
-状态：F0-01～F0-05均已正式CLOSED / PASS。D0-01已CLOSED / PASS（文档Commit `5f31891b4ae3a589057e7054758abb08ca42ec72`）。F0-06候选Commit `b9e83bb0c8e31ab660b37e7e0a46c1f0bb424e65` 已通过Planner源码/测试证据审查；远端Tag `baseline/F0-06`指向该Commit（早于UAT整改），是否作为正式基线待Owner确认。UAT-FIX-01、Windows启动器、选手联想与Docker生产部署已合入main（`b882ef0`），审查问题修复在本地分支`fix/review-findings`进行。
+状态：F0-01～F0-05均已正式CLOSED / PASS。D0-01已CLOSED / PASS（文档Commit `5f31891b4ae3a589057e7054758abb08ca42ec72`）。F0-06候选Commit `b9e83bb0c8e31ab660b37e7e0a46c1f0bb424e65` 已通过Planner源码/测试证据审查；远端Tag `baseline/F0-06`指向该Commit（早于UAT整改），历史含义待Owner确认，保留原Tag和验收记录。PR #1 Docker生产部署、PR #2审查修复与CI均已合入正式main `34d4cbdea89bba81a503f2b476f2e1d69de5d714`。当前为生产上线阶段，见[计划](project/production-launch-plan.md)及[本轮实际验证](project/production-launch-verification.md)。
 
 ## 产品定位与规范入口
 
@@ -43,7 +43,7 @@ Riichi是**轻量级四人立直麻将个人赛事管理系统**，帮助麻将�
 - **F0-04 CLOSED / PASS**：赛事独立规则、4/8/12/16人、1～6轮，draft→started、事务冻结和昵称快照；当时不含轮次/成绩。F0-06已新增策略/版本及可追溯默认回填。
 - **F0-05 CLOSED / PASS**：TournamentRound/RoundTable/RoundSeat/MachineAllocation，首轮随机四风、空闲设备按编号自动分配、跨赛事active唯一、调整/释放与审计、占用设备禁止停用/退役、SQLite并发和真实API/UI检查。F0-05当时仅首轮、轮次级占用；F0-06已改为完整工作流，旧历史保留。
 
-所有已生成machineId、RoundTable、RoundSeat及分配历史须非破坏性兼容。不得修改旧迁移、清库或重新随机掩盖兼容问题。PostgreSQL实际并发与生产部署仍未验证，不因文档修订改变验证状态。
+所有已生成machineId、RoundTable、RoundSeat及分配历史须非破坏性兼容。不得修改旧迁移、清库或重新随机掩盖兼容问题。PR #1已做隔离Linux ARM64容器PostgreSQL验证；本轮代码、真实生产部署和公开HTTPS须另行实测，不因文档修订改变验证状态。
 
 ## F0-06完整开发与最终决策
 

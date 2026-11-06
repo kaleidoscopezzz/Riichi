@@ -1,0 +1,26 @@
+(security_headers) {
+    header {
+        defer
+        Strict-Transport-Security "max-age={$HSTS_SECONDS:0}"
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy same-origin
+    }
+}
+(riichi_proxy) {
+    reverse_proxy nginx:8080 {
+        # Caddy is directly Internet-facing: do not add trusted_proxies.
+        # Its default X-Forwarded-* handling rejects spoofed inbound values.
+        header_up -Forwarded
+        header_up -X-Real-IP
+        header_up -X-Forwarded-SSL
+        header_up -X-Forwarded-Protocol
+    }
+}
+(production_tls) {
+    tls {
+        issuer acme {
+            dir {$ACME_CA:https://acme-v02.api.letsencrypt.org/directory}
+        }
+    }
+}
