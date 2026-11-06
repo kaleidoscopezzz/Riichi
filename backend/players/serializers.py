@@ -1,10 +1,11 @@
 from rest_framework import serializers
-from common.api import StrictFieldsMixin
+from common.api import StrictFieldsMixin, validate_display_name
 from .models import PlayerProfile
 
 
 class ProfileUpdateSerializer(StrictFieldsMixin, serializers.Serializer):
-    nickname = serializers.CharField(max_length=80)
+    # Shared by player nicknames and the administrator's own display name (players/me).
+    nickname = serializers.CharField(max_length=80, validators=[validate_display_name])
 
 
 class PlayerSerializer(serializers.ModelSerializer):

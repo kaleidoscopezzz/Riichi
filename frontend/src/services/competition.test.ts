@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { generateRound } from './rounds'
-import { saveResult, displayScore, completeTournament } from './competition'
+import {
+  saveResult,
+  displayScore,
+  completeTournament,
+  voidLottery,
+  isPendingLottery,
+  mergeLotteries,
+  type Lottery,
+} from './competition'
 
 afterEach(() => vi.unstubAllGlobals())
 describe('赛事 API 契约和无损展示', () => {
@@ -73,5 +81,68 @@ describe('赛事 API 契约和无损展示', () => {
     expect(displayScore({ numerator: '900719925474099300', denominator: '1' })).toBe(
       '900719925474099300.00',
     )
+  })
+})
+
+const lottery: Lottery = {
+  id: 7,
+  members: [1, 2],
+  order: [2, 1],
+  method: '签条',
+  description: '公开',
+  drawn_at: '2026-11-04T12:00:00Z',
+  created_by_id: 1,
+  created_at: '2026-11-04T12:01:00Z',
+  confirmed_by_id: null,
+  confirmed_at: null,
+  voided_by_id: null,
+  voided_at: null,
+  void_reason: '',
+  source_versions: [{ table_id: 3, version: 2 }],
+}
+describe('积分展示边界与抽签契约', () => {
+  it('舍入为零的负值不显示负号，负分母先移到分子，分母为 0 或非法时返回占位', () => {
+    expect(displayScore({ numerator: '-1', denominator: '1000' })).toBe('0.00')
+    expect(displayScore({ numerator: '-4', denominator: '1000' })).toBe('0.00')
+    expect(displayScore({ numerator: '-5', denominator: '1000' })).toBe('−0.01')
+    expect(displayScore({ numerator: '1', denominator: '-3' })).toBe('−0.33')
+    expect(displayScore({ numerator: '-50', denominator: '-3' })).toBe('16.67')
+    expect(displayScore({ numerator: '0', denominator: '-7' })).toBe('0.00')
+    expect(displayScore({ numerator: '5', denominator: '0' })).toBe('—')
+    expect(displayScore({ numerator: '1.5', denominator: '2' })).toBe('—')
+    expect(displayScore({ numerator: 'x', denominator: '1' })).toBe('—')
+  })
+  it('作废抽签提交原因到 void 接口，返回该记录', async () => {
+    const fetcher = vi.fn().mockImplementation(
+      async (url: string) =>
+        new Response(
+          JSON.stringify({
+            data: url.endsWith('/auth/csrf/')
+              ? { csrf_token: 'test-only' }
+              : { ...lottery, voided_at: '2026-11-04T13:00:00Z', void_reason: '顺序录错' },
+          }),
+        ),
+    )
+    vi.stubGlobal('fetch', fetcher)
+    const row = await voidLottery(5, 7, '顺序录错')
+    expect(fetcher.mock.calls[1][0]).toBe('/api/v1/tournaments/5/lotteries/7/void/')
+    expect(fetcher.mock.calls[1][1]).toMatchObject({ method: 'POST' })
+    expect(JSON.parse(fetcher.mock.calls[1][1].body)).toEqual({ reason: '顺序录错' })
+    expect(row.void_reason).toBe('顺序录错')
+  })
+  it('待确认：未确认、未作废、成员集合与来源版本均相同', () => {
+    const versions = [{ table_id: 3, version: 2 }]
+    expect(isPendingLottery(lottery, [1, 2], versions)).toBe(true)
+    expect(isPendingLottery(lottery, [2, 1], versions)).toBe(true)
+    expect(isPendingLottery(lottery, [1, 2, 3], versions)).toBe(false)
+    expect(isPendingLottery(lottery, [1, 2], [{ table_id: 3, version: 3 }])).toBe(false)
+    expect(isPendingLottery({ ...lottery, voided_at: 'now' }, [1, 2], versions)).toBe(false)
+    expect(isPendingLottery({ ...lottery, confirmed_at: 'now' }, [1, 2], versions)).toBe(false)
+  })
+  it('写入响应覆盖旧读取，但已结束的服务器状态不被本地待确认副本覆盖', () => {
+    const voided = { ...lottery, voided_at: 'now', void_reason: '录错' }
+    expect(mergeLotteries([lottery], [voided])).toEqual([voided])
+    expect(mergeLotteries([voided], [lottery])).toEqual([voided])
+    expect(mergeLotteries([], [lottery])).toEqual([lottery])
   })
 })

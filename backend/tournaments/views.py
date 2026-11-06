@@ -8,8 +8,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Tournament, TournamentParticipant
-from .serializers import TournamentSerializer, TournamentCreateSerializer, ParticipantWriteSerializer, EmptySerializer
+from .serializers import TournamentSerializer, TournamentCreateSerializer, TournamentUpdateSerializer, ParticipantWriteSerializer, EmptySerializer
 from .services import create_tournament, mutate_tournament
+from common.api import search_text
 
 
 def queryset():
@@ -29,7 +30,7 @@ class TournamentListView(generics.GenericAPIView):
     pagination_class = TournamentPagination
 
     def get(self, request):
-        search = request.query_params.get("search", "").strip()
+        search = search_text(request.query_params.get("search", "")).strip()
         status = request.query_params.get("status", "")
         if len(search) > 120:
             raise ValidationError({"search": ["搜索内容最多120字符。"]})
@@ -54,13 +55,14 @@ class TournamentDetailView(APIView):
         return response(pk)
 
     def patch(self, request, pk):
-        serializer = TournamentCreateSerializer(data=request.data, partial=True)
+        serializer = TournamentUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        if not serializer.validated_data:
-            raise ValidationError({"non_field_errors": ["请提供需要修改的字段。"]})
         values = dict(serializer.validated_data)
+        revision = values.pop("revision", None)
+        if not values:
+            raise ValidationError({"non_field_errors": ["请提供需要修改的字段。"]})
         ids = values.pop("participant_ids", None)
-        return response(mutate_tournament(pk, values=values, participant_ids=ids).pk)
+        return response(mutate_tournament(pk, values=values, participant_ids=ids, revision=revision).pk)
 
 
 class TournamentParticipantsView(APIView):
@@ -69,7 +71,7 @@ class TournamentParticipantsView(APIView):
     def put(self, request, pk):
         serializer = ParticipantWriteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return response(mutate_tournament(pk, participant_ids=serializer.validated_data["participant_ids"]).pk)
+        return response(mutate_tournament(pk, participant_ids=serializer.validated_data["participant_ids"], revision=serializer.validated_data.get("revision")).pk)
 
 
 class TournamentStartView(APIView):

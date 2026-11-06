@@ -5,7 +5,9 @@ import { Select } from './ui/select'
 import { Badge } from './ui/badge'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet'
 import { FormFeedback } from './form-feedback'
+import { ApiError } from '@/services/api'
 import {
+  fetchTournament,
   legalSize,
   previewOka,
   saveTournament,
@@ -31,11 +33,45 @@ export function TournamentEditor({
   const [returning, setReturning] = useState(String(tournament?.return_points || 30000))
   const [uma, setUma] = useState(tournament?.uma || ['30', '10', '-10', '-30'])
   const [selected, setSelected] = useState(tournament?.participants || [])
+  // The server copy this form edits; replaced when the latest draft is reloaded.
+  const [base, setBase] = useState(tournament)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  const [stale, setStale] = useState(false)
+  const [reloading, setReloading] = useState(false)
+  const [notice, setNotice] = useState('')
+  const locked = !!base && base.status !== 'draft'
+  function load(row: Tournament) {
+    setBase(row)
+    setName(row.name)
+    setDescription(row.description)
+    setRounds(String(row.round_count))
+    setStarting(String(row.starting_points))
+    setReturning(String(row.return_points))
+    setUma(row.uma)
+    setSelected(row.participants)
+  }
+  async function reload() {
+    if (!base) return
+    setReloading(true)
+    setError(null)
+    setNotice('')
+    try {
+      const latest = await fetchTournament(base.id)
+      load(latest)
+      setStale(false)
+      if (latest.status === 'draft') setNotice('已载入最新草稿，请重新核对并修改后再保存。')
+      else setError(new Error('该赛事已不是草稿，无法继续编辑。请关闭表单后查看赛事详情。'))
+    } catch (e) {
+      setError(e as Error)
+    } finally {
+      setReloading(false)
+    }
+  }
   async function submit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    setNotice('')
     if (
       !name.trim() ||
       !/^[1-6]$/.test(rounds) ||
@@ -59,12 +95,15 @@ export function TournamentEditor({
             return_points: Number(returning),
             uma,
             participant_ids: selected.map((p) => p.player_id),
+            // Optimistic lock: a draft changed elsewhere is rejected with 409 stale_tournament.
+            ...(base && typeof base.revision === 'number' ? { revision: base.revision } : {}),
           },
-          tournament?.id,
+          base?.id,
         ),
       )
     } catch (e) {
       setError(e as Error)
+      setStale(e instanceof ApiError && e.status === 409 && e.code === 'stale_tournament')
     } finally {
       setBusy(false)
     }
@@ -73,7 +112,7 @@ export function TournamentEditor({
     <Sheet
       open
       onOpenChange={(open) => {
-        if (!open && !busy) close()
+        if (!open && !busy && !reloading) close()
       }}
     >
       <SheetContent className="machine-sheet tournament-sheet" showCloseButton={false}>
@@ -89,13 +128,13 @@ export function TournamentEditor({
           size="icon"
           className="machine-sheet-close"
           aria-label="关闭赛事表单"
-          disabled={busy}
+          disabled={busy || reloading}
           onClick={close}
         >
           <X />
         </Button>
         <form className="account-form tournament-form" onSubmit={(e) => void submit(e)} noValidate>
-          <fieldset disabled={busy}>
+          <fieldset disabled={busy || reloading}>
             <section>
               <span className="eyebrow">01 / 基础信息</span>
               <label>
@@ -171,7 +210,7 @@ export function TournamentEditor({
             </section>
             <section>
               <span className="eyebrow">03 / 参赛选手</span>
-              <PlayerPicker selected={selected} change={setSelected} disabled={busy} />
+              <PlayerPicker selected={selected} change={setSelected} disabled={busy || reloading} />
             </section>
           </fieldset>
           <section className="tournament-summary">
@@ -182,12 +221,27 @@ export function TournamentEditor({
             </p>
             <p>保存不会启动赛事，也不会占用麻将机。</p>
           </section>
-          <FormFeedback error={error} />
+          <FormFeedback error={error} success={notice} />
+          {stale && (
+            <div className="stale-notice">
+              <p>
+                此草稿已在其他页面或由其他管理员更新，当前表单基于旧版本，不能直接覆盖。请重新加载最新草稿，核对后再保存；本次未保存的修改需要重新填写。
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={reloading}
+                onClick={() => void reload()}
+              >
+                {reloading ? '正在加载最新草稿…' : '重新加载最新草稿'}
+              </Button>
+            </div>
+          )}
           <div className="machine-form-footer">
-            <Button type="button" variant="outline" disabled={busy} onClick={close}>
+            <Button type="button" variant="outline" disabled={busy || reloading} onClick={close}>
               取消
             </Button>
-            <Button type="submit" disabled={busy}>
+            <Button type="submit" disabled={busy || reloading || locked}>
               {busy ? '正在保存…' : '保存草稿'}
             </Button>
           </div>

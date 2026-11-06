@@ -40,22 +40,7 @@ try {
   $bootstrap = $null
   if (Test-Path -LiteralPath $python) { $bootstrap = $python }
   elseif ($env:RIICHI_PYTHON) { $bootstrap = Get-Tool $env:RIICHI_PYTHON 'python.exe' }
-  else {
-    $candidates = @()
-    $local = Join-Path $script:Root '.tools\python'
-    if (Test-Path -LiteralPath $local) { $candidates += @(Get-ChildItem -LiteralPath $local -Directory | ForEach-Object { Join-Path $_.FullName 'python.exe' } | Where-Object { Test-Path -LiteralPath $_ }) }
-    $pyCommand = Get-Command py.exe -CommandType Application -ErrorAction SilentlyContinue
-    if ($pyCommand) {
-      $found = & $pyCommand.Source '-3.13' '-c' 'import sys; print(sys.executable)' 2>$null
-      if ($LASTEXITCODE -eq 0) { $candidates += [string]$found }
-    }
-    $pathPython = Get-Command python.exe -CommandType Application -ErrorAction SilentlyContinue
-    if ($pathPython) { $candidates += $pathPython.Source }
-    foreach ($candidate in $candidates) {
-      $reported = & $candidate '-c' 'import sys; print(chr(46).join(map(str,sys.version_info[:3])))' 2>$null
-      if ($LASTEXITCODE -eq 0 -and $reported -match '^3\.13\.\d+$' -and [version]$reported -ge $minimumPython) { $bootstrap = $candidate; break }
-    }
-  }
+  else { $bootstrap = Find-Python $minimumPython }
   if (-not $bootstrap) { throw "未找到 Python 3.13（最低 $versionText）。请安装后重试；不会全局安装运行时。" }
   $reported = & $bootstrap '-c' 'import sys; print(chr(46).join(map(str,sys.version_info[:3])))'
   if ($LASTEXITCODE -ne 0 -or $reported -notmatch '^3\.13\.\d+$' -or [version]$reported -lt $minimumPython) { throw "Python 版本不符合要求：需要 3.13，最低 $versionText；已有虚拟环境不会被覆盖。" }
@@ -67,8 +52,8 @@ try {
     $requirement = [string]$package.engines.($tool[1])
     if ($requirement -notmatch '^>=(\d+(?:\.\d+){0,2})$') { throw 'package.json engines 已变化，请核对启动器支持的版本规则。' }
     $minimum = $Matches[1]; if (-not $minimum.Contains('.')) { $minimum += '.0' }
-    $actual = (& $tool[0] '--version').Trim().TrimStart('v')
-    if ($LASTEXITCODE -ne 0 -or [version]$actual -lt [version]$minimum) { throw "$($tool[1]) 版本不符合 package.json 要求 $requirement。" }
+    $actual = ([string](Invoke-Probe $tool[0] @('--version'))).TrimStart('v') -as [version]
+    if ($null -eq $actual -or $actual -lt [version]$minimum) { throw "$($tool[1]) 版本不符合 package.json 要求 $requirement。" }
   }
   Write-Host "环境检查通过：Python $reported；Node / npm 符合 package.json。"
   $probe = Join-Path $script:Root 'scripts\launcher_probe.py'
@@ -135,7 +120,7 @@ try {
   $lastStatus = ''
   $deadline = [DateTime]::UtcNow.AddSeconds(100)
   do {
-    $state = Read-State
+    $state = Read-State -Required
     if ($state.status -ne $lastStatus) { Write-Host "进程状态：$($state.status)"; $lastStatus = $state.status }
     if ($state.status -eq 'failed') { throw "服务启动失败：$($state.error)；日志保存在 .runtime/launcher/$runId。" }
     if ($state.status -eq 'ready') { break }
@@ -151,7 +136,7 @@ try {
 } catch {
   Write-Host "启动失败：$($_.Exception.Message)" -ForegroundColor Red
   if ($null -ne $started) {
-    try { Stop-Owned $started; if (Test-Path -LiteralPath $script:StateFile) { Remove-Item -LiteralPath $script:StateFile } } catch { Write-Host '自动回收无法完成；已拒绝终止身份不符的进程，请核对状态。' }
+    try { $null = Stop-Owned $started; if (Test-Path -LiteralPath $script:StateFile) { Remove-Item -LiteralPath $script:StateFile } } catch { Write-Host '自动回收无法完成；已拒绝终止身份不符的进程，请核对状态。' }
   }
   exit 1
 } finally { if ($null -ne $mutex) { $mutex.ReleaseMutex(); $mutex.Dispose() } }

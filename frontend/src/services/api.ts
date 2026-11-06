@@ -1,11 +1,14 @@
 const base = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 
+/** DRF validation errors: message lists, nested dicts or per-item lists. */
+export type FieldErrors = Record<string, unknown>
+
 export class ApiError extends Error {
   constructor(
     public status: number,
     public code: string,
     message: string,
-    public fields: Record<string, string[]> = {},
+    public fields: FieldErrors = {},
   ) {
     super(message)
   }

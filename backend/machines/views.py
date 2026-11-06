@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from common.api import StrictFieldsMixin
+from common.api import StrictFieldsMixin, search_text
 from .models import MahjongMachine
 from .serializers import MachineSerializer, MachineWriteSerializer
 from .services import change_machine, create_machine
@@ -22,7 +22,7 @@ class MachineListView(generics.GenericAPIView):
     pagination_class = MachinePagination
 
     def get(self, request):
-        search = request.query_params.get("search", "").strip()
+        search = search_text(request.query_params.get("search", "")).strip()
         status = request.query_params.get("status", "")
         if len(search) > 100:
             raise ValidationError({"search": ["搜索内容最多100字符。"]})

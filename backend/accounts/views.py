@@ -49,10 +49,9 @@ class LoginView(AuthWriteView):
         serializer = LoginSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         user = authenticate(request, **serializer.validated_data)
-        if user is None:
+        # Non-staff gets the exact same answer as a wrong password: no password oracle.
+        if user is None or not user.is_staff:
             return error_response("invalid_credentials", "用户名或密码错误，或账号不可用。", status=400)
-        if not user.is_staff:
-            return error_response("admin_required", "仅雀庄管理员可以登录管理后台。", status=403)
         login(request, user)
         return JsonResponse({"data": user_data(user)})
 

@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation, type InitialEntry } from 'react-router-dom'
 import { App } from '@/app'
 import { AuthProvider } from '@/components/auth-provider'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -28,9 +28,16 @@ const profile = {
   updated_at: user.date_joined,
 }
 const mocked = vi.mocked(api)
-function show(path = '/login') {
+let current = ''
+function LocationProbe() {
+  const location = useLocation()
+  current = `${location.pathname}${location.search}${location.hash}`
+  return null
+}
+function show(path: InitialEntry = '/login') {
   return render(
     <MemoryRouter initialEntries={[path]}>
+      <LocationProbe />
       <ThemeProvider>
         <HealthContext.Provider
           value={{
@@ -143,5 +150,75 @@ describe('账号页面及权限', () => {
     await waitFor(() =>
       expect(screen.getByRole('heading', { name: '欢迎回到 Riichi' })).toBeTruthy(),
     )
+  })
+})
+
+const admin = { ...user, is_staff: true }
+const emptyPage = { count: 0, next: null, previous: null, results: [] }
+// The admin session is valid only between a successful /auth/login/ (or the initial
+// state) and expire(); every other request then fails as not authenticated.
+function session(signedIn = false) {
+  mocked.mockImplementation(async (path) => {
+    if (path === '/auth/login/') {
+      signedIn = true
+      return admin
+    }
+    if (!signedIn) throw new ApiError(403, 'not_authenticated', '请先登录。')
+    return path === '/auth/me/' ? admin : emptyPage
+  })
+  return {
+    expire() {
+      signedIn = false
+      act(() => {
+        window.dispatchEvent(new Event('riichi-session-expired'))
+      })
+    },
+  }
+}
+async function signIn() {
+  const keyboard = userEvent.setup()
+  await keyboard.type(await screen.findByLabelText('用户名'), 'test_account')
+  await keyboard.type(screen.getByLabelText('密码'), 'test-only')
+  await keyboard.click(screen.getByRole('button', { name: '登录' }))
+}
+describe('登录后回到原页面（F2）', () => {
+  it('未登录访问 /players → 跳到 /login → 登录成功后回到 /players', async () => {
+    session()
+    show('/players')
+    expect(await screen.findByRole('heading', { name: '欢迎回到 Riichi' })).toBeTruthy()
+    expect(current).toBe('/login')
+    await signIn()
+    expect(await screen.findByText('没有匹配的选手')).toBeTruthy()
+    expect(current).toBe('/players')
+  })
+  it('会话过期后重新登录回到原页面，并保留 search 与 hash', async () => {
+    const admin = session(true)
+    show('/players?status=archived#list')
+    expect(await screen.findByText('没有匹配的选手')).toBeTruthy()
+    admin.expire()
+    expect(await screen.findByRole('heading', { name: '欢迎回到 Riichi' })).toBeTruthy()
+    expect(current).toBe('/login')
+    await signIn()
+    expect(await screen.findByText('没有匹配的选手')).toBeTruthy()
+    expect(current).toBe('/players?status=archived#list')
+  })
+  it('直接打开登录页，登录后进入仪表盘', async () => {
+    session()
+    show('/login')
+    await signIn()
+    await waitFor(() => expect(current).toBe('/dashboard'))
+  })
+  it.each([
+    '//evil.example/players',
+    'https://evil.example/players',
+    '/\\evil.example',
+    '/login',
+    { pathname: '/register', search: '', hash: '' },
+    { pathname: '//evil.example', search: '', hash: '' },
+  ])('站外或认证页 from=%j 不会被跳转，退回仪表盘', async (from) => {
+    session()
+    show({ pathname: '/login', state: { from } })
+    await signIn()
+    await waitFor(() => expect(current).toBe('/dashboard'))
   })
 })

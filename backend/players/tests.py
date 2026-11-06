@@ -129,3 +129,51 @@ class ManagedPlayerTests(TestCase):
         with patch('players.signals.PlayerProfile.objects.create', side_effect=IntegrityError), self.assertRaises(PlayerConflict):
             create_player('注入失败')
         self.assertEqual(get_user_model().objects.count(), count)
+
+    def test_invisible_or_control_nicknames_rejected(self):
+        p = create_player('可见名称')
+        invisible = ['\u200b', '\u200b\u200c\u200d', '\u2060\ufeff', '\u202e', '\u202eabc', 'ab\u200fc', '\u2066名\u2069', 'a\x00b', 'a\x07b', '\x1b[31m红', 'a\u0085b', '\u00ad']
+        for nick in invisible:
+            with self.subTest(nick=ascii(nick)):
+                for path, method in [('', 'post'), (f'{p.pk}/', 'patch'), ('me/', 'patch')]:
+                    response = self.write(path, {'nickname': nick}, method)
+                    self.assertEqual(response.status_code, 400, (path, response.content))
+                    self.assertIn('nickname', response.json()['error']['fields'])
+        self.assertIn(self.write(body={'nickname': '\u202eabc'}).json()['error']['fields']['nickname'][0], ['名称不能包含控制字符或文字方向控制符。'])
+        self.assertEqual(self.write(body={'nickname': '\u200b'}).json()['error']['fields']['nickname'], ['名称至少需要包含一个可见的文字、数字、标点或符号。'])
+        for nick in ['\U0001f468\u200d\U0001f469\u200d\U0001f467', '❤\ufe0f', '张三', 'A-1', '★', '07', '「雀」', 'é\u0301', '超' * 80]:
+            with self.subTest(nick=ascii(nick)):
+                response = self.write(body={'nickname': nick})
+                self.assertEqual(response.status_code, 201, response.content)
+                self.assertEqual(response.json()['data']['nickname'], nick)
+        self.assertEqual(self.write('me/', {'nickname': '\U0001f004 雀庄老板'}, 'patch').status_code, 200)
+        self.assertEqual(self.write(body={'nickname': '超' * 81}).status_code, 400)
+
+    def test_search_with_control_characters_is_400(self):
+        create_player('搜索目标')
+        for base in ['/api/v1/players/', '/api/v1/machines/', '/api/v1/tournaments/']:
+            for value in ['%00', 'a%00b', '%07', '%1B', '%7F', '%C2%85']:
+                with self.subTest(base=base, value=value):
+                    response = self.client.get(f'{base}?search={value}')
+                    self.assertEqual(response.status_code, 400)
+                    self.assertEqual(response.json()['error']['fields'], {'search': ['搜索内容包含无效字符。']})
+            self.assertEqual(self.client.get(base + '?search=%E6%90%9C%E7%B4%A2').status_code, 200)
+        self.assertEqual(self.client.get('/api/v1/players/?search=%20%E6%90%9C%E7%B4%A2%20').json()['data']['count'], 1)
+
+    def test_admin_without_profile_gets_lazy_signal_profile(self):
+        admin = get_user_model().objects.create_user(username='legacy_owner_' + 'x' * 80, is_staff=True)
+        PlayerProfile.objects.filter(user=admin).delete()
+        client = Client(enforce_csrf_checks=True); client.force_login(admin)
+        token = client.get('/api/v1/auth/csrf/').json()['data']['csrf_token']
+        response = client.get('/api/v1/players/me/')
+        self.assertEqual(response.status_code, 200, response.content)
+        profile = PlayerProfile.objects.get(user=admin)
+        self.assertEqual((response.json()['data']['id'], response.json()['data']['nickname']), (profile.pk, admin.username[:80]))
+        self.assertEqual(client.get('/api/v1/players/me/').json()['data']['id'], profile.pk)
+        self.assertEqual(PlayerProfile.objects.filter(user=admin).count(), 1)
+        PlayerProfile.objects.filter(user=admin).delete()
+        response = client.patch('/api/v1/players/me/', {'nickname': '补建后的老板'}, content_type='application/json', HTTP_X_CSRFTOKEN=token)
+        self.assertEqual((response.status_code, response.json()['data']['nickname']), (200, '补建后的老板'))
+        self.assertEqual(PlayerProfile.objects.get(user=admin).nickname, '补建后的老板')
+        # The repaired administrator profile still stays out of player lists and CRUD.
+        self.assertNotIn(PlayerProfile.objects.get(user=admin).pk, [p['id'] for p in self.client.get('/api/v1/players/').json()['data']['results']])

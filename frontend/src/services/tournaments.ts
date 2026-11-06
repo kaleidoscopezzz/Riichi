@@ -4,7 +4,6 @@ export type Participant = {
   id: number
   player_id: number
   display_name: string
-  username: string
   is_active: boolean
   display_name_snapshot: string
 }
@@ -25,11 +24,13 @@ export type Tournament = {
   participant_count: number
   expected_table_count: number | null
   participants: Participant[]
+  /** Read-only optimistic lock; a draft PATCH echoes it back (409 stale_tournament). */
+  revision: number
 }
 export type TournamentInput = Pick<
   Tournament,
   'name' | 'description' | 'round_count' | 'starting_points' | 'return_points' | 'uma'
-> & { participant_ids: number[] }
+> & { participant_ids: number[]; revision?: number }
 export type Page<T> = { count: number; next: string | null; previous: string | null; results: T[] }
 export const legalSize = (count: number) => [4, 8, 12, 16].includes(count)
 export const fetchTournaments = (

@@ -87,3 +87,17 @@ init_admin仅在Owner明确命令调用时读取所选数据库alias；不存在
 前端复用shadcn Sheet/Button和原统一API错误/CSRF。显式.machine-form-footer同时约束button与asChild链接，等宽Grid/44px最小高度、窄屏堆叠；赛事Grid共享六列、名称左对齐/其他列居中、长文案可换行。只对明确操作区应用规则，保留图标按钮规格。真实截图和36组页面布局矩阵见[UAT报告](project/UAT-FIX-01-verification.md)，不将DOM测试冒充像素检查。
 
 Owner后续追加全站下拉整改：统一components/ui/select.tsx基于既有Radix Select，触发器46px、菜单项至少44px；Portal/Popper负责弹层、视口避让和Sheet层级，应用主题变量统一视觉，长文案换行、限制高度并滚动。九处业务入口全部复用，空字符串和数字ID只在组件/调用边界转换，API不变；保留Radix不可交互的aria-hidden表单桥接。新增交互测试及真实展开证据见[下拉清单](project/UAT-FIX-01-select-inventory.md)与UAT报告追加节。
+
+## 审查问题修复（fix/review-findings）
+
+新增迁移tournaments/0005（LotteryRecord.voided_by/voided_at/void_reason及`lottery_void_state` CHECK：未作废三字段为空；作废须有人、时间、非空原因且未确认）与0006（TournamentMachineReservation.release_reason；已释放旧行复制原reason，旧列不改，reverse为noop）。均只加字段，旧列与旧迁移不变。
+
+- 抽签：record_lottery在赛事锁内拒绝同组、同来源版本的第二条待确认记录（`lottery_pending`）；void_lottery同序加锁、留痕作废，已确认不可作废，完赛后只读。排名与完赛只引用已确认记录。
+- 成绩：只确认不带点数时以update_fields保存，草稿录入人/时间不变。
+- 预留：reason为建立原因，release_reason为释放原因，mapping.history同时返回。
+- 兼容：bridge_legacy与0004使用同一判定，畸形首轮不抛错而进入review_required，仍桥接active分配；historical_only赛事禁止故障换桌；复核缺逻辑桌返回409。
+- 赛事草稿：输出只读revision，写入可选revision，比较在首条条件UPDATE内完成。
+- 认证与错误：非staff登录与密码错误同为400；DRF使用common.authentication.CsrfSessionAuthentication，CSRF失败统一`csrf_failed`；Http404为`not_found`；ApiErrorMiddleware替换错误体时保留原响应头与Cookie。
+- 输入：common.api.validate_display_name拒绝控制字符与文字方向控制符；search_text拒绝列表搜索中的控制字符。
+
+前端新增lib/points.ts（统一点数解析）、lib/redirect.ts（站内回跳）、lib/field-errors.ts（嵌套错误展开）与components/error-boundary.tsx。CI见`.github/workflows/ci.yml`。详细证据见[修复报告](project/review-findings-fix-verification.md)。

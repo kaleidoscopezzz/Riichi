@@ -40,6 +40,26 @@ def create_player(nickname):
         database_error(exc)
 
 
+def own_profile(user):
+    """Account profile, lazily repaired for identities that predate the signal.
+
+    Same semantics as signals.create_player_profile (nickname=username[:80]).
+    FIRST statement writes the User row, then User -> Profile, like locked_player;
+    a concurrent creator is serialized and get_or_create returns its row.
+    """
+    try:
+        return user.player_profile
+    except PlayerProfile.DoesNotExist:
+        pass
+    try:
+        with transaction.atomic():
+            get_user_model().objects.filter(pk=user.pk).update(is_active=F('is_active'))
+            owner = get_object_or_404(get_user_model().objects.select_for_update(), pk=user.pk)
+            return PlayerProfile.objects.get_or_create(user=owner, defaults={'nickname': owner.username[:80]})[0]
+    except (IntegrityError, OperationalError) as exc:
+        database_error(exc)
+
+
 @contextmanager
 def locked_player(pk):
     # Read only to identify the parent. The transaction's FIRST statement is a

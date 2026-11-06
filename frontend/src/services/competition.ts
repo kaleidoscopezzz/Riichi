@@ -30,6 +30,17 @@ export type Standing = {
   second_count: number
   rounds: Score[]
 }
+export type ReservationHistory = {
+  id: number
+  machine_id: number
+  machine_no_snapshot: string
+  status: string
+  source: string
+  /** Why the reservation was established. Releasing no longer overwrites it. */
+  reason: string
+  /** Why the reservation was released; empty while it is still active. */
+  release_reason: string
+}
 export type FixedTable = {
   id: number
   ordinal: number
@@ -37,14 +48,7 @@ export type FixedTable = {
   machine_id: number | null
   machine_no: string | null
   name: string | null
-  history: {
-    id: number
-    machine_id: number
-    machine_no_snapshot: string
-    status: string
-    source: string
-    reason: string
-  }[]
+  history: ReservationHistory[]
 }
 export type Lottery = {
   id: number
@@ -52,14 +56,23 @@ export type Lottery = {
   order: number[]
   method: string
   description: string
+  drawn_at: string
+  created_by_id: number
+  created_at: string
+  confirmed_by_id: number | null
   confirmed_at: string | null
+  voided_by_id: number | null
+  voided_at: string | null
+  void_reason: string
+  source_versions: Version[]
 }
 export type Workspace = {
   status: string
   resource_state: string
   mapping: FixedTable[]
   standings: Standing[]
-  unresolved_groups: number[][]
+  /** Absent from a completed tournament's final snapshot. */
+  unresolved_groups?: number[][]
   ready?: boolean
   all_results_confirmed?: boolean
   champion_id?: number
@@ -100,6 +113,11 @@ export const confirmLottery = (id: number, lottery: number) =>
     method: 'POST',
     body: { confirmed: true },
   })
+export const voidLottery = (id: number, lottery: number, reason: string) =>
+  api<Lottery>(`/tournaments/${id}/lotteries/${lottery}/void/`, {
+    method: 'POST',
+    body: { reason },
+  })
 export const replaceTable = (id: number, ordinal: number, machine_id: number, reason: string) =>
   api<FixedTable[]>(`/tournaments/${id}/tables/replace/`, {
     method: 'POST',
@@ -116,13 +134,78 @@ export const reviewLegacy = (
     body: { historical_only, machine_ids, reason },
   })
 
+/** 409 codes after which the panel must re-read the workspace before anything else. */
+export const conflictRefreshCodes: ReadonlySet<string> = new Set([
+  'lottery_pending',
+  'lottery_voided',
+  'lottery_conflict',
+  'tournament_completed',
+  'stale_standings',
+])
+
+export function sameMembers(a: readonly number[], b: readonly number[]) {
+  const left = new Set(a)
+  const right = new Set(b)
+  return left.size === right.size && [...left].every((pk) => right.has(pk))
+}
+
+// Same comparison as the server: the full ordered list of confirmed table versions.
+export function sameVersions(a: readonly Version[], b: readonly Version[]) {
+  return (
+    a.length === b.length &&
+    a.every((v, i) => v.table_id === b[i].table_id && v.version === b[i].version)
+  )
+}
+
+/** Awaiting a second confirmation for exactly this tie group and these source results. */
+export function isPendingLottery(
+  lottery: Lottery,
+  members: readonly number[],
+  versions: readonly Version[],
+) {
+  return (
+    !lottery.confirmed_at &&
+    !lottery.voided_at &&
+    sameMembers(lottery.members, members) &&
+    sameVersions(lottery.source_versions ?? [], versions)
+  )
+}
+
+const settled = (lottery: Lottery) => Boolean(lottery.confirmed_at || lottery.voided_at)
+
+/**
+ * Overlay write responses on a workspace read which may predate them. A record only
+ * moves from pending to confirmed or voided, so a settled copy always wins.
+ */
+export function mergeLotteries(server: readonly Lottery[], local: readonly Lottery[]) {
+  const rows = new Map(server.map((lottery) => [lottery.id, lottery]))
+  for (const lottery of local) {
+    const known = rows.get(lottery.id)
+    if (!known || (settled(lottery) && !settled(known))) rows.set(lottery.id, lottery)
+  }
+  return [...rows.values()]
+}
+
 // Approximation for display ONLY. All ranking and accumulation comes from API.
 export function displayScore(value: Rational) {
-  const n = BigInt(value.numerator),
-    d = BigInt(value.denominator)
-  const negative = n < 0n
-  const abs = negative ? -n : n
-  const scaled = (abs * 100n + d / 2n) / d
-  return `${negative ? '−' : ''}${scaled / 100n}.${String(scaled % 100n).padStart(2, '0')}`
+  let numerator: bigint
+  let denominator: bigint
+  try {
+    numerator = BigInt(value.numerator)
+    denominator = BigInt(value.denominator)
+  } catch {
+    return '—'
+  }
+  if (denominator === 0n) return '—'
+  if (denominator < 0n) {
+    numerator = -numerator
+    denominator = -denominator
+  }
+  const negative = numerator < 0n
+  const abs = negative ? -numerator : numerator
+  const scaled = (abs * 100n + denominator / 2n) / denominator
+  // A value which rounds to zero is shown unsigned, never as −0.00.
+  const sign = negative && scaled !== 0n ? '−' : ''
+  return `${sign}${scaled / 100n}.${String(scaled % 100n).padStart(2, '0')}`
 }
 export const exactScore = (v: Rational) => `${v.numerator}/${v.denominator}`

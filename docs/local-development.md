@@ -16,7 +16,7 @@
 
 服务绑定为后端 `http://127.0.0.1:8000`、前端 `http://127.0.0.1:5173`。后端health通过后才启动Vite，前端就绪后自动打开浏览器；启动进程内将API_PROXY_TARGET固定为本轮后端、VITE_API_BASE_URL固定为本轮前端同源地址，不改.env文件，防止旧跨域配置将登录请求送往其他服务。自定义部署配置请使用手动/正式部署流程。浏览器保持同一主机名，避免混用localhost与127.0.0.1。
 
-启动窗口可以关闭，后台服务继续运行。退出时双击 `stop.bat`。重复启动复用已验证的现有服务并打开地址；端口属于其他程序时拒绝启动，不终止占用者。
+启动窗口可以关闭，后台服务继续运行。退出时双击 `stop.bat`。重复启动复用已验证的现有服务并打开地址；端口属于其他程序时拒绝启动，不终止占用者。端口检测除试绑 127.0.0.1 外，还会连接 127.0.0.1 与 ::1，监听在 0.0.0.0、::、::1 上的程序同样视为占用。
 
 ### 管理员初始化
 
@@ -33,7 +33,7 @@ Set-Location backend
 
 日志保存在 `.runtime/launcher/<本次运行ID>/`：`backend.log`、`frontend.log`、worker输出。`state.json` 只保存本项目进程身份/阶段，不保存密码、Cookie或数据库URL；所有运行文件及安装缓存均由Git忽略。不要向他人发送含本地隐私的完整日志。
 
-启动器以隐藏PowerShell进程持有Windows Job Object，应用以挂起状态创建、加入该Job后才运行，因此Node构建工具等子进程也受约束。停止前同时核对根目录、运行ID、命令行、PID、创建时间和可执行文件，并在同一内核句柄上重验与终止；不按进程名杀进程。进程已退出可清理过期状态；身份不符/状态损坏时拒绝终止，保留现场供人工核对。
+启动器以隐藏PowerShell进程持有Windows Job Object，应用以挂起状态创建、加入该Job后才运行，因此Node构建工具等子进程也受约束。停止前同时核对根目录、运行ID、命令行、PID、创建时间和可执行文件，并在同一内核句柄上重验与终止；不按进程名杀进程。启动进程已退出，或其 PID 已被创建时间不同的其他程序复用（证明原进程已不在），start/stop 只清理过期状态，不终止复用该 PID 的进程；Job Object 已设置 KILL_ON_JOB_CLOSE，子进程随启动进程退出被系统回收，状态中记录的前后端也逐个按 PID+创建时间核对，若仍以原身份存活则拒绝处理并要求人工核对。创建时间相同但可执行路径/命令行无法确认或不符、状态文件损坏时拒绝终止，保留现场供人工核对。读取状态时对替换瞬间的空文件/缺失/半写 JSON 短暂重试（约 1 秒），仍失败才判为损坏。
 
 若服务启动失败，本次创建的另一服务也会回收，日志保留；不会无提示重试、抢占端口或清理数据库。两次启动/停止之间用项目目录派生的命名Mutex互斥，不会启动多个实例。退出后只清理自己的进程状态，历史日志保留。
 
@@ -44,7 +44,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\start.ps1 -NoB
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\stop.ps1
 ```
 
-`-NonInteractive` 用于已准备环境的自动验证；遇到缺失依赖、配置或迁移会失败，不替代确认。可用进程级 `RIICHI_PYTHON` / `RIICHI_NODE` / `RIICHI_NPM` 指定现有工具路径，日常启动无需设置。Python优先复用现有虚拟环境，RIICHI_PYTHON只用于尚未创建虚拟环境时指定解释器；默认再查项目内运行时、Python Launcher和PATH。工具版本不符时不覆盖虚拟环境，需人工核对。
+`-NonInteractive` 用于已准备环境的自动验证；遇到缺失依赖、配置或迁移会失败，不替代确认。可用进程级 `RIICHI_PYTHON` / `RIICHI_NODE` / `RIICHI_NPM` 指定现有工具路径，日常启动无需设置。Python优先复用现有虚拟环境，RIICHI_PYTHON只用于尚未创建虚拟环境时指定解释器；默认再依次尝试项目内运行时（`.tools/python`）、Python Launcher（`py -3.13`）和PATH；每个候选单独探测，某个失败（例如 Python Launcher 未注册 3.13）会继续尝试下一个，全部不符时才提示未找到 Python 3.13。工具版本不符时不覆盖虚拟环境，需人工核对。
 
 ## Linux / macOS：手动运行
 
@@ -89,6 +89,12 @@ Set-Location frontend
 npm run typecheck
 npm test
 npm run build
+```
+
+无需安装依赖的启动器子测试（Python 发现回退、PID 复用自愈与拒绝）可直接运行，证据写入指定目录：
+
+```powershell
+python scripts\tests\verify_launcher.py --self-test --evidence .verification\launcher-self-test
 ```
 
 架构/规则见[架构](architecture.md)、[需求](requirements.md)、[完整赛事规范](F0-06-functional-spec.md)；实际启动器验证与未验证项见[本轮报告](project/windows-launcher-readme-verification.md)。

@@ -57,20 +57,28 @@ def source_versions(t):
 
 
 def bridge_legacy(t, user):
-    """Lazy safety net for legacy records; migration uses the same declared policy.
+    """Lazy safety net for legacy records; migration 0004 uses the same declared policy.
 
-    Never rewrite old allocations/seats. Even abnormal active reservations are
+    Never rewrite old allocations/seats and never raise on malformed history:
+    every existing table is bridged and even abnormal active reservations are
     mirrored to protect the pool, while resource_state requires explicit review.
+    Only a complete first round (round 1, legal size, tables 1..n, four winds,
+    exact participant cover) becomes the order source.
     """
     if t.resource_state != 'unselected' or not t.rounds.exists():
         return
     first = t.rounds.order_by('round_number').first()
-    structure(first)
+    expected = set(t.participants.values_list('pk', flat=True))
     order = []
-    valid = first.round_number == 1
-    for table in first.tables.all():
-        seats = {s.seat_wind: s.participant_id for s in table.seats.all()}
-        order.extend(seats[w] for w in WINDS)
+    tables = list(first.tables.order_by('table_number'))
+    valid = first.round_number == 1 and len(expected) in (4, 8, 12, 16) and [x.table_number for x in tables] == list(range(1, len(expected)//4+1))
+    for table in tables:
+        seats = list(table.seats.all())
+        by_wind = {s.seat_wind: s.participant_id for s in seats}
+        if len(seats) == 4 and set(by_wind) == set(WINDS):
+            order.extend(by_wind[w] for w in WINDS)
+        else:
+            valid = False
         fixed, _ = TournamentTable.objects.get_or_create(tournament=t, ordinal=table.table_number)
         # Existing allocation snapshot, not today's edited machine number.
         current = table.allocations.filter(status='active').select_related('machine').first()
@@ -81,10 +89,11 @@ def bridge_legacy(t, user):
         if current:
             Reservation.objects.get_or_create(legacy_allocation=current, defaults={'table': fixed, 'machine': current.machine, 'machine_no_snapshot': current.machine_no_snapshot, 'created_by_id': current.allocated_by_id, 'source': 'legacy_bridge_v1'})
         valid = valid and current is not None and current.machine.status == 'available'
-    t.first_round_order = order
-    t.order_source = 'legacy_table_wind_v1'
-    t.resource_state = 'fixed' if valid else 'review_required'
-    t.compatibility_audit = {'source': 'legacy_round_v1', 'identified_at': timezone.now().isoformat(), 'valid_allocations': bool(valid)}
+    valid_order = len(order) == len(expected) == len(set(order)) and set(order) == expected
+    t.first_round_order = order if valid_order else []
+    t.order_source = 'legacy_table_wind_v1' if valid_order else 'legacy_incomplete'
+    t.resource_state = 'fixed' if valid and valid_order else 'review_required'
+    t.compatibility_audit = {'source': 'legacy_round_v1', 'identified_at': timezone.now().isoformat(), 'valid_allocations': bool(valid and valid_order)}
     t.save()
 
 
@@ -94,7 +103,7 @@ def mapping(t):
         active = table.reservations.filter(status='active').select_related('machine').first()
         history = []
         for r in table.reservations.select_related('machine'):
-            history.append({'id': r.pk, 'machine_id': r.machine_id, 'machine_no': r.machine.machine_no, 'machine_no_snapshot': r.machine_no_snapshot, 'status': r.status, 'source': r.source, 'legacy_allocation_id': r.legacy_allocation_id, 'created_by': r.created_by_id, 'created_at': r.created_at, 'released_by': r.released_by_id, 'released_at': r.released_at, 'reason': r.reason})
+            history.append({'id': r.pk, 'machine_id': r.machine_id, 'machine_no': r.machine.machine_no, 'machine_no_snapshot': r.machine_no_snapshot, 'status': r.status, 'source': r.source, 'legacy_allocation_id': r.legacy_allocation_id, 'created_by': r.created_by_id, 'created_at': r.created_at, 'released_by': r.released_by_id, 'released_at': r.released_at, 'reason': r.reason, 'release_reason': r.release_reason})
         rows.append({'id': table.pk, 'ordinal': table.ordinal, 'label': 'ABCD'[table.ordinal - 1], 'reservation_id': active.pk if active else None, 'machine_id': active.machine_id if active else None, 'machine_no': active.machine.machine_no if active else None, 'name': active.machine.name if active else None, 'history': history})
     return rows
 
@@ -215,7 +224,7 @@ def write_result(table_id, user, version, *, points=None, confirm=False):
             if {item['participant_id'] for item in points} - allowed or len(points) != len({x['participant_id'] for x in points}):
                 raise ValidationError({'points': ['重复选手或选手不属于本桌。']})
             row.points = {str(item['participant_id']): item['raw_points'] for item in points}
-        row.edited_by = user
+            row.edited_by = user
         if confirm:
             allowed = {str(s.participant_id) for s in table.seats.all()}
             if set(row.points) != allowed or any(type(x) is not int for x in row.points.values()):
@@ -225,7 +234,11 @@ def write_result(table_id, user, version, *, points=None, confirm=False):
             row.scores = score(t, row.points)
             row.rule_snapshot = rules(t)
             row.status, row.confirmed_by, row.confirmed_at = 'confirmed', user, timezone.now()
-        row.save()
+        if points is None and row.pk:
+            # Confirmation only: the draft editor and edited_at (auto_now) stay untouched.
+            row.save(update_fields=['version', 'status', 'scores', 'rule_snapshot', 'confirmed_by', 'confirmed_at'])
+        else:
+            row.save()
         return result_data(table)
 
 
@@ -295,8 +308,12 @@ def record_lottery(pk, user, values):
         members = values['members']
         if len(members) != len(set(members)) or set(members) not in [set(g) for g in groups] or len(values['order']) != len(members) or set(values['order']) != set(members):
             raise ValidationError({'order': ['抽签须准确覆盖一个待决组，不能缺少或重复选手。']})
-        if values['source_versions'] != source_versions(t):
+        versions = source_versions(t)
+        if values['source_versions'] != versions:
             conflict('来源成绩已变化，请刷新最终排名。', 'stale_standings')
+        # At most one open record per group and source version: re-recording until a preferred order appears is not allowed.
+        if any(set(x.members) == set(members) and x.source_versions == versions for x in t.lotteries.filter(confirmed_at__isnull=True, voided_at__isnull=True)):
+            conflict('该并列组已有待确认的抽签记录，请先确认或作废后再录入。', 'lottery_pending')
         return LotteryRecord.objects.create(tournament=t, created_by=user, rules_version=t.rules_version, **values)
 
 
@@ -304,6 +321,8 @@ def confirm_lottery(pk, lottery_id, user):
     with locked(pk) as (t, _):
         ready_final(t)
         row = get_object_or_404(LotteryRecord, pk=lottery_id, tournament=t)
+        if row.voided_at:
+            conflict('抽签记录已作废。', 'lottery_voided')
         _, groups = ranking(t)
         if row.confirmed_at or row.source_versions != source_versions(t) or set(row.members) not in [set(g) for g in groups]:
             conflict('抽签已确认或来源已过期。', 'lottery_conflict')
@@ -312,10 +331,26 @@ def confirm_lottery(pk, lottery_id, user):
         return row
 
 
+def void_lottery(pk, lottery_id, user, reason):
+    """Void an unconfirmed record with audit; it stays listed but never ranks."""
+    with locked(pk, writable=False) as (t, _):
+        if t.status == 'completed':
+            conflict('赛事已完赛，抽签记录只读。', 'tournament_completed')
+        row = get_object_or_404(LotteryRecord, pk=lottery_id, tournament=t)
+        if row.confirmed_at:
+            conflict('已确认的抽签不能作废。', 'lottery_conflict')
+        if row.voided_at:
+            conflict('抽签记录已作废。', 'lottery_voided')
+        row.voided_by, row.voided_at, row.void_reason = user, timezone.now(), reason
+        row.save(update_fields=['voided_by', 'voided_at', 'void_reason'])
+        return row
+
+
 def release_reservation(row, user, reason):
+    # Keep the creation reason (e.g. fault replacement); audit the release separately.
     now = timezone.now()
-    row.status, row.released_by, row.released_at, row.reason = 'released', user, now, reason
-    row.save()
+    row.status, row.released_by, row.released_at, row.release_reason = 'released', user, now, reason
+    row.save(update_fields=['status', 'released_by', 'released_at', 'release_reason'])
     if row.legacy_allocation_id:
         MachineAllocation.objects.filter(pk=row.legacy_allocation_id, status='active').update(status='released', released_by=user, released_at=now, release_reason=reason)
 
@@ -323,6 +358,8 @@ def release_reservation(row, user, reason):
 def replace_machine(pk, ordinal, user, machine_id, reason):
     with locked(pk) as (t, machines):
         bridge_legacy(t, user)
+        if t.resource_state == 'historical_only':
+            conflict('仅补录历史成绩的赛事不能占用新物理桌。', 'historical_only')
         table = get_object_or_404(TournamentTable, tournament=t, ordinal=ordinal)
         current = table.reservations.filter(status='active').first()
         if not current:
@@ -349,16 +386,19 @@ def review_legacy(pk, user, *, historical_only, machine_ids, reason):
             needed = t.participants.count() // 4
             if len(machine_ids) != needed or len(set(machine_ids)) != needed:
                 raise ValidationError({'machine_ids': ['须为每个逻辑桌选择一个物理桌。']})
-            for ordinal, pk in enumerate(machine_ids, 1):
-                table = t.fixed_tables.get(ordinal=ordinal)
+            tables = {x.ordinal: x for x in t.fixed_tables.all()}
+            if any(ordinal not in tables for ordinal in range(1, needed + 1)):
+                conflict('旧赛事逻辑桌结构不完整，需人工核对。', 'legacy_structure_invalid')
+            for ordinal, machine_id in enumerate(machine_ids, 1):
+                table = tables[ordinal]
                 current = table.reservations.filter(status='active').first()
-                if current and current.machine_id == pk and machines[pk].status == 'available':
+                if current and current.machine_id == machine_id and machine_id in machines and machines[machine_id].status == 'available':
                     continue
-                if pk not in machines or machines[pk].status != 'available' or pk in occupied_ids():
+                if machine_id not in machines or machines[machine_id].status != 'available' or machine_id in occupied_ids():
                     conflict('复核目标已被占用或不可用，不会抢回旧设备。', 'machine_occupied')
                 if current:
                     release_reservation(current, user, reason)
-                Reservation.objects.create(table=table, machine=machines[pk], machine_no_snapshot=machines[pk].machine_no, created_by=user, source='legacy_review_v1', reason=reason)
+                Reservation.objects.create(table=table, machine=machines[machine_id], machine_no_snapshot=machines[machine_id].machine_no, created_by=user, source='legacy_review_v1', reason=reason)
             t.resource_state = 'fixed'
         t.compatibility_audit = {**t.compatibility_audit, 'reviewed_by': user.pk, 'reviewed_at': timezone.now().isoformat(), 'historical_only': historical_only, 'reason': reason}
         t.save()

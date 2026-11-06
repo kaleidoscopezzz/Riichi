@@ -62,6 +62,18 @@ class ReviewWrite(StrictFieldsMixin, serializers.Serializer):
     reason = serializers.CharField(max_length=500)
 
 
+class ExactText(serializers.CharField):
+    def to_internal_value(self, data):
+        if not isinstance(data, str):
+            self.fail('invalid')
+        return super().to_internal_value(data)
+
+
+class VoidWrite(StrictFieldsMixin, serializers.Serializer):
+    # Trimmed first; blank or over 500 characters is rejected.
+    reason = ExactText(max_length=500)
+
+
 def validated(cls, request):
     serializer = cls(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -73,7 +85,7 @@ def response(data, status=200):
 
 
 def lottery_data(row):
-    return {key: getattr(row, key) for key in ['id', 'members', 'order', 'method', 'description', 'drawn_at', 'created_by_id', 'created_at', 'confirmed_by_id', 'confirmed_at', 'source_versions', 'rules_version']}
+    return {key: getattr(row, key) for key in ['id', 'members', 'order', 'method', 'description', 'drawn_at', 'created_by_id', 'created_at', 'confirmed_by_id', 'confirmed_at', 'source_versions', 'rules_version', 'voided_by_id', 'voided_at', 'void_reason']}
 
 
 class AdminView(APIView):
@@ -123,6 +135,11 @@ class ConfirmLotteryView(AdminView):
     def post(self, request, pk, lottery_id):
         validated(ConfirmWrite, request)
         return response(lottery_data(svc.confirm_lottery(pk, lottery_id, request.user)))
+
+
+class VoidLotteryView(AdminView):
+    def post(self, request, pk, lottery_id):
+        return response(lottery_data(svc.void_lottery(pk, lottery_id, request.user, validated(VoidWrite, request)['reason'])))
 
 
 class FinishView(AdminView):

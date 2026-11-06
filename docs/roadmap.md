@@ -1,6 +1,6 @@
 # 开发路线
 
-D0-01已CLOSED / PASS；F0-06候选已通过Planner源码/证据审查，UAT-FIX-01整改中，正式基线暂缓。详细业务规则只在[F0-06完整功能规范](F0-06-functional-spec.md)维护，当前已实现事实见[需求总览](requirements.md)。
+D0-01已CLOSED / PASS；F0-06候选已通过Planner源码/证据审查，此后UAT-FIX-01整改、Windows启动器、选手联想及Docker生产部署（PR #1）已先后合入main（`b882ef0`）。远端存在Tag `baseline/F0-06`（解引用`b9e83bb`，早于UAT整改），与下文“UAT再次验收后才建立基线”的旧表述不一致，含义待Owner确认。详细业务规则只在[F0-06完整功能规范](F0-06-functional-spec.md)维护，当前已实现事实见[需求总览](requirements.md)。
 
 | 阶段 | 范围 | 当前状态 |
 | --- | --- | --- |
@@ -10,8 +10,9 @@ D0-01已CLOSED / PASS；F0-06候选已通过Planner源码/证据审查，UAT-FIX
 | F0-04 赛事领域 | 草稿、独立配置、参赛名单、启动冻结 | **CLOSED / PASS**；baseline/F0-04，434a8aa9ae5bd075705322e0556688b7424db16a |
 | F0-05 首轮与资源 | 首轮随机、轮次级设备分配/调整/释放、并发和历史 | **CLOSED / PASS**；baseline/F0-05，41929da1e53f8bb481beb4ea3bc31b65f9ee86ff |
 | D0-01 开发前文档统一 | 最终需求、两个已解决决胜规则、固定选桌与兼容设计、完整验收 | **CLOSED / PASS**；文档Commit `5f31891b4ae3a589057e7054758abb08ca42ec72`，Owner确认已推送及双端核验 |
-| F0-06 完整比赛闭环 | 成绩草稿/确认→精确计分→累计榜→后续分桌→冠军决胜/公开抽签→完赛及自动释放；同时完成赛事级选桌及非破坏性兼容 | **Planner源码/证据审查通过，Owner UAT整改中**；V1.0最后一次核心功能开发，不拆F0-07/F0-08；无F0-06正式基线 |
-| 集成测试与部署验收 | 全流程/迁移/并发验证、PostgreSQL验证、安全加固、部署与发布验收 | F0-06后执行，不再拆出独立计分/分桌/冠军核心开发阶段；当前生产部署未验证 |
+| F0-06 完整比赛闭环 | 成绩草稿/确认→精确计分→累计榜→后续分桌→冠军决胜/公开抽签→完赛及自动释放；同时完成赛事级选桌及非破坏性兼容 | **Planner源码/证据审查通过**；UAT-FIX-01已合入main（`checkpoint/UAT-FIX-01`，`c9d7bb8`）。远端Tag `baseline/F0-06`指向`b9e83bb`（2026-11-04 14:09，说明“approved”），是否作为正式基线待Owner确认；V1.0最后一次核心功能开发，不拆F0-07/F0-08 |
+| 集成测试与部署验收 | 全流程/迁移/并发验证、PostgreSQL验证、安全加固、部署与发布验收 | Linux Docker Compose生产部署已合入main（PR #1，`b882ef0`），容器内PostgreSQL全量测试通过；真实Ubuntu服务器与公网HTTPS仍UNVERIFIED。CI已建立（`.github/workflows/ci.yml`） |
+| 审查问题修复 | 代码审查发现的抽签、审计、兼容边界、认证/错误码、输入校验、前端交互、启动器与部署问题 | 本地分支`fix/review-findings`修复中，见[修复报告](project/review-findings-fix-verification.md)；新增迁移tournaments/0005、0006 |
 | 未来版本候选 | 微信、团体赛等 | 不纳入V1.0，须另行立项 |
 
 ## 已完成启动门禁与本次停止点
