@@ -4,6 +4,12 @@
 set -euo pipefail
 source "$(dirname -- "${BASH_SOURCE[0]}")/lib.sh"
 umask 077
+receipt=""
+if [[ "$#" -ne 0 ]]; then
+    [[ "$#" -eq 2 && "$1" == --receipt ]] || { echo '用法：backup.sh [--receipt 新回执.json]' >&2; exit 1; }
+    receipt="$2"
+    [[ ! -e "$receipt" ]] || { echo '回执已存在，拒绝覆盖。' >&2; exit 1; }
+fi
 temporary=""
 cleanup() {
     result=$?
@@ -24,4 +30,18 @@ compose exec -T db sh -eu -c 'exec pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB"
 [[ -s "$temporary" ]]
 # Publish without ever replacing an existing file, even on simultaneous runs.
 ln -- "$temporary" "$destination"
+if [[ -n "$receipt" ]]; then
+    python3 - "$destination" "$receipt" <<'PY'
+import hashlib, json, os, sys
+from pathlib import Path
+archive = Path(sys.argv[1]).resolve()
+digest = hashlib.sha256()
+with archive.open('rb') as stream:
+    for block in iter(lambda: stream.read(1024 * 1024), b''):
+        digest.update(block)
+with open(sys.argv[2], 'x', encoding='utf-8') as stream:
+    os.chmod(sys.argv[2], 0o600)
+    json.dump({'archive': str(archive), 'sha256': digest.hexdigest(), 'bytes': archive.stat().st_size}, stream)
+PY
+fi
 printf '%s 备份 SUCCESS；bytes=%s；%s\n' "$(date -u +%FT%TZ)" "$(wc -c < "$destination" | tr -d ' ')" "$destination"

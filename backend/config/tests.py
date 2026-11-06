@@ -19,6 +19,7 @@ class ProductionConfigurationTests(SimpleTestCase):
             "CORS_ALLOWED_ORIGINS": "https://riichi.example",
             "CSRF_TRUSTED_ORIGINS": "https://riichi.example",
             "POSTGRES_DB": "",
+            "RIICHI_LOAD_DOTENV": "False",
             **overrides,
         })
         return subprocess.run(
@@ -78,3 +79,21 @@ class ProductionConfigurationTests(SimpleTestCase):
     def test_discrete_database_configuration(self):
         result = self.import_production(POSTGRES_DB="riichi", POSTGRES_USER="app", POSTGRES_PASSWORD="qa-import-only", DATABASE_URL="sqlite:///:memory:")
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_dotenv_disabled_never_opens_workstation_file_and_local_default_is_preserved(self):
+        script = """
+from unittest.mock import patch
+with patch('environ.Env.read_env') as read:
+    import config.settings.base
+    print(read.call_count)
+"""
+        for enabled, expected in [("False", 0), ("True", 1), (None, 1)]:
+            environment = {**os.environ, "SECRET_KEY": secrets.token_urlsafe(64), "DATABASE_URL": "sqlite:///:memory:"}
+            if enabled is None:
+                environment.pop("RIICHI_LOAD_DOTENV", None)
+            else:
+                environment["RIICHI_LOAD_DOTENV"] = enabled
+            with self.subTest(enabled=enabled):
+                result = subprocess.run([sys.executable, "-c", script], cwd=Path(__file__).resolve().parent.parent, env=environment, capture_output=True, text=True, timeout=15, check=False)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stdout.strip(), str(expected))

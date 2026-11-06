@@ -59,7 +59,8 @@
 | 后端 | Python 3.13 · Django 5.2 LTS · Django REST Framework |
 | 前端 | React · TypeScript · Vite |
 | 界面 | Tailwind CSS · shadcn/ui · Radix UI · Lucide |
-| 数据 | SQLite 本地开发；预留 PostgreSQL 配置与驱动 |
+| 数据 | SQLite 本地开发；PostgreSQL 生产 |
+| 生产入口 | Caddy 自动 HTTPS → Nginx 静态资源与 API 代理 |
 | 会话与计分 | Django Session / CSRF · Fraction 精确计分 |
 
 依赖精确版本见 [requirements.txt](backend/requirements.txt) 和 [package-lock.json](frontend/package-lock.json)。更多设计见[架构文档](docs/architecture.md)。
@@ -92,7 +93,7 @@
 
 使用[手动启动说明](docs/local-development.md#linux--macos手动运行)，分别运行 Django 与 Vite。
 
-Ubuntu 服务器生产部署请使用 [Linux Docker Compose 部署指南](docs/deployment-linux.md)。
+Linux 服务器生产部署请使用 [Docker Compose 部署指南](docs/deployment-linux.md)，上线进度与已验证范围见[生产交付记录](docs/project/production-launch-verification.md)。
 
 ## 使用流程
 
@@ -139,4 +140,4 @@ npm run build
 - 已确认成绩保持只读，赛事启动后冻结名单与规则；不提供任意积分公式或补正入口。
 - 公开抽签由现场完成后记录、复核，系统不代替真实抽签。
 - 微信、团体赛、密码找回等未纳入当前范围。
-- PostgreSQL 实连、正式部署与公网安全加固需独立验证；本地启动成功不等于完成生产部署。
+- 本地启动、容器验证和真实生产上线分别验收；当前实测平台及未验证项见[生产交付记录](docs/project/production-launch-verification.md)。

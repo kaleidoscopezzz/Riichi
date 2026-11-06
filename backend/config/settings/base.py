@@ -7,8 +7,10 @@ from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 env = environ.Env(DEBUG=(bool, False))
-# Environment variables take precedence; .env is local-only and ignored by Git.
-environ.Env.read_env(BASE_DIR / ".env", overwrite=False)
+# Environment variables take precedence; QA and containers can explicitly avoid
+# opening any workstation .env at all. Local launcher behavior stays unchanged.
+if env.bool("RIICHI_LOAD_DOTENV", default=True):
+    environ.Env.read_env(BASE_DIR / ".env", overwrite=False)
 
 SECRET_KEY = env("SECRET_KEY")
 if len(SECRET_KEY) < 50 or len(set(SECRET_KEY)) < 5 or SECRET_KEY.startswith("django-insecure-"):

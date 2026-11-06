@@ -144,3 +144,19 @@ class LegacyMigrationTests(TransactionTestCase):
         apps = self.migrate()
         self.assertEqual(apps.get_model('tournaments', 'TournamentMachineReservation').objects.using(ALIAS).get(pk=old.pk).release_reason, '正式完赛自动释放')
         self.assert_unchanged(history)
+
+    def test_shared_review_rehearsal_checks_original_schema_projection(self):
+        from verification.review_migration_check import BEFORE_REVIEW, rehearse_review_migrations
+
+        apps = self.migrate(BEFORE_REVIEW)
+        model = lambda label: apps.get_model(*label.split('.')).objects.using(ALIAS)
+        admin = model('accounts.User').create(username='review_qa_admin', is_staff=True)
+        tournament = model('tournaments.Tournament').create(name='review QA', round_count=1, created_by=admin)
+        machine = model('machines.MahjongMachine').create(machine_no='004', name='review QA table')
+        members = [model('tournaments.TournamentParticipant').create(tournament=tournament, player=model('players.PlayerProfile').create(user=model('accounts.User').create(username=f'review_player{i}'), nickname=f'QA{i}'), display_name_snapshot=f'QA{i}').pk for i in range(2)]
+        result = rehearse_review_migrations(self.db, tournament_id=tournament.pk, admin_id=admin.pk, machine_id=machine.pk, members=members)
+        self.assertEqual(result['result'], 'PASS')
+        self.assertEqual(result['database_vendor'], 'sqlite')
+        self.assertEqual(result['invalid_void_states_rejected'], 3)
+        self.assertTrue(result['released_only_copy'])
+        self.assertTrue(result['migration_rerun_noop'])

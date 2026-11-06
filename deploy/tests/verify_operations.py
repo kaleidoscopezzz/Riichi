@@ -9,6 +9,9 @@ import os
 from pathlib import Path
 import secrets
 import subprocess
+import sys
+
+from qa_support import load_qa
 
 
 def main():
@@ -17,9 +20,7 @@ def main():
     parser.add_argument("--work-dir", required=True)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
-    env_file = Path(args.env_file).resolve()
-    values = dict(line.split("=", 1) for line in env_file.read_text().splitlines() if line and not line.startswith("#"))
-    assert values["POSTGRES_DB"] == "riichi_qa" and values["COMPOSE_PROJECT_NAME"].startswith("riichi-docker-qa"), "Isolated QA project required"
+    env_file, values = load_qa(args.env_file, root)
     work = Path(args.work_dir).resolve()
     assert work.is_relative_to(root / ".verification"), "QA artifacts must stay ignored"
     work.mkdir(parents=True, exist_ok=True)
@@ -50,6 +51,14 @@ def main():
         return json.loads(invoke(label, command + ["api", "python", "-m", "verification.data_manifest"]))
 
     before = manifest("manifest-before")
+    # Public certificates and the local QA CA must survive restart/recreation.
+    # Hash certificate files only; never emit CA or certificate private keys.
+    def certificate_hashes(label):
+        return invoke(label, compose + ["exec", "-T", "caddy", "sh", "-eu", "-c",
+            "find /data/caddy -type f -name '*.crt' -exec sha256sum '{}' ';' | sort"])
+
+    certificates = certificate_hashes("certificates-before")
+    assert "root.crt" in certificates and "localhost.crt" in certificates
     other_cwd = work / "任意 工作目录"
     other_cwd.mkdir(exist_ok=True)
     invoke("status-arbitrary-cwd", script("status"), cwd=other_cwd)
@@ -77,36 +86,44 @@ def main():
     invoke("restart", compose + ["restart"])
     invoke("wait-after-restart", compose + ["up", "-d", "--wait", "--wait-timeout", "120"])
     assert manifest("manifest-restarted") == before
+    assert certificate_hashes("certificates-restarted") == certificates
     invoke("recreate", compose + ["up", "-d", "--force-recreate", "--wait", "--wait-timeout", "120"])
     assert manifest("manifest-recreated") == before
+    assert certificate_hashes("certificates-recreated") == certificates
     invoke("db-stop-for-failure", compose + ["stop", "db"])
     invoke("backup-db-unavailable", script("backup"), expected=1, contains="FAILED")
     invoke("db-restart", compose + ["up", "-d", "--wait", "db"])
     assert manifest("manifest-after-failure") == before
     services = {}
-    for service in ("api", "nginx", "db"):
+    for service in ("caddy", "api", "nginx", "db"):
         container = invoke(f"id-{service}", compose + ["ps", "-q", service]).strip()
         info = json.loads(subprocess.check_output(["docker", "inspect", container]))[0]
         ports = info["HostConfig"]["PortBindings"] or {}
         networks = list(info["NetworkSettings"]["Networks"])
-        if service in ("api", "db"):
+        if service != "caddy":
             assert not ports, f"{service} must not publish ports"
         else:
-            assert set(ports) == {"8080/tcp", "8443/tcp"}
+            assert set(ports) == {"80/tcp", "443/tcp"}
             assert all(binding["HostIp"] == "127.0.0.1" for bindings in ports.values() for binding in bindings)
         if service != "db":
             assert info["Config"]["User"].split(":")[0] not in ("", "0", "root")
             assert info["HostConfig"]["ReadonlyRootfs"]
         services[service] = {"published_ports": sorted(ports), "networks": networks, "user": info["Config"]["User"]}
-    for network in ("web", "data"):
+    for network in ("proxy", "web", "data"):
         name = values["COMPOSE_PROJECT_NAME"] + "_" + network
         info = json.loads(subprocess.check_output(["docker", "network", "inspect", name]))[0]
         assert info["Internal"]
     assert all(not name.endswith("_data") for name in services["nginx"]["networks"])
     assert all(name.endswith("_data") for name in services["db"]["networks"])
+    assert set(name.rsplit("_", 1)[-1] for name in services["caddy"]["networks"]) == {"edge", "proxy"}
+    caddy_id = invoke("id-caddy-network", compose + ["ps", "-q", "caddy"]).strip()
+    caddy_info = json.loads(subprocess.check_output(["docker", "inspect", caddy_id]))[0]
+    assert caddy_info["NetworkSettings"]["Networks"][values["COMPOSE_PROJECT_NAME"] + "_proxy"]["IPAddress"] == values["CADDY_PROXY_IP"]
     role = invoke("app-role", compose + ["exec", "-T", "db", "sh", "-c", 'psql -X -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At -c "SELECT rolsuper,rolcreatedb,rolcreaterole FROM pg_roles WHERE rolname=\'riichi\'"'])
     assert role.strip() == "f|f|f"
-    print(json.dumps({"result": "PASS", "checks": outcomes, "canonical_counts_hashes_fk_integrity": "equal before/restore/restart/recreate/failure", "concurrent_backups": len(created), "services": services}, ensure_ascii=False, indent=2))
+    invoke("proxy-matrix", [sys.executable, str(root / "deploy/tests/verify_proxy.py"),
+        "--env-file", str(env_file), "--work-dir", str(work)])
+    print(json.dumps({"result": "PASS", "checks": outcomes, "certificate_restart_recreate": "unchanged", "canonical_counts_hashes_fk_integrity": "equal before/restore/restart/recreate/failure", "concurrent_backups": len(created), "services": services}, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

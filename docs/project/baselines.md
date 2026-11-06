@@ -1,6 +1,12 @@
 # 本地与 GitHub 双基线制度
 
-## 当前正式基线
+## 当前生产任务起点（2026-11-06）
+
+本地分支main、HEAD、`git ls-remote origin refs/heads/main`只读核验均为`34d4cbdea89bba81a503f2b476f2e1d69de5d714`，起点工作区干净；Git历史已包含PR #1 Docker生产部署及PR #2审查修复/CI合并。随后在该main上建立`codex/production-launch`独立任务分支。该事实更新不重写下文各阶段历史快照，不更改既有Tag或原验收状态。
+
+Owner最新将任务分为两阶段：第一阶段授权开发、提交/推送、PR、独立审查及CI通过后合并main，随后停止；第二阶段等待新服务器与明确授权，不连接任何正式服务器。最终候选SHA、PR/CI和main合并SHA在[本轮验证报告](production-launch-verification.md)记录，实际部署SHA在第二阶段实测后登记；不得把提交自身SHA写入其自身文件造成自引用。历史F0-06 Tag含义不作为此次生产基线的替代，不自行重打Tag。
+
+## F0-01～F0-05正式基线与后续历史记录
 
 根据 Owner 下发的 F0-02 任务，F0-01 已正式验收：Tag `baseline/F0-01`，Commit `94a1fec747806682602dd24f7edbbcc4e27d07f0`。本地已用 `git rev-parse baseline/F0-01^{commit}` 验证 Tag 解引用指向该 Commit（附注 Tag 对象 SHA 与 Commit SHA 不同是正常现象）。
 
@@ -68,3 +74,7 @@ Owner确认F0-06 GitHub候选为`b9e83bb0c8e31ab660b37e7e0a46c1f0bb424e65`，Pla
 | `main` | `b882ef065bbd9ebae55f6a04ea324675ee41e3fb` | 依次合入UAT-FIX-01、Windows启动器（`49febeb`）、选手联想（`4bc28e5`）及PR #1 Docker生产部署（`babac8f`） |
 
 审查问题修复在本地分支`fix/review-findings`进行，未commit/tag/push，见[修复报告](review-findings-fix-verification.md)。
+
+## 2026-11-06 Caddy 部署工程验证
+
+第一阶段从 `34d4cbdea89bba81a503f2b476f2e1d69de5d714` 开始。候选 `3cef736941d3825e1d67b2926cf646251e9ee31c` 通过六项隔离 CI。正式合并提交以 [PR #3](https://github.com/kaleidoscopezzz/Riichi/pull/3) 记录为准。实际部署 SHA 在第二阶段验收后登记。详见[验证报告](production-launch-verification.md)。

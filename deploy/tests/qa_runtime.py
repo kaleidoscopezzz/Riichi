@@ -12,7 +12,9 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.error import HTTPError
-from urllib.request import HTTPCookieProcessor, HTTPSHandler, Request, build_opener
+from urllib.request import HTTPCookieProcessor, HTTPRedirectHandler, HTTPSHandler, Request, build_opener
+
+from qa_support import load_qa
 
 
 def main():
@@ -21,9 +23,9 @@ def main():
     parser.add_argument("--ca", required=True)
     parser.add_argument("--url", required=True)
     args = parser.parse_args()
-    assert args.url.startswith("https://localhost:"), "QA is loopback only"
     root = Path(__file__).resolve().parents[2]
-    compose = ["docker", "compose", "--env-file", args.env_file, "-f", str(root / "deploy/compose.yaml")]
+    env_file, values = load_qa(args.env_file, root, args.url)
+    compose = ["docker", "compose", "--env-file", str(env_file), "-f", str(root / "deploy/compose.yaml")]
     username, password = "qa_" + secrets.token_hex(6), secrets.token_urlsafe(32)
     seed = '''
 import json, sys
@@ -41,6 +43,17 @@ u=U(username='qa_nonstaff');u.set_password(credentials['password']);u.save()
     jar = http.cookiejar.CookieJar()
     client = build_opener(HTTPSHandler(context=ssl.create_default_context(cafile=args.ca)), HTTPCookieProcessor(jar))
     count = 0
+
+    class NoRedirect(HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            return None
+
+    try:
+        build_opener(NoRedirect).open(f"http://localhost:{values['HTTP_PORT']}/tournaments?qa=1", timeout=10)
+        raise AssertionError("HTTP request must redirect to HTTPS")
+    except HTTPError as response:
+        assert response.code == 308 and response.headers["Location"] == args.url + "/tournaments?qa=1"
+        response.close()
 
     def raw(path, method="GET", body=None, headers=None):
         request = Request(args.url + path, method=method, headers=headers or {}, data=json.dumps(body).encode() if body is not None else None)
@@ -70,14 +83,15 @@ u=U(username='qa_nonstaff');u.set_password(credentials['password']);u.save()
     assert raw("/.env")[0] == 404
     assert call("/not-a-real-api/", expected=404)["error"]["code"] == "not_found"
     assert call("/health/")["status"] == "ok"
-    # Spoofed proxy proto is overwritten by TLS Nginx; no redirect loop.
+    # Public Caddy overwrites spoofed protocol headers; Nginx preserves its
+    # trusted HTTPS assertion despite the internal Caddy->Nginx HTTP hop.
     assert raw("/api/v1/health/", headers={"X-Forwarded-Proto": "http", "X-Forwarded-Host": "evil.invalid"})[0] == 200
     call("/players/", expected=403)
     call("/auth/register/", "POST", {}, 403)
     credentials = {"username": username, "password": password}
     call("/auth/login/", "POST", credentials, 403, csrf=False)
     call("/auth/login/", "POST", credentials, 403, origin="https://evil.invalid")
-    call("/auth/login/", "POST", {"username": "qa_nonstaff", "password": password}, 403)
+    assert call("/auth/login/", "POST", {"username": "qa_nonstaff", "password": password}, 400)["error"]["code"] == "invalid_credentials"
     call("/auth/login/", "POST", credentials)
     assert any(cookie.name == "sessionid" and cookie.secure and cookie.has_nonstandard_attr("HttpOnly") for cookie in jar)
     assert any(cookie.name == "csrftoken" and cookie.secure for cookie in jar)
@@ -108,7 +122,13 @@ u=U(username='qa_nonstaff');u.set_password(credentials['password']);u.save()
                 call(f'/round-tables/{table["id"]}/result/confirm/', "POST", {"version": result["version"], "points": points}, 409)
         workspace = call(f"/tournaments/{pk}/workspace/")
         for members in workspace["unresolved_groups"]:
-            draw = call(f"/tournaments/{pk}/lotteries/", "POST", {"members": members, "order": members[::-1], "source_versions": workspace["source_versions"], "method": "隔离QA抽签模拟", "description": "Docker HTTPS 流程验证", "drawn_at": datetime.now(timezone.utc).isoformat()}, 201)
+            draw_body = {"members": members, "order": members[::-1], "source_versions": workspace["source_versions"], "method": "隔离QA抽签模拟", "description": "Docker HTTPS 流程验证", "drawn_at": datetime.now(timezone.utc).isoformat()}
+            draw = call(f"/tournaments/{pk}/lotteries/", "POST", draw_body, 201)
+            assert call(f"/tournaments/{pk}/lotteries/", "POST", draw_body, 409)["error"]["code"] == "lottery_pending"
+            voided = call(f'/tournaments/{pk}/lotteries/{draw["id"]}/void/', "POST", {"reason": "隔离QA验证留痕作废与重录"})
+            assert voided["voided_at"] and voided["voided_by_id"] and voided["void_reason"]
+            call(f'/tournaments/{pk}/lotteries/{draw["id"]}/confirm/', "POST", {"confirmed": True}, 409)
+            draw = call(f"/tournaments/{pk}/lotteries/", "POST", draw_body, 201)
             call(f'/tournaments/{pk}/lotteries/{draw["id"]}/confirm/', "POST", {"confirmed": True})
         final = call(f"/tournaments/{pk}/complete/", "POST", {"confirmed": True, "source_versions": workspace["source_versions"]})
         assert final["champion_id"] and len(final["standings"]) == size
@@ -120,7 +140,7 @@ u=U(username='qa_nonstaff');u.set_password(credentials['password']);u.save()
     limited = [(json.loads(body), headers) for status, body, headers in statuses if status == 429]
     assert limited and limited[0][0]["error"]["code"] == "login_rate_limited"
     assert limited[0][1]["Retry-After"] == "60"
-    print(json.dumps({"result": "PASS", "https": "isolated self-signed CA verified", "requests_including_csrf": count, "session_csrf_proxy_headers_spa_api404_rate_limit": "PASS", "runs": runs}, ensure_ascii=False, indent=2))
+    print(json.dumps({"result": "PASS", "https": "isolated Caddy internal CA verified; not public ACME acceptance", "requests_including_csrf": count, "session_csrf_proxy_headers_spa_api404_rate_limit": "PASS", "runs": runs}, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

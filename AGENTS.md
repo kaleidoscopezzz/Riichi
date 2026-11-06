@@ -4,7 +4,9 @@
 
 Riichi定位为**轻量级四人立直麻将个人赛事管理系统**，帮助管理员快速组织比赛、录入成绩、重排座次并决出冠军；设备调度不是产品主线。需求以[requirements](docs/requirements.md)为总览，F0-06详细规则以[统一功能规范](docs/F0-06-functional-spec.md)为准，技术与兼容设计见[architecture](docs/architecture.md)。
 
-当前任务 **审查问题修复（本地分支 `fix/review-findings`）**。起点为main `b882ef065bbd9ebae55f6a04ea324675ee41e3fb`（已合并PR #1 Docker生产部署），工作区干净。范围是代码审查发现的问题：公开抽签同组仅一条待确认记录及留痕作废、成绩录入与确认审计分离、旧赛事兼容边界、登录/错误码/错误响应头、昵称与搜索输入校验、赛事草稿乐观并发、前端登录回跳/抽签刷新/点数严格解析/错误边界、Windows启动器PID复用自愈与PS5.1探测、部署跳转端口与备份目录，并新增CI。新增迁移tournaments/0005、0006（只加字段；0006仅把已释放预留的旧reason复制到新列，不改旧列）。验证使用独立QA数据库，不写Owner数据库；Owner库升级前须备份并明确确认迁移。
+当前任务 **Linux生产上线第一阶段：Caddy工程与集成交付（分支 `codex/production-launch`）**。只读核验的起点为本地及远程 main `34d4cbdea89bba81a503f2b476f2e1d69de5d714`，工作区当时干净；PR #1 Docker生产部署和PR #2审查问题修复/CI均已合并。Owner最新范围要求：完成工程、测试、Push/PR、CI全绿、独立审查、合并main后停止；第二阶段等待Owner提供新服务器并明确授权，第一阶段绝不连接旧服务器或任何正式服务器。任务计划与进度见[生产上线计划](docs/project/production-launch-plan.md)，本轮实际命令、证据、阻塞与UNVERIFIED见[生产上线验证](docs/project/production-launch-verification.md)。旧修复分支、未提交等描述是历史阶段快照，不代表当前Git状态。
+
+本轮保留Docker、Nginx静态资源/API代理/登录限流，增加Caddy为唯一公网80/443入口，自动申请/续期Let's Encrypt并持久化ACME状态；校验Caddy→Nginx→Django的HTTPS、代理头及真实客户端IP信任。生产IP/域名仅为忽略的运行参数，不写入仓库配置、测试或通用文档。默认沿用服务器现有业务库，缺库时正常初始化空库；不导入本地Owner SQLite。完整赛事写入只在隔离QA，生产只做管理员登录、读取与安全检查，不造业务记录。
 
 F0-01～F0-05保持CLOSED / PASS，D0-01文档Commit `5f31891b4ae3a589057e7054758abb08ca42ec72`。F0-05正式代码基线解引用为`41929da1e53f8bb481beb4ea3bc31b65f9ee86ff`。远端另有Tag `baseline/F0-06`（2026-11-04 14:09创建，解引用`b9e83bb0c8e31ab660b37e7e0a46c1f0bb424e65`，说明为“approved”，早于UAT-FIX-01整改）与`checkpoint/UAT-FIX-01`（解引用`c9d7bb87d4c8badb33513a38a147c9a24807c924`）。该Tag与“UAT再次验收后才建立F0-06基线”的旧表述不一致，其最终含义由Owner确认，文档不据此自行改判验收状态。所有历史迁移/报告/证据与Tag保留。
 
@@ -12,7 +14,7 @@ V1.0当前只供雀庄老板/管理员使用。公开注册关闭，普通用户
 
 ## 技术与工程边界
 
-- 前后端分离、模块化单体：backend为Python3.13/Django5.2 LTS/DRF，SQLite开发、PostgreSQL生产预留；frontend为React/TypeScript/Vite/Tailwind/shadcn/ui/Lucide。
+- 前后端分离、模块化单体：backend为Python3.13/Django5.2 LTS/DRF，SQLite开发、PostgreSQL生产；frontend为React/TypeScript/Vite/Tailwind/shadcn/ui/Lucide。生产为Caddy→Nginx→Gunicorn/Django→PostgreSQL，只有Caddy发布公网端口。
 - 配置、公共服务、accounts、players、machines、tournaments按现有边界组织，不引入微服务、Redis、Celery、任意公式编辑器或动态表达式执行。
 - 运行时、虚拟环境、依赖和缓存留在项目内；不得全局安装或改全局环境。稳定依赖锁随真正依赖变更维护；F0-06未新增依赖。
 - 简体中文、Riichi Premium、统一组件和反馈，桌面/手机、深浅主题、键盘与焦点、可读对比度。只展示真实API数据，不虚构赛事、选手、成绩或统计。
@@ -32,14 +34,14 @@ V1.0当前只供雀庄老板/管理员使用。公开注册关闭，普通用户
 
 - 未被赛事引用的PlayerProfile可确认物理删除，同时仅停用内部User以保留身份审计；不级联删除User。被任意草稿/历史赛事引用须归档，必要时恢复。User→Profile锁顺序与赛事参赛校验一致，管理员档案禁止普通选手CRUD。
 - UAT-FIX-01未新增迁移，不改变Owner库或实际admin密码，所有QA独立库。按钮修复只作用于显式操作区，桌面六列统一Grid、赛事名左对齐，其余居中；320/390px卡片和换行不溢出。
-- 审查修复轮新增tournaments/0005（LotteryRecord作废人/时间/原因及状态CHECK）与0006（Reservation.release_reason；已释放旧行复制原reason到新列，旧列不改）。Owner库升级前须备份、只读核对迁移图后明确确认；验证只在QA库及副本。
+- 已合并的审查修复新增tournaments/0005（LotteryRecord作废人/时间/原因及状态CHECK）与0006（Reservation.release_reason；已释放旧行复制原reason到新列，旧列不改）。生产库升级前盘点、停写、一致备份并在独立恢复库演练，核对实际迁移图和计划；不得修改这两份或更早历史迁移，不fake、不清库。本地Owner库保持不写。
 
 - 已解除四台现役上限，capacity_slot仅保留nullable legacy列和旧值，新设备NULL；单赛事显式选1～4张真实物理桌，A～D固定贯穿轮次，故障替换审计，完赛自动释放。
 - Tournament为draft/started/completed；启动冻结数字规则、策略/版本、名单和昵称。TableResult为每桌OneToOne，草稿版本、整数原始点数、确认审计及无损有理数结果；确认后只读。
 - 新赛事用TournamentTable/Reservation；保留MachineAllocation和轮桌座全部历史及稳定ID。所有资源写入检查新预留与旧active记录，并共用物理池PK→赛事→子记录锁顺序。
 - 新增迁移回填可追溯规则来源、旧首轮序列及预留桥接，不改旧列（含updated_at）、旧迁移、原始座次或历史分配状态。原占用有效完整则继承，released/异常需复核，不自动抢回旧设备。
 - 全部配置轮次已存在、无需后续实体对局的旧赛事，可复核为historical_only后补历史成绩和正常完赛，不临时占新桌。已释放旧记录不恢复active。
-- Owner开发库只读核验与备份；验证仅在忽略目录中的独立QA库及副本。PostgreSQL仍UNVERIFIED；跨表完整性由服务校验，不冒称CHECK保证。
+- Owner开发库只读核验与备份；开发验证仅在忽略目录中的独立QA库及副本。PR #1历史报告已验证Linux ARM64容器PostgreSQL；该结果不替代本轮代码和真实服务器验证，实际状态按本轮报告逐项记录。跨表完整性由服务校验，不冒称CHECK保证。
 
 ## 已确认计分及冠军规则
 
@@ -57,13 +59,15 @@ UAT交付继续回归F0-06完整4人1轮、8/12人多轮、16人6轮，覆盖负
 
 功能开发交付须实际执行Django check/migrate/makemigrations检查/全量测试、TypeScript/Vitest/build/npm audit、HTTP/浏览器/安全忽略检查，保存准确命令、环境、结果及UNVERIFIED。历史测试结果不能冒充本轮实际执行。F0-06之后仅集成测试、部署、安全加固、发布验收；微信、团体赛仍属未来候选。
 
-仓库CI（.github/workflows/ci.yml）在push main及PR时运行SQLite与PostgreSQL后端check/makemigrations/migrate/全量测试、前端typecheck/Vitest/build/npm audit、部署脚本ShellCheck与Compose校验、启动器PS5.1解析与BOM检查。CI通过不替代真实Windows首次安装、浏览器及生产部署验证；README不得引用未实际运行的CI结果。
+仓库 CI 在 main、`codex/**` 分支推送和 PR 时运行双库后端全量测试、前端检查、ShellCheck、Compose 校验、启动器 PS5.1 静态检查及 Linux Docker/Chromium 隔离 QA。真实 Windows 首次安装和正式服务器验收单独记录。
 
 ## Git与停止限制
 
-- 当前任务在本地分支fix/review-findings，不执行git commit、tag、push或merge，不改远端、历史、既有基线与验收证据。
-- Owner负责Git提交/推送/Tag，Planner负责独立源码验收及双端核验。自检不替代外部验收。
-- 本轮修复报告见[审查问题修复报告](docs/project/review-findings-fix-verification.md)，列修改文件、逐项修复与测试、迁移验证、Django/前端回归、UNVERIFIED和Git状态；完成停止，等待Owner验收。保留历史报告和证据。
+- 第一阶段Owner已明确授权在最新main派生的独立任务分支开发、更新文档、自检、提交、推送、创建PR、独立审查并在测试/CI全部通过后合并main；合并后停止。第二阶段等待Owner提供新服务器并明确授权，当前不得连接任何正式服务器、部署、迁移生产库或初始化生产管理员。不得直接在main开发、强推、重写历史、删除旧Tag/证据、绕过失败CI或分支保护；不自动创建历史验收Tag。
+- 独立Reviewer审查最终候选，开发自检不替代独立结论；GitHub强制独立账号审批而当前身份无法满足时才请求Owner处理。旧阶段“Owner负责Git/开发者停止”仅约束对应历史任务，不覆盖本轮授权。
+- 第二阶段获准后先盘点真实服务器服务、端口、卷、数据库、磁盘和防火墙，遇非本项目服务冲突或无法验证数据保护时停止受影响部署，不抢占资源。使用已配置SSH认证；不提取或要求粘贴私钥。未知主机密钥须由可信渠道核对，不关闭StrictHostKeyChecking。
+- 生产数据库按备份、独立恢复核对、明确迁移计划后部署；不覆盖现有.env、不轮换已有密钥/密码、不逆迁移。新管理员沿用交互init_admin，由Owner输入密码；已有管理员不重复初始化或改密。真实域名证书/浏览器/服务器未实测项不得标PASS。
+- 第一阶段报告记录GitHub PR/CI、独立审查、合并SHA、QA备份恢复和未验证项；实际部署SHA与线上验收留待第二阶段，不得预填。历史[审查问题修复报告](docs/project/review-findings-fix-verification.md)、验收结论与失败证据原文保留，后续事实采用追加追记。
 
 ## Windows启动器与README
 

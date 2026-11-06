@@ -12,7 +12,7 @@ COPY deploy/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY deploy/nginx/default.conf /etc/nginx/riichi.conf.template
 COPY deploy/nginx/start.sh /usr/local/bin/riichi-nginx
 USER 101:101
-EXPOSE 8080 8443
+EXPOSE 8080
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=4 \
     CMD wget -q -O /dev/null http://127.0.0.1:8081/healthz || exit 1
 ENTRYPOINT ["/usr/local/bin/riichi-nginx"]

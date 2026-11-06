@@ -29,9 +29,13 @@ services:
     logging: *logging
   api:
     image: riichi-api:${RIICHI_VERSION:-local}
-    build: {context: .., dockerfile: deploy/Dockerfile.backend}
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+      labels: {org.opencontainers.image.revision: "${RIICHI_VERSION:-local}"}
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
+      RIICHI_LOAD_DOTENV: "False"
       DEBUG: "False"
       SECRET_KEY: ${SECRET_KEY:?Generate SECRET_KEY on server}
       ALLOWED_HOSTS: ${SERVER_NAME:?Set a real SERVER_NAME}
@@ -59,23 +63,15 @@ services:
     logging: *logging
   nginx:
     image: riichi-nginx:${RIICHI_VERSION:-local}
-    build: {context: .., dockerfile: deploy/Dockerfile.frontend}
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.frontend
+      labels: {org.opencontainers.image.revision: "${RIICHI_VERSION:-local}"}
     environment:
       SERVER_NAME: ${SERVER_NAME:?Set a real SERVER_NAME}
-      HSTS_SECONDS: ${HSTS_SECONDS:-0}
-      # Same value as the published HTTPS port below; used for HTTP->HTTPS redirects.
-      HTTPS_PORT: ${HTTPS_PORT:-443}
-    ports:
-      - "${PUBLIC_BIND_IP:-0.0.0.0}:${HTTP_PORT:-80}:8080"
-      - "${PUBLIC_BIND_IP:-0.0.0.0}:${HTTPS_PORT:-443}:8443"
-    volumes:
-      - type: bind
-        source: ${TLS_CERT_DIR:?Set absolute TLS_CERT_DIR}
-        target: /etc/nginx/tls
-        read_only: true
-        bind: {create_host_path: false}
+      CADDY_PROXY_IP: ${CADDY_PROXY_IP:-172.30.80.2}
     depends_on: {api: {condition: service_healthy}}
-    networks: [edge, web]
+    networks: [proxy, web]
     read_only: true
     tmpfs: ["/tmp:rw,noexec,nosuid,size=64m,mode=1777"]
     cap_drop: [ALL]
@@ -84,9 +80,59 @@ services:
     mem_limit: ${NGINX_MEMORY_LIMIT:-128m}
     cpus: ${NGINX_CPUS:-0.5}
     logging: *logging
+  caddy:
+    # Official multi-architecture manifest verified against Docker Hub.
+    image: caddy:2.11.9-alpine@sha256:71d41fe4b1ae92a058abc87afe614178b996d8a6b96d0f4c71ae30606e5927e3
+    command: [caddy, run, --config, "/etc/caddy/${CADDY_CONFIG:-Caddyfile}", --adapter, caddyfile]
+    environment:
+      CADDY_CONFIG: ${CADDY_CONFIG:-Caddyfile}
+      SERVER_NAME: ${SERVER_NAME:?Set a real SERVER_NAME}
+      HTTPS_PORT: ${HTTPS_PORT:-443}
+      HSTS_SECONDS: ${HSTS_SECONDS:-0}
+      ACME_CA: ${ACME_CA:-https://acme-v02.api.letsencrypt.org/directory}
+    ports:
+      - "${PUBLIC_BIND_IP:-0.0.0.0}:${HTTP_PORT:-80}:80"
+      - "${PUBLIC_BIND_IP:-0.0.0.0}:${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./caddy:/etc/caddy:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: {nginx: {condition: service_healthy}}
+    networks:
+      edge: {}
+      proxy:
+        ipv4_address: ${CADDY_PROXY_IP:-172.30.80.2}
+    # The official image seeds writable sticky /data/caddy and /config/caddy
+    # directories. Named volumes preserve those permissions and ACME state.
+    user: "10001:10001"
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=32m,mode=1777"]
+    sysctls: {net.ipv4.ip_unprivileged_port_start: "0"}
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, --output, /dev/null, http://127.0.0.1:2019/config/]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 10s
+    restart: unless-stopped
+    mem_limit: ${CADDY_MEMORY_LIMIT:-256m}
+    cpus: ${CADDY_CPUS:-0.5}
+    logging: *logging
 networks:
   edge: {}
+  proxy:
+    internal: true
+    ipam:
+      # Reserve the lower half for the gateway and Caddy. Otherwise Docker can
+      # dynamically give Caddy's static address to Nginx, which starts first.
+      config:
+        - subnet: ${PROXY_SUBNET:-172.30.80.0/28}
+          ip_range: ${PROXY_DYNAMIC_RANGE:-172.30.80.8/29}
   web: {internal: true}
   data: {internal: true}
 volumes:
   postgres_data: {}
+  caddy_data: {}
+  caddy_config: {}
