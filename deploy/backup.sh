@@ -14,9 +14,10 @@ cleanup() {
 }
 trap cleanup EXIT
 db_identity
-BACKUP_DIR="${RIICHI_BACKUP_DIR:-$DEPLOY_DIR/backups}"
+# BACKUP_DIR comes from lib.sh (RIICHI_BACKUP_DIR, default ~/riichi-backups).
 mkdir -p -- "$BACKUP_DIR"
 BACKUP_DIR="$(cd -- "$BACKUP_DIR" && pwd)"
+warn_backup_location "$BACKUP_DIR"
 temporary="$(mktemp "$BACKUP_DIR/.backup.XXXXXX")"
 destination="$BACKUP_DIR/${DB_NAME}_$(date -u +%Y%m%dT%H%M%SZ)_$(basename "$temporary").dump"
 compose exec -T db sh -eu -c 'exec pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --format=custom --compress=6 --no-owner --no-privileges' </dev/null > "$temporary"

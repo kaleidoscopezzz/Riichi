@@ -32,7 +32,8 @@ def main():
     admin_credentials = {key: credentials[key] for key in ['username', 'password']}
     call('/auth/login/', 'POST', admin_credentials, 403, csrf=False)
     if 'legacy' in credentials:
-        call('/auth/login/', 'POST', credentials['legacy'], 403)
+        # Non-staff with a correct password gets the same 400 invalid_credentials as a wrong password.
+        call('/auth/login/', 'POST', credentials['legacy'], 400)
     call('/auth/login/', 'POST', admin_credentials)
     created = [call('/players/', 'POST', {'nickname': f'HTTP老板选手{i+1:02}'}, 201) for i in range(16)]
     ids = [p['id'] for p in created]

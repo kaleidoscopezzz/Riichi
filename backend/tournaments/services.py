@@ -55,15 +55,18 @@ def database_busy(exc):
     raise exc
 
 
-def mutate_tournament(pk, *, values=None, participant_ids=None, start=False):
+def mutate_tournament(pk, *, values=None, participant_ids=None, start=False, revision=None):
     try:
         with transaction.atomic():
             # FIRST database statement is a conditional write, not a read. All
             # public mutations acquire the same parent lock, including list edits.
             # SQLite serializes writers; PostgreSQL locks this row until commit.
-            changed = Tournament.objects.filter(pk=pk, status="draft").update(revision=F("revision") + 1)
+            # An optional client revision is compared inside this same UPDATE.
+            changed = Tournament.objects.filter(pk=pk, status="draft", **({} if revision is None else {"revision": revision})).update(revision=F("revision") + 1)
             tournament = get_object_or_404(Tournament, pk=pk)
             if not changed:
+                if tournament.status == "draft":
+                    raise TournamentConflict("赛事草稿已被他人修改，请刷新后再保存。", "stale_tournament")
                 raise TournamentConflict("赛事已经启动，不能重复启动。" if start else "赛事已启动，配置和名单已冻结。", "already_started" if start else "tournament_frozen")
             if values is not None:
                 for key, value in values.items():

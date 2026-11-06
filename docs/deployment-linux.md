@@ -46,7 +46,7 @@ openssl rand -hex 32
 | 变量 | 填写方法 |
 | --- | --- |
 | SERVER_NAME | Owner 提供的单个真实域名，不含协议、端口、路径或通配符 |
-| CSRF_TRUSTED_ORIGINS | 对应的 `https://域名`；非标准端口需包含端口 |
+| CSRF_TRUSTED_ORIGINS | 浏览器实际访问的来源：`https://域名`；HTTPS_PORT 不是 443 时写成 `https://域名:端口` |
 | SECRET_KEY | 新生成的至少 50 字符随机值 |
 | POSTGRES_DB / POSTGRES_USER | 数据库和应用角色名，建议保留小写默认值 |
 | POSTGRES_PASSWORD | 新生成的应用数据库密码 |
@@ -64,13 +64,13 @@ export RIICHI_ENV_FILE="$PWD/deploy/.env"
 export RIICHI_BACKUP_DIR=/srv/riichi-backups
 ```
 
-这两个变量供脚本使用；手工 Compose 命令必须显式带 `--env-file`。不把备份目录放进静态资源目录。
+这两个变量供脚本使用；手工 Compose 命令必须显式带 `--env-file`。备份目录默认是运行脚本用户的 `~/riichi-backups`（仓库外），强烈建议显式指向另一块盘或会同步到异地的目录；不要放在仓库内（`git clean -xdf` 或重新克隆会删除）或静态资源目录。
 
 ## 3. 域名、HTTPS 和代理
 
 Owner 将域名 DNS 指向主机，并提供可信 CA 的 `fullchain.pem` 与 `privkey.pem`。将两个文件放进 `TLS_CERT_DIR`，只读挂载 `/etc/nginx/tls`。Nginx UID/GID 为 101，证书目录应允许该组读取：目录可用 root:101 / 750，私钥 root:101 / 640；结合实际宿主机用户映射核对权限。禁止提交证书私钥。不要直接挂载不可遍历的 ACME 符号链接，提供容器内可读取的完整文件或证书副本。
 
-Nginx 内部监听 8080/8443，宿主机映射 80/443；HTTP 308 跳转固定配置域名，不使用客户端 Host 构造跳转。Nginx 覆盖 X-Forwarded-Proto/For/Host 等头；API 不发布端口，Compose 显式开启 `TRUST_PROXY_HEADERS`。若未来修改网络、接入 CDN 或额外代理，须重新验证信任边界，不直接启用公网 real_ip 信任。
+Nginx 内部监听 8080/8443，宿主机映射 `HTTP_PORT`/`HTTPS_PORT`（默认 80/443）；HTTP 308 跳转到固定配置域名，不使用客户端 Host 构造跳转。HTTPS_PORT 不是 443 时，Compose 把它传给 Nginx，跳转目标为 `https://域名:HTTPS_PORT`；端口须为 1–65535 的整数，否则 Nginx 拒绝启动。此时浏览器 Origin 带端口：Nginx 原样转发含端口的 Host，Django 按同源校验通过，`ALLOWED_HOSTS` 只填域名（比对时忽略端口）；CSRF_TRUSTED_ORIGINS 仍应写成带端口的实际来源，与浏览器地址一致。Nginx 覆盖 X-Forwarded-Proto/For/Host 等头；API 不发布端口，Compose 显式开启 `TRUST_PROXY_HEADERS`。若未来修改网络、接入 CDN 或额外代理，须重新验证信任边界，不直接启用公网 real_ip 信任。
 
 HSTS 默认 `HSTS_SECONDS=0`。HTTPS 稳定后可先设 300，再逐步延长；修改后重建 API/Nginx。Django `check --deploy` 在 0 时报告 W004，属于本次明确保留的初期策略，没有静默安全检查。includeSubDomains/preload 在代码中关闭，未来只有 Owner 明确批准并核对所有子域后才可另行修改。
 
@@ -138,12 +138,12 @@ docker compose --env-file deploy/.env -f deploy/compose.yaml exec api python man
 bash deploy/backup.sh
 ```
 
-脚本用维护角色执行 pg_dump custom 压缩格式，存宿主机 `RIICHI_BACKUP_DIR`（默认 deploy/backups）。UTC 时间戳与随机后缀防止覆盖；权限 600，检查退出状态和非空，输出时间、字节数和 SUCCESS/FAILED。不完整文件不会发布为成功备份。镜像重建不影响此目录。由 Owner 配置每天及升级前备份，按恢复点需求制定保留期，并加密复制到异机/对象存储；本仓库不会自动删除旧备份。
+脚本用维护角色执行 pg_dump custom 压缩格式，存宿主机 `RIICHI_BACKUP_DIR`（默认 `~/riichi-backups`，位于仓库外）。若该目录位于仓库内，backup.sh 与 status.sh 会显著警告；默认目录仍与数据库卷同盘，强烈建议指向另一块盘或异地同步目录。`bash deploy/status.sh` 显示当前备份目录和最新备份；旧版本默认的 `deploy/backups` 若仍有备份会提示，需人工复制到仓库外并核对，脚本不移动或删除它们。UTC 时间戳与随机后缀防止覆盖；权限 600，检查退出状态和非空，输出时间、字节数和 SUCCESS/FAILED。不完整文件不会发布为成功备份。镜像重建不影响此目录。由 Owner 配置每天及升级前备份，按恢复点需求制定保留期，并加密复制到异机/对象存储；本仓库不会自动删除旧备份。
 
 在当前服务旁恢复到独立新库，例如：
 
 ```bash
-bash deploy/restore.sh /srv/riichi-backups/CHOSEN_BACKUP.dump riichi_restore_check
+bash deploy/restore.sh "${RIICHI_BACKUP_DIR:-$HOME/riichi-backups}/CHOSEN_BACKUP.dump" riichi_restore_check
 ```
 
 替换成实际备份文件。必须输入 `RESTORE riichi_restore_check`。脚本只允许当前库名加 `_restore_...` 的新库；拒绝当前业务库、既有目标及不可信名称。pg_restore 在单事务中恢复，遇错停止；失败时保留目标用于诊断，不删除数据库。只恢复自己信任的备份，因为恢复会执行其中 SQL。
@@ -211,7 +211,8 @@ down.sh 只 stop，保留数据卷。常规操作严禁 `down -v`，也不清理
 
 - API unhealthy：先看 api/db 日志，确认库可连接、迁移已完成；公开 health 成功不能证明数据库就绪。
 - TLS 启动失败：检查真实文件、完整证书链及 101 的读取权限；证书目录不存在时配置拒绝自动创建。
-- 403 CSRF：检查浏览器域名/端口与 CSRF_TRUSTED_ORIGINS，Secure Cookie 是否送达，代理头是否覆盖；不要关闭 CSRF。
+- 403 CSRF：检查浏览器域名/端口与 CSRF_TRUSTED_ORIGINS，Secure Cookie 是否送达，代理头是否覆盖，Nginx 是否仍转发含端口的 Host；不要关闭 CSRF。
+- HTTP 跳转到打不开的地址：确认 `.env` 的 HTTPS_PORT 与实际发布端口一致，修改后 `up -d` 重建 nginx。
 - 登录 429：等待一分钟，核对共享出口；不要绕过 Nginx 直接暴露 API。
 - 数据看似丢失：检查项目名、卷挂载及数据库名，停止写入核对旧卷，禁止删除/重建掩盖问题。
 - 端口占用：查明已有服务，调整绑定或维护窗口，不终止无关进程。
@@ -248,7 +249,7 @@ bash deploy/down.sh
 
 QA 覆盖 4/8/12/16 人、1/3/2/6 轮、负数/零、总和拒绝、确认锁定、重排、抽签、冠军和释放，以及 HTTPS、代理头、API 404、SPA、Session/CSRF、非管理员拒绝和登录限流。QA 会在空 riichi_qa 中生成随机测试管理员，仅该隔离测试脚本可这样建测试身份；正式账号必须使用交互 init_admin。
 
-`verify_operations.py` 仅接受 riichi_qa 和专用 QA 项目名，检查实际拒绝原因，并测试并行备份、恢复内容一致、restart/recreate 持久化、数据库不可用备份失败、任意工作目录、内部网络和角色权限。它保留备份、恢复库与失败日志，不清理数据。生产环境禁止运行该故障模拟工具。
+`verify_operations.py` 仅接受 riichi_qa 和专用 QA 项目名，检查实际拒绝原因，并测试并行备份、恢复内容一致、restart/recreate 持久化、数据库不可用备份失败、任意工作目录、内部网络和角色权限。它保留备份、恢复库与失败日志，不清理数据。生产环境禁止运行该故障模拟工具。QA 备份位于仓库内被忽略的 `.verification`，backup.sh 会输出仓库内警告，属预期；正式环境不要这样放置。
 
 历史迁移可在另一个全新 QA 库中复验（目标已存在时停止，不覆盖）：
 

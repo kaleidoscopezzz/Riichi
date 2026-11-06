@@ -49,10 +49,10 @@ const row: Tournament = {
     id,
     player_id: id,
     display_name: `选手${id}`,
-    username: `user${id}`,
     is_active: true,
     display_name_snapshot: '',
   })),
+  revision: 1,
 }
 const page = (rows = [row]): Page<Tournament> => ({
   count: rows.length,
@@ -305,5 +305,77 @@ describe('赛事工作台', () => {
     app.unmount()
     showApp('/tournaments', true)
     expect(await screen.findByText(row.name)).toBeTruthy()
+  })
+})
+
+describe('草稿乐观并发与参赛者契约（F9）', () => {
+  it('保存草稿带上 revision；409 stale_tournament 提示后端消息并可载入最新草稿', async () => {
+    render(<TournamentsPage />)
+    const user = await openDetail()
+    await user.click(screen.getByRole('button', { name: '编辑草稿' }))
+    vi.mocked(saveTournament).mockRejectedValueOnce(
+      new ApiError(409, 'stale_tournament', '赛事草稿已被他人修改，请刷新后再保存。'),
+    )
+    await user.click(screen.getByRole('button', { name: '保存草稿' }))
+    expect(saveTournament).toHaveBeenLastCalledWith(
+      expect.objectContaining({ revision: 1, participant_ids: [1, 2, 3, 4] }),
+      1,
+    )
+    expect((await screen.findByRole('alert')).textContent).toContain('赛事草稿已被他人修改')
+    vi.mocked(fetchTournament).mockResolvedValueOnce({
+      ...row,
+      name: '他人修改后的赛事',
+      revision: 2,
+      participants: row.participants.slice(0, 2),
+      participant_count: 2,
+    })
+    await user.click(screen.getByRole('button', { name: '重新加载最新草稿' }))
+    expect(((await screen.findByLabelText('赛事名称')) as HTMLInputElement).value).toBe(
+      '他人修改后的赛事',
+    )
+    expect(await screen.findByText(/已载入最新草稿/)).toBeTruthy()
+    expect(screen.queryByRole('button', { name: '重新加载最新草稿' })).toBeNull()
+    expect(screen.getByText('已选 2 / 16 人')).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: '保存草稿' }))
+    await waitFor(() =>
+      expect(saveTournament).toHaveBeenLastCalledWith(
+        expect.objectContaining({ name: '他人修改后的赛事', revision: 2, participant_ids: [1, 2] }),
+        1,
+      ),
+    )
+  })
+  it('其他 409 不显示重新加载入口；新建草稿不带 revision', async () => {
+    render(<TournamentsPage />)
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: '创建赛事' }))
+    await user.type(screen.getByLabelText('赛事名称'), '新赛事')
+    vi.mocked(saveTournament).mockRejectedValueOnce(
+      new ApiError(409, 'tournament_frozen', '赛事已启动，配置和名单已冻结。'),
+    )
+    await user.click(screen.getByRole('button', { name: '保存草稿' }))
+    expect((await screen.findByRole('alert')).textContent).toContain('已冻结')
+    expect(screen.queryByRole('button', { name: '重新加载最新草稿' })).toBeNull()
+    expect(vi.mocked(saveTournament).mock.calls[0][0]).not.toHaveProperty('revision')
+  })
+  it('载入时发现赛事已启动则提示不可编辑，并禁用保存', async () => {
+    render(<TournamentsPage />)
+    const user = await openDetail()
+    await user.click(screen.getByRole('button', { name: '编辑草稿' }))
+    vi.mocked(saveTournament).mockRejectedValueOnce(
+      new ApiError(409, 'stale_tournament', '赛事草稿已被他人修改，请刷新后再保存。'),
+    )
+    await user.click(screen.getByRole('button', { name: '保存草稿' }))
+    vi.mocked(fetchTournament).mockResolvedValueOnce({ ...row, status: 'started', revision: 3 })
+    await user.click(await screen.findByRole('button', { name: '重新加载最新草稿' }))
+    expect((await screen.findByRole('alert')).textContent).toContain('已不是草稿')
+    expect(screen.getByRole('button', { name: '保存草稿' }).hasAttribute('disabled')).toBe(true)
+  })
+  it('参赛者详情不依赖内部用户名', async () => {
+    render(<TournamentsPage />)
+    await openDetail()
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.getByText('选手1')).toBeTruthy()
+    expect(dialog.queryByText(/user\d/)).toBeNull()
+    expect(row.participants[0]).not.toHaveProperty('username')
   })
 })

@@ -166,6 +166,8 @@ class TournamentMachineReservation(models.Model):
     released_at = models.DateTimeField(null=True, blank=True)
     released_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name='reservation_releases')
     reason = models.CharField(max_length=500, blank=True)
+    # Creation reason stays in `reason`; release writes only this field.
+    release_reason = models.CharField(max_length=500, blank=True, default='')
 
     class Meta:
         ordering = ['id']
@@ -206,3 +208,10 @@ class LotteryRecord(models.Model):
     confirmed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT, related_name='confirmed_lotteries')
     confirmed_at = models.DateTimeField(null=True)
     rules_version = models.PositiveSmallIntegerField(default=1)
+    # Voided drafts stay as public audit; only confirmed records ever rank.
+    voided_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT, related_name='voided_lotteries')
+    voided_at = models.DateTimeField(null=True)
+    void_reason = models.CharField(max_length=500, blank=True, default='')
+
+    class Meta:
+        constraints = [models.CheckConstraint(condition=Q(voided_at__isnull=True, voided_by__isnull=True, void_reason='') | (Q(voided_at__isnull=False, voided_by__isnull=False, confirmed_at__isnull=True) & ~Q(void_reason='')), name='lottery_void_state')]

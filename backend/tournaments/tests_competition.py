@@ -1,19 +1,21 @@
 import json
 from concurrent.futures import ThreadPoolExecutor
+from datetime import timedelta
 from fractions import Fraction
 from threading import Barrier
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.db import close_old_connections, IntegrityError, transaction
+from django.http import Http404
 from django.test import TestCase, TransactionTestCase, Client
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from machines.services import create_machine, change_machine, MachineConflict
-from .models import Tournament, TournamentRound, RoundSeat, RoundTable, MachineAllocation, TableResult, TournamentMachineReservation as Reservation
+from .models import Tournament, TournamentRound, RoundSeat, RoundTable, MachineAllocation, TableResult, LotteryRecord, TournamentMachineReservation as Reservation
 from .services import create_tournament, mutate_tournament, TournamentConflict
-from .competition_services import (generate, write_result, ranking, metric, source_versions, preview, record_lottery, confirm_lottery, finish, replace_machine, review_legacy, bridge_legacy, locked)
+from .competition_services import (generate, write_result, ranking, metric, source_versions, preview, record_lottery, confirm_lottery, void_lottery, finish, replace_machine, review_legacy, bridge_legacy, locked, mapping)
 from .scoring import score, pack, unpack
 from .legacy_test_fixture import generate_first_round
 from .round_services import change_allocation
@@ -41,6 +43,20 @@ class Fixtures:
         for members in preview(t.pk)['unresolved_groups']:
             row = record_lottery(t.pk, self.admin, {'members': members, 'order': list(reversed(members)), 'method': '现场签条', 'description': '公开抽取顺序，测试真实记录服务', 'drawn_at': timezone.now(), 'source_versions': source_versions(t)})
             confirm_lottery(t.pk, row.pk, self.admin)
+
+    def draw(self, t, order=None):
+        members = preview(t.pk)['unresolved_groups'][0]
+        return members, {'members': members, 'order': order or members, 'method': '纸签', 'description': '公开监督', 'drawn_at': timezone.now(), 'source_versions': source_versions(t)}
+
+    def legacy_round(self, t, machines):
+        # A still-running F0-05 process writing round 1 directly; one table per given machine.
+        r = TournamentRound.objects.create(tournament=t, round_number=1, generated_by=self.admin)
+        entries = list(t.participants.all())
+        for i, machine in enumerate(machines):
+            table = RoundTable.objects.create(round=r, table_number=i+1)
+            RoundSeat.objects.bulk_create([RoundSeat(round=r, table=table, participant=p, seat_wind=w) for p, w in zip(entries[i*4:i*4+4], ['east', 'south', 'west', 'north'])])
+            MachineAllocation.objects.create(table=table, machine=machine, machine_no_snapshot=machine.machine_no, allocated_by=self.admin)
+        return r
 
 
 class CompetitionTests(Fixtures, TestCase):
@@ -237,6 +253,115 @@ class CompetitionTests(Fixtures, TestCase):
         with patch('tournaments.competition_services.release_reservation',side_effect=IntegrityError('injected')),self.assertRaises(TournamentConflict): finish(t.pk,self.admin,source_versions(t))
         t.refresh_from_db();self.assertEqual(t.status,'started');self.assertFalse(t.final_snapshot);self.assertEqual(Reservation.objects.filter(status='active').count(),2)
 
+    def code(self, call):
+        with self.assertRaises(TournamentConflict) as error:
+            call()
+        return error.exception.default_code
+
+    def test_confirm_only_keeps_draft_editor_audit(self):
+        other = get_user_model().objects.create_user(username='second_admin', is_staff=True)
+        t = self.tournament(8); first, second = list(self.first(t).tables.all())
+        for table in (first, second):
+            write_result(table.pk, self.admin, 0, points=[{'participant_id': s.participant_id, 'raw_points': v} for s, v in zip(table.seats.order_by('id'), [40000, 30000, 20000, 10000])])
+        past = timezone.now() - timedelta(days=1)
+        TableResult.objects.update(edited_at=past)  # any auto_now rewrite becomes visible
+        row = write_result(first.pk, other, 1, confirm=True)
+        stored = TableResult.objects.get(table=first)
+        self.assertEqual((stored.edited_by_id, stored.edited_at, stored.confirmed_by_id, stored.status, stored.version), (self.admin.pk, past, other.pk, 'confirmed', 2))
+        self.assertEqual((row['edited_by'], row['edited_at'], row['confirmed_by']), (self.admin.pk, past, other.pk))
+        # Confirming WITH points is an edit: the confirmer becomes the editor.
+        points = [{'participant_id': s.participant_id, 'raw_points': 25000} for s in second.seats.all()]
+        write_result(second.pk, other, 1, points=points, confirm=True)
+        stored = TableResult.objects.get(table=second)
+        self.assertEqual((stored.edited_by_id, stored.confirmed_by_id, stored.points), (other.pk, other.pk, {str(x['participant_id']): 25000 for x in points}))
+        self.assertGreater(stored.edited_at, past)
+
+    def test_lottery_pending_void_and_only_confirmed_ranks(self):
+        other = self.tournament(); self.confirm(self.first(other, [self.machines[1].pk]).tables.get(), [25000]*4)
+        foreign = record_lottery(other.pk, self.admin, self.draw(other)[1])
+        t = self.tournament(); self.confirm(self.first(t).tables.get(), [25000]*4)
+        members, values = self.draw(t)
+        row = record_lottery(t.pk, self.admin, values)
+        # Neither the same nor a "better" order may be recorded while one is open.
+        for order in [members, members[::-1]]:
+            self.assertEqual(self.code(lambda: record_lottery(t.pk, self.admin, values | {'order': order})), 'lottery_pending')
+        with self.assertRaises(Http404):
+            void_lottery(t.pk, foreign.pk, self.admin, '他场记录')
+        voided = void_lottery(t.pk, row.pk, self.admin, '签条污损，重新公开抽取')
+        self.assertEqual((voided.voided_by_id, voided.void_reason, voided.confirmed_at), (self.admin.pk, '签条污损，重新公开抽取', None))
+        self.assertIsNotNone(voided.voided_at)
+        self.assertEqual(self.code(lambda: void_lottery(t.pk, row.pk, self.admin, '重复作废')), 'lottery_voided')
+        self.assertEqual(self.code(lambda: confirm_lottery(t.pk, row.pk, self.admin)), 'lottery_voided')
+        # Voided and unconfirmed records never rank or complete.
+        self.assertEqual([set(g) for g in preview(t.pk)['unresolved_groups']], [set(members)])
+        self.assertEqual(self.code(lambda: finish(t.pk, self.admin, source_versions(t))), 'lottery_required')
+        second = record_lottery(t.pk, self.admin, values | {'order': members[::-1]})
+        confirm_lottery(t.pk, second.pk, self.admin)
+        self.assertEqual(self.code(lambda: void_lottery(t.pk, second.pk, self.admin, '确认后作废')), 'lottery_conflict')
+        result = finish(t.pk, self.admin, source_versions(t))
+        self.assertEqual((result['champion_id'], result['lottery_ids']), (members[-1], [second.pk]))
+        self.assertEqual(self.code(lambda: void_lottery(t.pk, row.pk, self.admin, '完赛后')), 'tournament_completed')
+        self.assertEqual(list(t.lotteries.order_by('id').values_list('id', flat=True)), [row.pk, second.pk])
+
+    def test_lottery_void_state_database_constraint(self):
+        t = self.tournament(); self.confirm(self.first(t).tables.get(), [25000]*4)
+        row = record_lottery(t.pk, self.admin, self.draw(t)[1])
+        now = timezone.now()
+        for values in [{'voided_at': now}, {'voided_by': self.admin}, {'void_reason': '仅有原因'}, {'voided_at': now, 'voided_by': self.admin}, {'voided_at': now, 'voided_by': self.admin, 'void_reason': '确认后作废', 'confirmed_at': now, 'confirmed_by': self.admin}]:
+            with self.subTest(values=sorted(values)), self.assertRaises(IntegrityError), transaction.atomic():
+                LotteryRecord.objects.filter(pk=row.pk).update(**values)
+        self.assertEqual(LotteryRecord.objects.filter(pk=row.pk).update(voided_at=now, voided_by=self.admin, void_reason='合法作废'), 1)
+
+    def test_fault_replacement_reason_survives_completion_release(self):
+        t = self.tournament(); table = self.first(t).tables.get()
+        replace_machine(t.pk, 1, self.admin, self.machines[5].pk, '实体故障：自动洗牌异常')
+        self.confirm(table); finish(t.pk, self.admin, source_versions(t))
+        original, replacement = Reservation.objects.filter(table__tournament=t).order_by('id')
+        self.assertEqual((original.reason, original.release_reason), ('', '实体故障：自动洗牌异常'))
+        self.assertEqual((replacement.source, replacement.status, replacement.reason, replacement.release_reason), ('fault_replacement_v1', 'released', '实体故障：自动洗牌异常', '正式完赛自动释放'))
+        self.assertEqual([(h['reason'], h['release_reason']) for h in mapping(t)[0]['history']], [('', '实体故障：自动洗牌异常'), ('实体故障：自动洗牌异常', '正式完赛自动释放')])
+
+    def test_historical_only_cannot_take_new_machine(self):
+        t = self.tournament(8); kept, released = list(generate_first_round(t.pk, self.admin).tables.all())
+        change_allocation(released.pk, self.admin, reason='旧版真实释放')
+        review_legacy(t.pk, self.admin, historical_only=True, machine_ids=[], reason='实体对局均已结束，仅补历史成绩')
+        t.refresh_from_db(); self.assertEqual(t.resource_state, 'historical_only')
+        before = list(Reservation.objects.values_list('id', 'machine_id', 'status', 'reason'))
+        # The bridged reservation of table A must not be swapped onto a new physical table.
+        self.assertEqual(self.code(lambda: replace_machine(t.pk, 1, self.admin, self.machines[5].pk, '不应占用新桌')), 'historical_only')
+        self.assertEqual(list(Reservation.objects.values_list('id', 'machine_id', 'status', 'reason')), before)
+
+    def test_review_incomplete_legacy_tables_is_conflict(self):
+        # One table recorded for eight players: only logical table A can exist.
+        t = self.tournament(8); self.legacy_round(t, [self.machines[0]])
+        with locked(t.pk) as (t, _): bridge_legacy(t, self.admin)
+        self.assertEqual((t.resource_state, t.order_source, list(t.fixed_tables.values_list('ordinal', flat=True))), ('review_required', 'legacy_incomplete', [1]))
+        self.assertEqual(self.code(lambda: review_legacy(t.pk, self.admin, historical_only=False, machine_ids=[self.machines[0].pk, self.machines[2].pk], reason='补选空闲桌')), 'legacy_structure_invalid')
+        self.assertEqual(Reservation.objects.filter(source='legacy_review_v1').count(), 0)
+
+    def test_bridge_malformed_first_round_written_after_migration(self):
+        # Migrated as unselected without rounds; an old process then wrote a seat-incomplete round 1.
+        t = self.tournament(8); r = generate_first_round(t.pk, self.admin)
+        r.tables.get(table_number=2).seats.get(seat_wind='north').delete()
+        seats = list(RoundSeat.objects.order_by('id').values_list('id', 'table_id', 'participant_id', 'seat_wind'))
+        allocations = list(MachineAllocation.objects.order_by('id').values_list('id', 'machine_id', 'status'))
+        with locked(t.pk) as (t, _): bridge_legacy(t, self.admin)  # formerly a 400 on every write path, forever
+        self.assertEqual((t.resource_state, t.order_source, t.first_round_order, t.compatibility_audit['valid_allocations']), ('review_required', 'legacy_incomplete', [], False))
+        self.assertEqual(list(t.fixed_tables.values_list('ordinal', flat=True)), [1, 2])
+        self.assertEqual(sorted(Reservation.objects.filter(status='active', source='legacy_bridge_v1').values_list('legacy_allocation_id', 'machine_id')), [(a[0], a[1]) for a in allocations])
+        self.assertEqual(list(RoundSeat.objects.order_by('id').values_list('id', 'table_id', 'participant_id', 'seat_wind')), seats)
+        self.assertEqual(list(MachineAllocation.objects.order_by('id').values_list('id', 'machine_id', 'status')), allocations)
+        with self.assertRaises(TournamentConflict) as error:
+            self.first(self.tournament(8), [a[1] for a in allocations])
+        self.assertEqual(error.exception.default_code, 'machine_occupied')
+        review_legacy(t.pk, self.admin, historical_only=True, machine_ids=[], reason='首轮记录异常，仅保留历史')
+        t.refresh_from_db(); self.assertEqual(t.resource_state, 'historical_only')
+        # Valid legacy data keeps exactly the previous bridge result.
+        valid = self.tournament(4); r = generate_first_round(valid.pk, self.admin)
+        with locked(valid.pk) as (valid, _): bridge_legacy(valid, self.admin)
+        self.assertEqual((valid.resource_state, valid.order_source, set(valid.compatibility_audit), valid.compatibility_audit['valid_allocations']), ('fixed', 'legacy_table_wind_v1', {'source', 'identified_at', 'valid_allocations'}, True))
+        self.assertEqual(valid.first_round_order, [r.tables.get().seats.get(seat_wind=w).participant_id for w in ['east', 'south', 'west', 'north']])
+
 
 class CompetitionApiTests(Fixtures, TestCase):
     def setUp(self):
@@ -245,7 +370,7 @@ class CompetitionApiTests(Fixtures, TestCase):
         self.token=self.client.get('/api/v1/auth/csrf/').json()['data']['csrf_token']
 
     def test_permissions_csrf_all_new_writes(self):
-        paths=[f'tournaments/{self.t.pk}/workspace/',f'tournaments/{self.t.pk}/tables/replace/',f'tournaments/{self.t.pk}/compatibility-review/',f'tournaments/{self.t.pk}/lotteries/',f'tournaments/{self.t.pk}/lotteries/1/confirm/',f'tournaments/{self.t.pk}/complete/',f'round-tables/{self.table.pk}/result/',f'round-tables/{self.table.pk}/result/confirm/']
+        paths=[f'tournaments/{self.t.pk}/workspace/',f'tournaments/{self.t.pk}/tables/replace/',f'tournaments/{self.t.pk}/compatibility-review/',f'tournaments/{self.t.pk}/lotteries/',f'tournaments/{self.t.pk}/lotteries/1/confirm/',f'tournaments/{self.t.pk}/lotteries/1/void/',f'tournaments/{self.t.pk}/complete/',f'round-tables/{self.table.pk}/result/',f'round-tables/{self.table.pk}/result/confirm/']
         for who in [None,self.users[0]]:
             client=Client(enforce_csrf_checks=True)
             if who: client.force_login(who)
@@ -266,6 +391,93 @@ class CompetitionApiTests(Fixtures, TestCase):
         stored=TableResult.objects.get(table=self.table)
         self.assertEqual(stored.scores,row['scores'])
         data=self.client.get(url).json()['data'];self.assertEqual(unpack(data['scores'][0]['bonus']),Fraction(50,3))
+
+    def post(self, path, body, client=None, token=None):
+        return (client or self.client).post('/api/v1/' + path, body, content_type='application/json', HTTP_X_CSRFTOKEN=token or self.token)
+
+    def test_http_result_confirm_lottery_void_complete_and_workspace(self):
+        other = get_user_model().objects.create_user(username='http_second_admin', is_staff=True)
+        confirmer = Client(enforce_csrf_checks=True); confirmer.force_login(other)
+        token = confirmer.get('/api/v1/auth/csrf/').json()['data']['csrf_token']
+        url = f'round-tables/{self.table.pk}/result/'
+        points = [{'participant_id': s.participant_id, 'raw_points': 25000} for s in self.table.seats.all()]
+        draft = self.client.put('/api/v1/' + url, {'version': 0, 'points': points}, content_type='application/json', HTTP_X_CSRFTOKEN=self.token)
+        self.assertEqual((draft.status_code, draft.json()['data']['version'], draft.json()['data']['status']), (200, 1, 'draft'))
+        confirmed = self.post(url + 'confirm/', {'version': 1}, confirmer, token)
+        self.assertEqual(confirmed.status_code, 200, confirmed.content)
+        data = confirmed.json()['data']
+        self.assertEqual((data['status'], data['version'], data['edited_by'], data['confirmed_by'], data['edited_at']), ('confirmed', 2, self.admin.pk, other.pk, draft.json()['data']['edited_at']))
+        self.assertEqual(self.post(url + 'confirm/', {'version': 2}).json()['error']['code'], 'result_locked')
+        workspace = self.client.get(f'/api/v1/tournaments/{self.t.pk}/workspace/')
+        self.assertEqual((workspace.status_code, workspace['Cache-Control']), (200, 'no-store'))
+        ws = workspace.json()['data']
+        self.assertEqual((ws['status'], ws['resource_state'], ws['ready'], ws['all_results_confirmed'], ws['lotteries'], ws['mapping'][0]['machine_id']), ('started', 'fixed', False, True, [], self.machines[0].pk))
+        members = ws['unresolved_groups'][0]
+        self.assertEqual(set(members), {s.participant_id for s in self.table.seats.all()})
+        body = {'members': members, 'order': members, 'method': '现场签条', 'description': '公开抽取，全员见证', 'drawn_at': timezone.now().isoformat(), 'source_versions': ws['source_versions']}
+        lottery = self.post(f'tournaments/{self.t.pk}/lotteries/', body)
+        self.assertEqual(lottery.status_code, 201, lottery.content)
+        first = lottery.json()['data']
+        self.assertEqual((first['confirmed_at'], first['voided_by_id'], first['voided_at'], first['void_reason']), (None, None, None, ''))
+        pending = self.post(f'tournaments/{self.t.pk}/lotteries/', body | {'order': members[::-1]})
+        self.assertEqual((pending.status_code, pending.json()['error']['code'], pending.json()['error']['message']), (409, 'lottery_pending', '该并列组已有待确认的抽签记录，请先确认或作废后再录入。'))
+        void = f'tournaments/{self.t.pk}/lotteries/{first["id"]}/void/'
+        for bad in [{}, {'reason': ''}, {'reason': ' \t '}, {'reason': '长' * 501}, {'reason': 5}, {'reason': None}, {'reason': ['作废']}, {'reason': '原因', 'confirmed': True}, []]:
+            self.assertEqual(self.post(void, bad).status_code, 400, bad)
+        missing = self.post(f'tournaments/{self.t.pk}/lotteries/999999/void/', {'reason': '不存在'})
+        self.assertEqual((missing.status_code, missing.json()['error']['code']), (404, 'not_found'))
+        voided = self.post(void, {'reason': '  签条污损，重新公开抽取  '})
+        self.assertEqual(voided.status_code, 200, voided.content)
+        data = voided.json()['data']
+        self.assertEqual((data['id'], data['voided_by_id'], data['void_reason'], data['confirmed_at']), (first['id'], self.admin.pk, '签条污损，重新公开抽取', None))
+        self.assertIsNotNone(data['voided_at'])
+        self.assertEqual(self.post(void, {'reason': '长' * 500}).json()['error']['code'], 'lottery_voided')
+        self.assertEqual(self.post(f'tournaments/{self.t.pk}/lotteries/{first["id"]}/confirm/', {'confirmed': True}).json()['error']['code'], 'lottery_voided')
+        second = self.post(f'tournaments/{self.t.pk}/lotteries/', body | {'order': members[::-1]})
+        self.assertEqual(second.status_code, 201, second.content)
+        second_id = second.json()['data']['id']
+        approved = self.post(f'tournaments/{self.t.pk}/lotteries/{second_id}/confirm/', {'confirmed': True})
+        self.assertEqual((approved.status_code, approved.json()['data']['confirmed_by_id']), (200, self.admin.pk))
+        self.assertEqual(self.post(f'tournaments/{self.t.pk}/lotteries/{second_id}/void/', {'reason': '确认后作废'}).json()['error']['code'], 'lottery_conflict')
+        ws = self.client.get(f'/api/v1/tournaments/{self.t.pk}/workspace/').json()['data']
+        self.assertTrue(ws['ready'])
+        self.assertEqual({x['id']: (x['void_reason'], x['confirmed_by_id']) for x in ws['lotteries']}, {first['id']: ('签条污损，重新公开抽取', None), second_id: ('', self.admin.pk)})
+        complete = self.post(f'tournaments/{self.t.pk}/complete/', {'source_versions': ws['source_versions'], 'confirmed': True})
+        self.assertEqual(complete.status_code, 200, complete.content)
+        final = complete.json()['data']
+        self.assertEqual((final['champion_id'], final['lottery_ids'], [r['rank'] for r in final['standings']]), (members[-1], [second_id], [1, 2, 3, 4]))
+        done = self.client.get(f'/api/v1/tournaments/{self.t.pk}/workspace/').json()['data']
+        self.assertEqual((done['status'], done['champion_id'], done['mapping'][0]['machine_id']), ('completed', members[-1], None))
+        self.assertEqual(self.post(void, {'reason': '完赛后'}).json()['error']['code'], 'tournament_completed')
+        self.assertEqual(self.post(f'tournaments/{self.t.pk}/complete/', {'source_versions': ws['source_versions'], 'confirmed': True}).status_code, 409)
+
+    def test_http_fault_replacement_keeps_logical_table(self):
+        response = self.post(f'tournaments/{self.t.pk}/tables/replace/', {'ordinal': 1, 'machine_id': self.machines[5].pk, 'reason': '实体故障'})
+        self.assertEqual(response.status_code, 200, response.content)
+        row = response.json()['data'][0]
+        self.assertEqual((row['label'], row['machine_id'], row['reservation_id']), ('A', self.machines[5].pk, Reservation.objects.get(status='active').pk))
+        self.assertEqual([(h['machine_id'], h['status'], h['reason'], h['release_reason']) for h in row['history']], [(self.machines[0].pk, 'released', '', '实体故障'), (self.machines[5].pk, 'active', '实体故障', '')])
+        self.assertEqual(self.post(f'tournaments/{self.t.pk}/tables/replace/', {'ordinal': 1, 'machine_id': self.machines[5].pk, 'reason': '未改变'}).json()['error']['code'], 'machine_unchanged')
+        self.assertEqual(self.post(f'tournaments/{self.t.pk}/tables/replace/', {'ordinal': 1, 'machine_id': self.machines[6].pk, 'reason': '多余字段', 'source': 'x'}).status_code, 400)
+        self.table.refresh_from_db(); self.assertEqual(self.table.machine_snapshot['machine_id'], self.machines[0].pk)
+
+    def test_http_compatibility_review_legacy(self):
+        legacy = self.tournament(8); kept, released = list(generate_first_round(legacy.pk, self.admin).tables.all())
+        change_allocation(released.pk, self.admin, reason='旧版真实释放')
+        kept_machine = kept.allocations.get().machine_id
+        body = {'historical_only': False, 'machine_ids': [kept_machine, self.machines[6].pk], 'reason': '保留有效占用，补选空闲桌'}
+        response = self.post(f'tournaments/{legacy.pk}/compatibility-review/', body)
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual([(x['label'], x['machine_id']) for x in response.json()['data']], [('A', kept_machine), ('B', self.machines[6].pk)])
+        legacy.refresh_from_db()
+        self.assertEqual((legacy.resource_state, legacy.compatibility_audit['reviewed_by'], legacy.compatibility_audit['historical_only']), ('fixed', self.admin.pk, False))
+        self.assertEqual(self.post(f'tournaments/{legacy.pk}/compatibility-review/', body).json()['error']['code'], 'review_not_required')
+        self.assertEqual(MachineAllocation.objects.get(table=released).release_reason, '旧版真实释放')
+
+    def test_http_incomplete_legacy_structure_is_409(self):
+        legacy = self.tournament(8); self.legacy_round(legacy, [self.machines[3]])
+        response = self.post(f'tournaments/{legacy.pk}/compatibility-review/', {'historical_only': False, 'machine_ids': [self.machines[3].pk, self.machines[4].pk], 'reason': '补选'})
+        self.assertEqual((response.status_code, response.json()['error']['code']), (409, 'legacy_structure_invalid'))
 
 
 class CompetitionConcurrencyTests(Fixtures, TransactionTestCase):

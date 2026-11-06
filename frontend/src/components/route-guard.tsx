@@ -18,7 +18,11 @@ export function RouteGuard({ admin = false }: { admin?: boolean }) {
         <Button onClick={() => void restore()}>重新连接</Button>
       </div>
     )
-  if (!user) return <Navigate to="/login" state={{ from: location.pathname }} replace />
+  if (!user) {
+    // Keep the query and hash too, so signing in (again) lands on the same view.
+    const { pathname, search, hash } = location
+    return <Navigate to="/login" state={{ from: { pathname, search, hash } }} replace />
+  }
   if (admin && !user.is_staff)
     return (
       <div className="session-state" role="alert">

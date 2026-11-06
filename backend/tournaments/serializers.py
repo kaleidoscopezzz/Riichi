@@ -35,6 +35,8 @@ class TournamentWriteSerializer(StrictFieldsMixin, serializers.Serializer):
 
 class ParticipantWriteSerializer(StrictFieldsMixin, serializers.Serializer):
     participant_ids = serializers.ListField(child=ExactInteger(min_value=1), max_length=16)
+    # Optional optimistic concurrency token; omitted keeps the legacy last-write behaviour.
+    revision = ExactInteger(min_value=0, max_value=2147483647, required=False)
 
     def validate_participant_ids(self, value):
         if len(value) != len(set(value)):
@@ -49,6 +51,10 @@ class TournamentCreateSerializer(TournamentWriteSerializer):
         return ParticipantWriteSerializer().validate_participant_ids(value)
 
 
+class TournamentUpdateSerializer(TournamentCreateSerializer):
+    revision = ExactInteger(min_value=0, max_value=2147483647, required=False)
+
+
 class EmptySerializer(StrictFieldsMixin, serializers.Serializer):
     pass
 
@@ -61,7 +67,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tournament
-        fields = ["id", "name", "description", "round_count", "starting_points", "return_points", "uma", "oka", "status", "created_by", "created_at", "updated_at", "started_at", "participant_count", "expected_table_count", "participants", "score_tie_policy", "champion_tiebreak_policy", "rules_version", "rules_source", "resource_state", "completed_at", "champion_id"]
+        fields = ["id", "name", "description", "round_count", "starting_points", "return_points", "uma", "oka", "status", "created_by", "created_at", "updated_at", "started_at", "revision", "participant_count", "expected_table_count", "participants", "score_tie_policy", "champion_tiebreak_policy", "rules_version", "rules_source", "resource_state", "completed_at", "champion_id"]
 
     def get_participant_count(self, obj):
         return len(obj.participants.all())
@@ -71,9 +77,9 @@ class TournamentSerializer(serializers.ModelSerializer):
         return count // 4 if count in (4, 8, 12, 16) else None
 
     def get_participants(self, obj):
+        # Internal technical usernames are never exposed; players are identified by IDs and nicknames.
         return [{"id": entry.id, "player_id": entry.player_id,
                  "display_name": entry.display_name_snapshot if obj.status != "draft" else entry.player.nickname,
-                 "username": entry.player.user.username,
                  "is_active": entry.player.user.is_active,
                  "display_name_snapshot": entry.display_name_snapshot}
                 for entry in obj.participants.all()]

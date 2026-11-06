@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { Trophy, X } from 'lucide-react'
 import { Button } from './ui/button'
 import { Select } from './ui/select'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet'
 import { FormFeedback } from './form-feedback'
+import { ApiError } from '@/services/api'
 import type { Tournament } from '@/services/tournaments'
 import { generateRound, windLabels, type MachineResource, type RoundTable } from '@/services/rounds'
 import {
@@ -11,11 +12,19 @@ import {
   completeTournament,
   recordLottery,
   confirmLottery,
+  voidLottery,
   replaceTable,
   reviewLegacy,
+  conflictRefreshCodes,
+  isPendingLottery,
+  mergeLotteries,
+  sameMembers,
+  sameVersions,
   type Workspace,
   type FixedTable,
+  type Lottery,
 } from '@/services/competition'
+import { parsePoints } from '@/lib/points'
 
 export type CompetitionActionType =
   | { mode: 'generate' | 'finish' | 'review' }
@@ -23,6 +32,17 @@ export type CompetitionActionType =
   | { mode: 'replace'; fixed: FixedTable }
   | { mode: 'history'; fixed: FixedTable }
   | { mode: 'lottery'; members: number[] }
+
+const voidReasonLimit = 500
+const formatTime = (value: string | null) =>
+  value ? new Date(value).toLocaleString('zh-CN') : '未记录'
+
+// History entries are read-only: only the earliest current pending record is actionable.
+function lotteryState(lottery: Lottery, current: boolean, waiting: boolean) {
+  if (lottery.voided_at) return '已作废'
+  if (lottery.confirmed_at) return current ? '已确认' : '已确认（来源成绩已变化，不再适用）'
+  return waiting ? '待确认（较晚录入，须先处理更早的记录）' : '待确认（来源成绩已变化，记录失效）'
+}
 
 export function CompetitionAction({
   action,
@@ -32,6 +52,7 @@ export function CompetitionAction({
   next,
   close,
   saved,
+  refresh,
 }: {
   action: CompetitionActionType
   t: Tournament
@@ -40,9 +61,16 @@ export function CompetitionAction({
   next: number
   close: () => void
   saved: (message: string) => void
+  /** Re-read the page data (workspace and preview) while the panel stays open. */
+  refresh: () => void
 }) {
+  const fieldId = useId()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  // local: input validation; server: failed write; refreshed: failed write whose
+  // conflict code already triggered a re-read of the workspace.
+  const [errorSource, setErrorSource] = useState<'local' | 'server' | 'refreshed'>('server')
+  const [notice, setNotice] = useState('')
   const [stage, setStage] = useState(false)
   const [selected, setSelected] = useState<number[]>([])
   const [target, setTarget] = useState('')
@@ -51,7 +79,13 @@ export function CompetitionAction({
   const [drawnAt, setDrawnAt] = useState('')
   const [order, setOrder] = useState<number[]>([])
   const [historical, setHistorical] = useState(false)
-  const [lotteryId, setLotteryId] = useState<number | null>(null)
+  // Lottery write responses, overlaid on the workspace until the re-read lands.
+  const [writtenLotteries, setWrittenLotteries] = useState<Lottery[]>([])
+  const [voidTarget, setVoidTarget] = useState<number | null>(null)
+  const [voidReason, setVoidReason] = useState('')
+  const [voidStage, setVoidStage] = useState(false)
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [attempted, setAttempted] = useState(false)
   const table = action.mode === 'result' ? action.table : null
   const [points, setPoints] = useState<Record<string, string>>(() =>
     Object.fromEntries(
@@ -63,18 +97,44 @@ export function CompetitionAction({
   )
   const [version, setVersion] = useState(table?.result?.version || 0)
   const needed = t.expected_table_count || 0
-  const allInteger = Object.values(points).every(
-    (v) => /^-?\d+$/.test(v) && Number.isSafeInteger(Number(v)),
+  // One parser feeds the draft payload, the running total and the confirm check.
+  const seats = (table?.seats || []).map((seat) => ({
+    seat,
+    parsed: parsePoints(points[seat.participant_id] ?? ''),
+  }))
+  const invalidCount = seats.filter(({ parsed }) => !parsed.ok).length
+  const entered = seats.flatMap(({ parsed }) =>
+    parsed.ok && parsed.value !== null ? [parsed.value] : [],
   )
-  const filled = Object.values(points).filter((v) => v !== '').length
-  const sum = Object.values(points).reduce((n, v) => n + (/^-?\d+$/.test(v) ? BigInt(v) : 0n), 0n)
+  const filled = entered.length
+  const sum = entered.reduce((n, v) => n + BigInt(v), 0n)
   const expected = BigInt(t.starting_points) * 4n
-  const valid = allInteger && filled === 4 && sum === expected
+  const valid = invalidCount === 0 && filled === 4 && sum === expected
   const free = resources.filter(
     (m) =>
       m.assignable ||
       (action.mode === 'review' && ws.mapping.some((f) => f.machine_id === m.machine_id)),
   )
+  const machineLabel = (pk: number) => {
+    const machine = resources.find((m) => m.machine_id === pk)
+    return machine ? `${machine.machine_no} · ${machine.name}` : `设备 #${pk}`
+  }
+  const playerName = (pk: number) =>
+    ws.standings.find((s) => s.participant_id === pk)?.display_name || `选手 #${pk}`
+  const members = action.mode === 'lottery' ? action.members : null
+  const groupLotteries = members
+    ? mergeLotteries(ws.lotteries, writtenLotteries).filter((l) => sameMembers(l.members, members))
+    : []
+  // Earliest first: a later record can never be confirmed in place of an earlier one.
+  const pendingLotteries = members
+    ? groupLotteries
+        .filter((l) => isPendingLottery(l, members, ws.source_versions))
+        .sort((a, b) => a.id - b.id)
+    : []
+  const pending = pendingLotteries[0] || null
+  const lotteryHistory = groupLotteries.filter((l) => l !== pending).sort((a, b) => b.id - a.id)
+  const groupOpen =
+    !!members && (ws.unresolved_groups ?? []).some((group) => sameMembers(group, members))
   const title = {
     generate: next === 1 ? '确认选桌与首轮' : `确认生成第 ${next} 轮`,
     result: '半庄成绩',
@@ -87,30 +147,89 @@ export function CompetitionAction({
   async function run(operation: () => Promise<unknown>, message: string, stay = false) {
     setBusy(true)
     setError(null)
+    setNotice('')
     try {
       await operation()
       if (!stay) saved(message)
     } catch (e) {
       setError(e as Error)
+      // The server state moved on (pending/voided/confirmed/completed elsewhere):
+      // show its message and re-read everything before any further decision.
+      if (e instanceof ApiError && e.status === 409 && conflictRefreshCodes.has(e.code)) {
+        setErrorSource('refreshed')
+        refresh()
+      } else setErrorSource('server')
     } finally {
       setBusy(false)
     }
   }
   async function result(confirm: boolean) {
-    const values = table!.seats.map((s) => ({
-      participant_id: s.participant_id,
-      raw_points: points[s.participant_id] === '' ? null : Number(points[s.participant_id]),
-    }))
-    if (values.some((v) => v.raw_points !== null && !Number.isSafeInteger(v.raw_points))) {
-      setError(new Error('点数必须是安全范围内的整数。'))
+    if (!table) return
+    setAttempted(true)
+    if (invalidCount) {
+      setError(new Error('点数必须是安全范围内的整数，请按选手格子下方的提示修改后再保存。'))
+      setErrorSource('local')
       return
     }
+    if (confirm && !valid) return
+    const values = seats.map(({ seat, parsed }) => ({
+      participant_id: seat.participant_id,
+      raw_points: parsed.ok ? parsed.value : null,
+    }))
     await run(
       async () => {
-        const row = await saveResult(table!.id, version, values, confirm)
+        const row = await saveResult(table.id, version, values, confirm)
         setVersion(row.version)
       },
       confirm ? '成绩已正式确认并锁定。' : '草稿已保存，可刷新后继续填写。',
+    )
+  }
+  function record() {
+    if (!members) return
+    const versions = ws.source_versions
+    void run(
+      async () => {
+        const row = await recordLottery(t.id, {
+          members,
+          order,
+          method,
+          description: reason,
+          drawn_at: new Date(drawnAt).toISOString(),
+          source_versions: versions,
+        })
+        setWrittenLotteries((rows) => [
+          ...rows,
+          { ...row, source_versions: row.source_versions ?? versions },
+        ])
+        setNotice('公开抽签记录已保存，请核对后二次确认；如记录有误，可填写原因作废。')
+        // Whatever happens next (confirm, close or cancel) the page must not keep
+        // showing a workspace without this record.
+        refresh()
+      },
+      '',
+      true,
+    )
+  }
+  function revoke(lottery: Lottery) {
+    const text = voidReason.trim()
+    if (!text || text.length > voidReasonLimit) return
+    void run(
+      async () => {
+        const row = await voidLottery(t.id, lottery.id, text)
+        setWrittenLotteries((rows) => [...rows.filter((r) => r.id !== row.id), row])
+        setVoidTarget(null)
+        setVoidReason('')
+        setVoidStage(false)
+        // A voided draw must never be reused: start the next record from scratch.
+        setOrder([])
+        setMethod('')
+        setDrawnAt('')
+        setReason('')
+        setNotice(`抽签记录 #${lottery.id} 已作废。请重新组织公开抽签后录入新结果。`)
+        refresh()
+      },
+      '',
+      true,
     )
   }
   const pickers = (
@@ -122,11 +241,13 @@ export function CompetitionAction({
             aria-label={`逻辑桌 ${'ABCD'[i]} 物理桌`}
             value={selected[i] || ''}
             disabled={busy}
-            onValueChange={(value) =>
+            onValueChange={(value) => {
+              // Any change after a preview invalidates it: preview again before submit.
+              setStage(false)
               setSelected((v) =>
                 Array.from({ length: needed }, (_, j) => (j === i ? Number(value) : v[j] || 0)),
               )
-            }
+            }}
             options={[
               { value: '', label: '选择真实物理桌' },
               ...free.map((m) => ({
@@ -216,29 +337,44 @@ export function CompetitionAction({
                 。允许负数与零，未确认前可保存部分草稿。
               </p>
               <div className="result-inputs">
-                {table.seats.map((s) => (
-                  <label key={s.id} className="round-field">
-                    <span>
-                      {windLabels[s.seat_wind]} · {s.display_name}
-                    </span>
-                    <input
-                      autoComplete="off"
-                      inputMode="text"
-                      aria-label={`${s.display_name} 终局点数`}
-                      value={points[s.participant_id]}
-                      onChange={(e) => {
-                        setStage(false)
-                        setPoints((v) => ({ ...v, [s.participant_id]: e.target.value }))
-                      }}
-                      placeholder="整数点数"
-                    />
-                  </label>
-                ))}
+                {seats.map(({ seat: s, parsed }) => {
+                  const errorId = `${fieldId}-points-${s.participant_id}`
+                  const message =
+                    !parsed.ok && (attempted || touched[s.participant_id]) ? parsed.error : ''
+                  return (
+                    <label key={s.id} className="round-field">
+                      <span>
+                        {windLabels[s.seat_wind]} · {s.display_name}
+                      </span>
+                      <input
+                        autoComplete="off"
+                        inputMode="text"
+                        aria-label={`${s.display_name} 终局点数`}
+                        aria-invalid={message ? true : undefined}
+                        aria-describedby={message ? errorId : undefined}
+                        value={points[s.participant_id]}
+                        onBlur={() => setTouched((v) => ({ ...v, [s.participant_id]: true }))}
+                        onChange={(e) => {
+                          setStage(false)
+                          if (errorSource === 'local') setError(null)
+                          setPoints((v) => ({ ...v, [s.participant_id]: e.target.value }))
+                        }}
+                        placeholder="整数点数"
+                      />
+                      {message && (
+                        <span id={errorId} className="field-error">
+                          {message}
+                        </span>
+                      )}
+                    </label>
+                  )
+                })}
               </div>
               <div className={`points-total ${valid ? 'valid' : ''}`} aria-live="polite">
                 <p>
                   已填写 {filled} / 4 · 实录合计 {sum.toString()}
                 </p>
+                {invalidCount > 0 && <p>{invalidCount} 位选手的点数格式有误，未计入合计。</p>}
                 <p>
                   标准合计 {expected.toString()} · 差额 {(sum - expected).toString()}
                 </p>
@@ -269,7 +405,18 @@ export function CompetitionAction({
                       {h.status === 'active' ? '占用中' : '已释放'} · {h.source} · 稳定 machineId #
                       {h.machine_id}
                     </p>
-                    <p>{h.reason || '初始选桌或旧占用继承'}</p>
+                    <dl className="history-reasons">
+                      <div>
+                        <dt>建立原因</dt>
+                        <dd>{h.reason || '初始选桌或旧占用继承'}</dd>
+                      </div>
+                      {h.status !== 'active' && (
+                        <div>
+                          <dt>释放原因</dt>
+                          <dd>{h.release_reason || '未填写释放原因'}</dd>
+                        </div>
+                      )}
+                    </dl>
                   </article>
                 ))
               ) : (
@@ -331,7 +478,11 @@ export function CompetitionAction({
                 <input
                   type="checkbox"
                   checked={historical}
-                  onChange={(e) => setHistorical(e.target.checked)}
+                  disabled={busy}
+                  onChange={(e) => {
+                    setStage(false)
+                    setHistorical(e.target.checked)
+                  }}
                 />{' '}
                 全部配置轮次已存在，无需后续实体对局，仅补历史成绩
               </label>
@@ -341,9 +492,30 @@ export function CompetitionAction({
                 <textarea
                   maxLength={500}
                   value={reason}
-                  onChange={(e) => setReason(e.target.value)}
+                  onChange={(e) => {
+                    setStage(false)
+                    setReason(e.target.value)
+                  }}
                 />
               </label>
+              {stage && (
+                <div className="confirmation-preview" aria-label="兼容复核摘要">
+                  <h3>复核摘要</h3>
+                  <p>
+                    historical_only：
+                    {historical
+                      ? '是 · 仅补录历史成绩并正常完赛，不占用物理桌'
+                      : '否 · 继续后续实体对局，按下列映射固定物理桌'}
+                  </p>
+                  {!historical &&
+                    selected.map((pk, i) => (
+                      <p key={pk}>
+                        逻辑桌 {'ABCD'[i]} → 物理桌 {machineLabel(pk)}
+                      </p>
+                    ))}
+                  <p>复核原因：{reason.trim()}</p>
+                </div>
+              )}
               <Button
                 disabled={busy || !reason.trim() || (!historical && !selectionValid)}
                 onClick={() =>
@@ -359,140 +531,224 @@ export function CompetitionAction({
               </Button>
             </>
           )}
-          {action.mode === 'lottery' && (
+          {members && (
             <>
               <p>
                 本组所有绩效指标完全相同。请在公开抽签完成后，依次选择所得完整顺序；系统不会随机生成结果。
               </p>
-              {action.members.map((_, i) => (
-                <label className="round-field" key={i}>
-                  抽签顺位 {i + 1}
-                  <Select
-                    aria-label={`抽签顺位 ${i + 1}`}
-                    disabled={busy || !!lotteryId}
-                    value={order[i] || ''}
-                    onValueChange={(value) =>
-                      setOrder((v) =>
-                        Array.from({ length: action.members.length }, (_, j) =>
-                          j === i ? Number(value) : v[j] || 0,
-                        ),
-                      )
-                    }
-                    options={[
-                      { value: '', label: '选择选手' },
-                      ...action.members.map((pk) => ({
-                        value: pk,
-                        label:
-                          ws.standings.find((s) => s.participant_id === pk)?.display_name ||
-                          `选手 #${pk}`,
-                        disabled: order.includes(pk) && order[i] !== pk,
-                      })),
-                    ]}
-                  />
-                </label>
-              ))}
-              <label className="round-field">
-                抽签方式
-                <input
-                  disabled={!!lotteryId}
-                  maxLength={200}
-                  value={method}
-                  onChange={(e) => setMethod(e.target.value)}
-                />
-              </label>
-              <label className="round-field">
-                实际抽签时间
-                <input
-                  type="datetime-local"
-                  disabled={!!lotteryId}
-                  value={drawnAt}
-                  onChange={(e) => setDrawnAt(e.target.value)}
-                />
-              </label>
-              <label className="round-field">
-                公开过程说明
-                <textarea
-                  disabled={!!lotteryId}
-                  maxLength={2000}
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                />
-              </label>
-              {!lotteryId ? (
-                <Button
-                  disabled={
-                    busy ||
-                    order.length !== action.members.length ||
-                    order.some((x) => !x) ||
-                    new Set(order).size !== action.members.length ||
-                    !method.trim() ||
-                    !reason.trim() ||
-                    !drawnAt
-                  }
-                  onClick={() =>
-                    void run(
-                      async () => {
-                        const l = await recordLottery(t.id, {
-                          members: action.members,
-                          order,
-                          method,
-                          description: reason,
-                          drawn_at: new Date(drawnAt).toISOString(),
-                          source_versions: ws.source_versions,
-                        })
-                        setLotteryId(l.id)
-                      },
-                      '',
-                      true,
-                    )
-                  }
-                >
-                  保存公开抽签记录
-                </Button>
-              ) : (
+              <p>并列选手：{members.map(playerName).join('、')}</p>
+              {!groupOpen ? (
+                <div className="confirmation-preview">
+                  <h3>该并列组已无需抽签</h3>
+                  <p>赛事可能已完赛，或该组抽签已由其他操作确认。请关闭面板，核对最新排名。</p>
+                </div>
+              ) : pending ? (
                 <>
-                  <p>记录已保存，请核对上述顺序。确认后用于正式排名。</p>
+                  <section
+                    className="confirmation-preview lottery-record"
+                    aria-labelledby={`${fieldId}-pending`}
+                  >
+                    <h3 id={`${fieldId}-pending`}>待二次确认的抽签记录 #{pending.id}</h3>
+                    <ol className="lottery-order" aria-label="抽签顺序">
+                      {pending.order.map((pk, i) => (
+                        <li key={pk}>
+                          第 {i + 1} 位：{playerName(pk)}
+                        </li>
+                      ))}
+                    </ol>
+                    <dl className="lottery-meta">
+                      <div>
+                        <dt>抽签方式</dt>
+                        <dd>{pending.method}</dd>
+                      </div>
+                      <div>
+                        <dt>公开过程说明</dt>
+                        <dd>{pending.description}</dd>
+                      </div>
+                      <div>
+                        <dt>实际抽签时间</dt>
+                        <dd>{formatTime(pending.drawn_at)}</dd>
+                      </div>
+                      <div>
+                        <dt>记录人</dt>
+                        <dd>
+                          管理员 #{pending.created_by_id} · {formatTime(pending.created_at)}
+                        </dd>
+                      </div>
+                    </dl>
+                    {pendingLotteries.length > 1 && (
+                      <p>
+                        该组另有 {pendingLotteries.length - 1}{' '}
+                        条较晚录入的待确认记录，须先确认或作废本条。
+                      </p>
+                    )}
+                    <p>同一并列组只允许一条待确认记录，处理前不能再录入新结果。</p>
+                  </section>
                   <Button
                     disabled={busy}
                     onClick={() =>
-                      void run(() => confirmLottery(t.id, lotteryId), '公开抽签已确认。')
+                      void run(() => confirmLottery(t.id, pending.id), '公开抽签已确认。')
                     }
                   >
                     二次确认抽签顺序
                   </Button>
+                  {voidTarget !== pending.id ? (
+                    <Button
+                      variant="outline"
+                      disabled={busy}
+                      onClick={() => {
+                        setVoidTarget(pending.id)
+                        setVoidReason('')
+                        setVoidStage(false)
+                      }}
+                    >
+                      作废此记录
+                    </Button>
+                  ) : (
+                    <>
+                      <label className="round-field">
+                        作废原因
+                        <textarea
+                          value={voidReason}
+                          maxLength={voidReasonLimit}
+                          required
+                          disabled={busy}
+                          aria-describedby={`${fieldId}-void-hint`}
+                          onChange={(e) => {
+                            setVoidStage(false)
+                            setVoidReason(e.target.value)
+                          }}
+                        />
+                      </label>
+                      <p id={`${fieldId}-void-hint`} className="field-note">
+                        必填，最多 {voidReasonLimit} 字（已填写 {voidReason.trim().length}{' '}
+                        字）。作废记录保留审计，不能恢复，也不能再确认。
+                      </p>
+                      {voidStage && (
+                        <div className="confirmation-preview" aria-label="作废确认">
+                          <h3>确认作废抽签记录 #{pending.id}</h3>
+                          <p>顺序：{pending.order.map(playerName).join(' → ')}</p>
+                          <p>作废原因：{voidReason.trim()}</p>
+                        </div>
+                      )}
+                      <Button
+                        variant={voidStage ? 'destructive' : 'outline'}
+                        disabled={busy || !voidReason.trim()}
+                        onClick={() => (voidStage ? revoke(pending) : setVoidStage(true))}
+                      >
+                        {voidStage ? '确认作废' : '预览作废'}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        disabled={busy}
+                        onClick={() => {
+                          setVoidTarget(null)
+                          setVoidStage(false)
+                        }}
+                      >
+                        放弃作废
+                      </Button>
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  {members.map((_, i) => (
+                    <label className="round-field" key={i}>
+                      抽签顺位 {i + 1}
+                      <Select
+                        aria-label={`抽签顺位 ${i + 1}`}
+                        disabled={busy}
+                        value={order[i] || ''}
+                        onValueChange={(value) =>
+                          setOrder((v) =>
+                            Array.from({ length: members.length }, (_, j) =>
+                              j === i ? Number(value) : v[j] || 0,
+                            ),
+                          )
+                        }
+                        options={[
+                          { value: '', label: '选择选手' },
+                          ...members.map((pk) => ({
+                            value: pk,
+                            label: playerName(pk),
+                            disabled: order.includes(pk) && order[i] !== pk,
+                          })),
+                        ]}
+                      />
+                    </label>
+                  ))}
+                  <label className="round-field">
+                    抽签方式
+                    <input
+                      disabled={busy}
+                      maxLength={200}
+                      value={method}
+                      onChange={(e) => setMethod(e.target.value)}
+                    />
+                  </label>
+                  <label className="round-field">
+                    实际抽签时间
+                    <input
+                      type="datetime-local"
+                      disabled={busy}
+                      value={drawnAt}
+                      onChange={(e) => setDrawnAt(e.target.value)}
+                    />
+                  </label>
+                  <label className="round-field">
+                    公开过程说明
+                    <textarea
+                      disabled={busy}
+                      maxLength={2000}
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                    />
+                  </label>
+                  <Button
+                    disabled={
+                      busy ||
+                      order.length !== members.length ||
+                      order.some((x) => !x) ||
+                      new Set(order).size !== members.length ||
+                      !method.trim() ||
+                      !reason.trim() ||
+                      !drawnAt
+                    }
+                    onClick={record}
+                  >
+                    保存公开抽签记录
+                  </Button>
                 </>
               )}
-              {!lotteryId &&
-                ws.lotteries
-                  .filter(
-                    (l) =>
-                      !l.confirmed_at &&
-                      l.members.length === action.members.length &&
-                      l.members.every((pk) => action.members.includes(pk)),
-                  )
-                  .map((l) => (
-                    <div className="confirmation-preview" key={l.id}>
+              {lotteryHistory.length > 0 && (
+                <section className="lottery-history" aria-labelledby={`${fieldId}-history`}>
+                  <h3 id={`${fieldId}-history`}>本组抽签记录历史</h3>
+                  {lotteryHistory.map((l) => (
+                    <article key={l.id}>
+                      <strong>
+                        记录 #{l.id} ·{' '}
+                        {lotteryState(
+                          l,
+                          sameVersions(l.source_versions ?? [], ws.source_versions),
+                          pendingLotteries.includes(l),
+                        )}
+                      </strong>
+                      <p>顺序：{l.order.map(playerName).join(' → ')}</p>
                       <p>
-                        已有待确认记录：
-                        {l.order
-                          .map(
-                            (pk) => ws.standings.find((s) => s.participant_id === pk)?.display_name,
-                          )
-                          .join(' → ')}
+                        {l.method} · 抽签时间 {formatTime(l.drawn_at)} · 记录人 管理员 #
+                        {l.created_by_id}
                       </p>
-                      <p>
-                        {l.method} · {l.description}
-                      </p>
-                      <Button
-                        disabled={busy}
-                        onClick={() =>
-                          void run(() => confirmLottery(t.id, l.id), '已有公开抽签已二次确认。')
-                        }
-                      >
-                        核对并确认已有抽签
-                      </Button>
-                    </div>
+                      {l.voided_at && (
+                        <p>
+                          作废原因：{l.void_reason || '未填写'} · {formatTime(l.voided_at)} · 管理员
+                          #{l.voided_by_id}
+                        </p>
+                      )}
+                    </article>
                   ))}
+                </section>
+              )}
             </>
           )}
           {action.mode === 'finish' && (
@@ -516,8 +772,14 @@ export function CompetitionAction({
               </Button>
             </>
           )}
-          <FormFeedback error={error} />
-          {error && <p>请关闭面板并刷新工作台核对服务器状态，再决定是否重新操作。</p>}
+          <FormFeedback error={error} success={notice} />
+          {error && errorSource !== 'local' && (
+            <p>
+              {errorSource === 'refreshed'
+                ? '已自动重新读取工作台数据，请核对最新状态后再决定是否操作。'
+                : '请关闭面板并刷新工作台核对服务器状态，再决定是否重新操作。'}
+            </p>
+          )}
           <Button variant="ghost" disabled={busy} onClick={close}>
             {action.mode === 'history' ? '关闭' : '取消'}
           </Button>

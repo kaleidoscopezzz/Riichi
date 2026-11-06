@@ -3,14 +3,14 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
-from common.api import StrictFieldsMixin
+from common.api import StrictFieldsMixin, validate_display_name
 
 User = get_user_model()
 
 
 class RegisterSerializer(StrictFieldsMixin, serializers.Serializer):
     username = serializers.CharField(max_length=150, validators=User._meta.get_field("username").validators)
-    nickname = serializers.CharField(max_length=80)
+    nickname = serializers.CharField(max_length=80, validators=[validate_display_name])
     password = serializers.CharField(write_only=True, trim_whitespace=False, max_length=128)
     password_confirm = serializers.CharField(write_only=True, trim_whitespace=False, max_length=128)
 

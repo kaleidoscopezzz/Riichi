@@ -50,7 +50,6 @@ describe('参赛选手实时联想', () => {
         id: 80,
         player_id: 1,
         display_name: '草稿原昵称',
-        username: 'private',
         is_active: true,
         display_name_snapshot: '历史快照',
       },
@@ -235,5 +234,93 @@ describe('参赛选手实时联想', () => {
       expect.objectContaining({ participant_ids: [1, 2] }),
       undefined,
     )
+  })
+})
+
+describe('分页保留与归档标记（F8/F9）', () => {
+  it('选中第 2 页选手后保留已加载结果与页码，只更新选中状态', async () => {
+    vi.mocked(findPlayers)
+      .mockResolvedValueOnce(page(players.slice(0, 20), '/next'))
+      .mockResolvedValueOnce(page(players.slice(20)))
+    const user = userEvent.setup()
+    render(<Harness />)
+    await user.click(input())
+    await screen.findAllByRole('option')
+    await user.click(screen.getByRole('button', { name: '加载更多选手' }))
+    await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(24))
+    await user.click(option(22))
+    expect(screen.getByText('已选 1 / 16 人')).toBeTruthy()
+    expect(screen.getAllByRole('option')).toHaveLength(24)
+    expect(option(22).getAttribute('aria-selected')).toBe('true')
+    expect(screen.getByText('已显示 24 / 24 人')).toBeTruthy()
+    expect(findPlayers).toHaveBeenCalledTimes(2)
+    expect(document.activeElement).toBe(input())
+    // Keyboard picking continues in place on the loaded later page as well.
+    await user.keyboard('{ArrowDown}{Enter}')
+    expect(screen.getByText('已选 2 / 16 人')).toBeTruthy()
+    const chosen = screen
+      .getAllByRole('option')
+      .filter((o) => o.getAttribute('aria-selected') === 'true')
+    expect(chosen).toHaveLength(2)
+    expect(screen.getAllByRole('option')).toHaveLength(24)
+    expect(findPlayers).toHaveBeenCalledTimes(2)
+  })
+  it('第 1 页带查询词选中后仍清空查询，便于继续搜索', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+    await user.type(input(), '小明')
+    await waitFor(() =>
+      expect(findPlayers).toHaveBeenLastCalledWith(1, '小明', expect.any(AbortSignal)),
+    )
+    await screen.findAllByRole('option')
+    await user.click(option(2))
+    expect((input() as HTMLInputElement).value).toBe('')
+    expect(screen.getByText('已选 1 / 16 人')).toBeTruthy()
+  })
+  it('选中后的名单条目不含内部用户名', async () => {
+    const change = vi.fn()
+    const user = userEvent.setup()
+    render(<PlayerPicker selected={[]} change={change} disabled={false} />)
+    await user.click(input())
+    await screen.findAllByRole('option')
+    await user.click(option(1))
+    expect(change).toHaveBeenCalledWith([
+      { id: 0, player_id: 1, display_name: '小明', is_active: true, display_name_snapshot: '' },
+    ])
+    expect(change.mock.calls[0][0][0]).not.toHaveProperty('username')
+  })
+  it('草稿里的已归档选手显示标记与提示，移除后提示消失', async () => {
+    const user = userEvent.setup()
+    render(
+      <Harness
+        initial={[
+          {
+            id: 81,
+            player_id: 30,
+            display_name: '老会员',
+            is_active: false,
+            display_name_snapshot: '',
+          },
+          {
+            id: 82,
+            player_id: 2,
+            display_name: '小明',
+            is_active: true,
+            display_name_snapshot: '',
+          },
+        ]}
+      />,
+    )
+    const archived = screen.getByRole('button', { name: '移除 老会员（选手 #30，已归档）' })
+    expect(archived.textContent).toContain('已归档')
+    const hint = document.getElementById(archived.getAttribute('aria-describedby')!)
+    expect(hint?.textContent).toContain('保存草稿会被拒绝')
+    expect(hint?.textContent).toContain('老会员 #30')
+    const active = screen.getByRole('button', { name: '移除 小明（选手 #2）' })
+    expect(active.textContent).not.toContain('已归档')
+    expect(active.getAttribute('aria-describedby')).toBeNull()
+    await user.click(archived)
+    expect(screen.queryByText(/保存草稿会被拒绝/)).toBeNull()
+    expect(screen.getByText('已选 1 / 16 人')).toBeTruthy()
   })
 })

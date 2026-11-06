@@ -1,7 +1,7 @@
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from common.api import StrictFieldsMixin
+from common.api import StrictFieldsMixin, search_text
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
@@ -11,18 +11,18 @@ from rest_framework.views import APIView
 
 from .models import PlayerProfile
 from .serializers import PlayerSerializer, ProfileUpdateSerializer, AccountProfileSerializer
-from .services import create_player, mutate_player
+from .services import create_player, mutate_player, own_profile
 
 
 class ProfileView(APIView):
     permission_classes = [IsAdminUser]
     def get(self, request):
-        return Response({"data": AccountProfileSerializer(request.user.player_profile).data}, headers={"Cache-Control": "no-store"})
+        return Response({"data": AccountProfileSerializer(own_profile(request.user)).data}, headers={"Cache-Control": "no-store"})
 
     def patch(self, request):
         serializer = ProfileUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        profile = request.user.player_profile
+        profile = own_profile(request.user)
         profile.nickname = serializer.validated_data["nickname"]
         profile.save(update_fields=["nickname", "updated_at"])
         return Response({"data": AccountProfileSerializer(profile).data})
@@ -41,7 +41,7 @@ class PlayerListView(generics.ListAPIView):
     pagination_class = PlayerPagination
 
     def get_queryset(self):
-        search = self.request.query_params.get("search", "").strip()
+        search = search_text(self.request.query_params.get("search", "")).strip()
         if len(search) > 150:
             raise ValidationError({"search": ["搜索内容最多 150 字符。"]})
         eligible = self.request.query_params.get("eligible", "")

@@ -39,25 +39,74 @@ function Write-State($State) {
   if (Test-Path -LiteralPath $script:StateFile) { [IO.File]::Replace($temporary, $script:StateFile, [NullString]::Value) }
   else { [IO.File]::Move($temporary, $script:StateFile) }
 }
-function Read-State {
-  if (-not (Test-Path -LiteralPath $script:StateFile)) { return $null }
-  # Readers allow atomic replacement; Get-Content's sharing mode can otherwise
-  # race the worker's phase updates on Windows PowerShell 5.1.
-  $stream = [IO.File]::Open($script:StateFile, [IO.FileMode]::Open, [IO.FileAccess]::Read, ([IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete))
-  $reader = New-Object IO.StreamReader($stream, [Text.Encoding]::UTF8, $true)
-  try { $state = $reader.ReadToEnd() | ConvertFrom-Json } finally { $reader.Dispose() }
+function Test-StateShape($State) {
+  # Under StrictMode a missing field would throw later; reject it as damage.
+  if ($State -isnot [Management.Automation.PSCustomObject]) { return $false }
+  foreach ($name in @('root', 'runId', 'owner', 'status', 'backend', 'frontend', 'error')) { if ($null -eq $State.PSObject.Properties[$name]) { return $false } }
+  if ($null -eq $State.owner) { return $false }
+  foreach ($identity in @($State.owner, $State.backend, $State.frontend)) {
+    if ($null -eq $identity) { continue }
+    if ($identity -isnot [Management.Automation.PSCustomObject]) { return $false }
+    foreach ($name in @('ProcessId', 'CreationTime', 'ImagePath')) { if ($null -eq $identity.PSObject.Properties[$name]) { return $false } }
+    if ([string]$identity.ProcessId -notmatch '^\d+$' -or [string]$identity.CreationTime -notmatch '^\d+$') { return $false }
+  }
+  return ($State.status -is [string])
+}
+function Read-State([switch]$Required) {
+  # File.Replace is not atomic for readers: a poll can briefly hit a missing,
+  # empty or half-swapped file. Retry those; still unreadable means damage.
+  for ($attempt = 1; ; $attempt++) {
+    try {
+      if (-not (Test-Path -LiteralPath $script:StateFile)) {
+        if (-not $Required) { return $null }
+        throw (New-Object IO.FileNotFoundException)
+      }
+      # Readers allow atomic replacement; Get-Content's sharing mode can otherwise
+      # race the worker's phase updates on Windows PowerShell 5.1.
+      $stream = [IO.File]::Open($script:StateFile, [IO.FileMode]::Open, [IO.FileAccess]::Read, ([IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete))
+      $reader = New-Object IO.StreamReader($stream, [Text.Encoding]::UTF8, $true)
+      try { $text = $reader.ReadToEnd() } finally { $reader.Dispose() }
+      if ([string]::IsNullOrWhiteSpace($text)) { throw (New-Object IO.InvalidDataException) }
+      $state = $text | ConvertFrom-Json
+      if (-not (Test-StateShape $state)) { throw (New-Object IO.InvalidDataException) }
+      break
+    } catch {
+      if ($attempt -ge 20) { throw '启动状态文件缺失、为空或格式损坏，已拒绝管理进程，请人工核对 .runtime/launcher。' }
+      Start-Sleep -Milliseconds 50
+    }
+  }
   if ($state.root -ne $script:Root -or $state.runId -notmatch '^[a-f0-9]{32}$') { throw '启动状态不属于当前目录或格式损坏，已拒绝管理进程，请人工核对 .runtime/launcher。' }
   return $state
 }
+function Test-Alive($Identity) {
+  # Same PID and creation time. A later process reusing the PID is not ours.
+  $current = [RiichiLauncher.ProcessJob]::Snapshot([int]$Identity.ProcessId)
+  return ($null -ne $current -and $current.CreationTime -eq [string]$Identity.CreationTime)
+}
+function Assert-ChildrenGone($State) {
+  # KILL_ON_JOB_CLOSE reclaims the tree once the owner exits, asynchronously;
+  # wait briefly. A child still alive with its recorded identity is never
+  # terminated here: that is an anomaly for manual review.
+  $deadline = [DateTime]::UtcNow.AddSeconds(5)
+  foreach ($child in @($State.backend, $State.frontend)) {
+    if ($null -eq $child) { continue }
+    while (Test-Alive $child) {
+      if ([DateTime]::UtcNow -ge $deadline) { throw "启动进程已退出，但子进程 PID $($child.ProcessId) 仍以原身份运行；未终止任何进程，请人工核对。" }
+      Start-Sleep -Milliseconds 100
+    }
+  }
+}
 function Test-Owner($State) {
+  # $false only when the owner is proven gone: no such PID, exited, or the PID
+  # now belongs to a process created at another time (reuse; never touched).
   $identity = [RiichiLauncher.ProcessJob]::Snapshot([int]$State.owner.ProcessId)
-  if ($null -eq $identity) { return $false }
-  if ($identity.CreationTime -ne $State.owner.CreationTime -or $identity.ImagePath -ne $State.owner.ImagePath) { throw 'PID 已复用或进程身份不符，拒绝终止无关进程；请人工核对状态文件。' }
+  if ($null -eq $identity -or $identity.CreationTime -ne $State.owner.CreationTime) { Assert-ChildrenGone $State; return $false }
+  if ($identity.ImagePath -ne $State.owner.ImagePath) { throw '进程创建时间相同但可执行路径不符或无法读取，拒绝终止；请人工核对状态文件。' }
   $process = Get-CimInstance Win32_Process -Filter "ProcessId=$($identity.ProcessId)"
   if ($null -eq $process -or [string]::IsNullOrEmpty($process.CommandLine)) {
     # A normal exit can occur between the kernel snapshot and CIM query. Only
     # accept that case after another kernel check, never on missing CIM alone.
-    if ($null -eq [RiichiLauncher.ProcessJob]::Snapshot([int]$State.owner.ProcessId)) { return $false }
+    if (-not (Test-Alive $State.owner)) { Assert-ChildrenGone $State; return $false }
     throw '无法确认进程命令行，拒绝终止；请人工核对状态。'
   }
   $worker = Join-Path $script:Root 'scripts\run.ps1'
@@ -65,11 +114,61 @@ function Test-Owner($State) {
   return $true
 }
 function Stop-Owned($State) {
-  if (Test-Owner $State) { [RiichiLauncher.ProcessJob]::StopVerified([int]$State.owner.ProcessId, $State.owner.CreationTime, $State.owner.ImagePath) }
+  # $true when the verified owner was stopped; $false when it was already gone.
+  if (-not (Test-Owner $State)) { return $false }
+  [RiichiLauncher.ProcessJob]::StopVerified([int]$State.owner.ProcessId, $State.owner.CreationTime, $State.owner.ImagePath)
+  return $true
 }
 function Test-PortFree([int]$Port) {
+  $message = "端口 $Port 已被占用，未终止占用者。请先核对服务或端口。"
+  # Windows lets 127.0.0.1 bind while another program listens on 0.0.0.0, ::
+  # or ::1, so also connect to both loopbacks. A listener accepts within
+  # milliseconds; a refused loopback connect takes about 2 s, hence the timeout.
+  $probes = @()
+  foreach ($address in @([Net.IPAddress]::Loopback, [Net.IPAddress]::IPv6Loopback)) {
+    $client = $null
+    try { $client = New-Object Net.Sockets.TcpClient($address.AddressFamily); $probes += [pscustomobject]@{ Client = $client; Pending = $client.BeginConnect($address, $Port, $null, $null) } }
+    catch { if ($null -ne $client) { $client.Close() } } # e.g. IPv6 disabled; the bind test still applies.
+  }
+  try {
+    $deadline = [DateTime]::UtcNow.AddMilliseconds(300)
+    foreach ($probe in $probes) {
+      $connected = $false
+      if ($probe.Pending.AsyncWaitHandle.WaitOne([int][Math]::Max(0, ($deadline - [DateTime]::UtcNow).TotalMilliseconds))) {
+        try { $probe.Client.EndConnect($probe.Pending); $connected = $true } catch { }
+      }
+      if ($connected) { throw $message }
+    }
+  } finally { foreach ($probe in $probes) { $probe.Client.Close() } }
   $listener = New-Object Net.Sockets.TcpListener([Net.IPAddress]::Loopback, $Port)
-  try { $listener.Start() } catch { throw "端口 $Port 已被占用，未终止占用者。请先核对服务或端口。" } finally { $listener.Stop() }
+  try { $listener.Start() } catch { throw $message } finally { $listener.Stop() }
+}
+function Invoke-Probe([string]$FilePath, [string[]]$Arguments) {
+  # Windows PowerShell 5.1 turns redirected native stderr into a terminating
+  # NativeCommandError under EAP=Stop. Isolate each probe: stdout or $null.
+  $ErrorActionPreference = 'Continue'
+  try { $output = @(& $FilePath @Arguments 2>$null) } catch { return $null }
+  if ($LASTEXITCODE -ne 0) { return $null }
+  return ($output -join "`n").Trim()
+}
+function Find-Python([version]$Minimum) {
+  # Project runtime, Python Launcher, then PATH. A missing 3.13 or a failing
+  # candidate never stops the search; $null when none qualifies.
+  $candidates = @()
+  $local = Join-Path $script:Root '.tools\python'
+  if (Test-Path -LiteralPath $local) { $candidates += @(Get-ChildItem -LiteralPath $local -Directory | ForEach-Object { Join-Path $_.FullName 'python.exe' } | Where-Object { Test-Path -LiteralPath $_ }) }
+  $pyCommand = Get-Command py.exe -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($pyCommand) {
+    $found = Invoke-Probe $pyCommand.Source @('-3.13', '-c', 'import sys; print(sys.executable)')
+    if ($found) { $candidates += $found }
+  }
+  $pathPython = Get-Command python.exe -CommandType Application -ErrorAction SilentlyContinue
+  if ($pathPython) { $candidates += $pathPython.Source }
+  foreach ($candidate in $candidates) {
+    $reported = Invoke-Probe $candidate @('-c', 'import sys; print(chr(46).join(map(str,sys.version_info[:3])))')
+    if ($reported -match '^3\.13\.\d+$' -and [version]$reported -ge $Minimum) { return $candidate }
+  }
+  return $null
 }
 function Test-Http([string]$Url, [switch]$Health) {
   try {

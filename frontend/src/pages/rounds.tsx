@@ -20,7 +20,13 @@ import {
   type TournamentRound,
   type MachineResource,
 } from '@/services/rounds'
-import { fetchWorkspace, displayScore, exactScore, type Workspace } from '@/services/competition'
+import {
+  fetchWorkspace,
+  displayScore,
+  exactScore,
+  isPendingLottery,
+  type Workspace,
+} from '@/services/competition'
 
 export function RoundsPage() {
   const { id } = useParams()
@@ -77,6 +83,11 @@ export function RoundsPage() {
   const visible = rounds.find((r) => r.round_number === selectedRound) || latest
   const confirmed = latest?.tables.every((table) => table.result?.status === 'confirmed')
   const completed = t?.status === 'completed'
+  // A completed tournament's final snapshot carries no unresolved groups at all.
+  const unresolved = ws?.unresolved_groups ?? []
+  // Background re-reads (e.g. right after a lottery write) keep the loaded page
+  // mounted, so an open panel and its focus-return target survive the refresh.
+  const loaded = !!t && !!ws && t.id === Number(id)
   return (
     <div className="competition-workspace">
       <Link className="back-link" to="/tournaments">
@@ -93,7 +104,8 @@ export function RoundsPage() {
         </Button>
       </section>
       <FormFeedback error={error} success={success} />
-      {loading ? (
+      {loading && loaded && <p role="status">正在刷新比赛数据…</p>}
+      {loading && !loaded ? (
         <p role="status">正在读取比赛、成绩与物理桌…</p>
       ) : error ? (
         <Button onClick={() => setRevision((v) => v + 1)}>重新加载工作台</Button>
@@ -300,11 +312,11 @@ export function RoundsPage() {
                     <p>
                       {!ws.all_results_confirmed
                         ? '请先完成所有桌次成绩确认。'
-                        : ws.unresolved_groups.length
+                        : unresolved.length
                           ? '以下选手所有比较指标完全相同，须分别公开抽签。首轮顺序不用于冠军决胜。'
                           : '最终排名已确定，正式完赛后锁定结果并自动释放本赛事物理桌。'}
                     </p>
-                    {ws.unresolved_groups.map((members, i) => (
+                    {unresolved.map((members, i) => (
                       <div className="lottery-group" key={members.join('-')}>
                         <span>
                           并列组 {i + 1}：
@@ -314,6 +326,9 @@ export function RoundsPage() {
                                 ws.standings.find((x) => x.participant_id === pk)?.display_name,
                             )
                             .join('、')}
+                          {ws.lotteries.some((l) =>
+                            isPendingLottery(l, members, ws.source_versions),
+                          ) && ' · 已有待二次确认的抽签记录'}
                         </span>
                         <Button
                           variant="outline"
@@ -351,6 +366,7 @@ export function RoundsPage() {
           resources={resources}
           next={(latest?.round_number || 0) + 1}
           close={close}
+          refresh={() => setRevision((v) => v + 1)}
           saved={(message) => {
             close()
             setSuccess(message)

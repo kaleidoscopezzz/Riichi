@@ -181,6 +181,38 @@ class TournamentTests(TestCase):
         with self.assertRaises(IntegrityError), transaction.atomic():
             TournamentParticipant.objects.create(tournament_id=row["id"], player_id=self.ids[0])
 
+    def test_participants_never_expose_internal_username(self):
+        for i, user in enumerate(self.users[:4]):
+            user.player_profile.nickname = f"公开昵称{i}"
+            user.player_profile.save()
+        row = self.create(participant_ids=self.ids[:4])
+        for data in [row, self.client.get(f'/api/v1/tournaments/{row["id"]}/').json()["data"], self.client.get("/api/v1/tournaments/").json()["data"]["results"][0], self.write(f'{row["id"]}/start/').json()["data"]]:
+            self.assertEqual(set(data["participants"][0]), {"id", "player_id", "display_name", "is_active", "display_name_snapshot"})
+            self.assertNotIn("entrant", str(data))
+
+    def test_optional_revision_rejects_stale_draft_writes(self):
+        row = self.create(participant_ids=self.ids[:4])
+        self.assertEqual(row["revision"], 0)
+        saved = self.write(f'{row["id"]}/', {"name": "第一次保存", "revision": 0}, "patch")
+        self.assertEqual((saved.status_code, saved.json()["data"]["revision"], saved.json()["data"]["name"]), (200, 1, "第一次保存"))
+        for path, body, method in [(f'{row["id"]}/', {"name": "过期表单", "revision": 0}, "patch"), (f'{row["id"]}/', {"participant_ids": self.ids[4:8], "revision": 0}, "patch"), (f'{row["id"]}/participants/', {"participant_ids": self.ids[4:8], "revision": 0}, "put"), (f'{row["id"]}/', {"name": "未来版本", "revision": 9}, "patch")]:
+            with self.subTest(path=path, body=body):
+                response = self.write(path, body, method)
+                self.assertEqual(response.status_code, 409)
+                self.assertEqual(response.json()["error"], {"code": "stale_tournament", "message": "赛事草稿已被他人修改，请刷新后再保存。", "fields": {}})
+        current = Tournament.objects.get(pk=row["id"])
+        self.assertEqual((current.name, current.revision, set(current.participants.values_list("player_id", flat=True))), ("第一次保存", 1, set(self.ids[:4])))
+        for body in [{"revision": 1}, {"name": "类型", "revision": True}, {"name": "类型", "revision": "1"}, {"name": "类型", "revision": -1}, {"name": "类型", "revision": 1.0}]:
+            self.assertEqual(self.write(f'{row["id"]}/', body, "patch").status_code, 400, body)
+        self.assertEqual(self.write(f'{row["id"]}/participants/', {"participant_ids": self.ids[4:8], "revision": 1}, "put").json()["data"]["revision"], 2)
+        # Omitting revision keeps the legacy (script-compatible) last-write behaviour.
+        self.assertEqual(self.write(f'{row["id"]}/', {"description": "脚本更新"}, "patch").json()["data"]["revision"], 3)
+        self.assertEqual(self.write(f'{row["id"]}/participants/', {"participant_ids": self.ids[:4]}, "put").json()["data"]["revision"], 4)
+        started = self.write(f'{row["id"]}/start/').json()["data"]
+        # Frozen beats stale: a started tournament still reports tournament_frozen.
+        self.assertEqual(self.write(f'{row["id"]}/', {"name": "冻结", "revision": started["revision"]}, "patch").json()["error"]["code"], "tournament_frozen")
+        self.assertEqual(self.write(f'{row["id"]}/', {"name": "冻结", "revision": 0}, "patch").json()["error"]["code"], "tournament_frozen")
+
 
 class ConcurrentTournamentTests(TransactionTestCase):
     def setUp(self):
@@ -226,3 +258,13 @@ class ConcurrentTournamentTests(TransactionTestCase):
         self.assertTrue(all(e.display_name_snapshot for e in entries))
         with self.assertRaises(TournamentConflict):
             mutate_tournament(row.pk, values={"name": "冻结后拒绝"})
+
+    def test_same_revision_parallel_edits_only_one_commits(self):
+        row = create_tournament(self.admin, {"name": "并发草稿", "round_count": 1, "participant_ids": self.ids[:4]})
+        results = self.race([lambda: mutate_tournament(row.pk, values={"name": "甲的修改"}, revision=0), lambda: mutate_tournament(row.pk, values={"name": "乙的修改"}, revision=0), lambda: mutate_tournament(row.pk, participant_ids=self.ids[4:], revision=0)])
+        self.assertEqual(results.count("ok"), 1, results)
+        self.assertTrue(set(results) <= {"ok", "stale_tournament", "tournament_busy"}, results)
+        row.refresh_from_db()
+        self.assertEqual(row.revision, 1)
+        changed = [row.name != "并发草稿", set(row.participants.values_list("player_id", flat=True)) == set(self.ids[4:])]
+        self.assertEqual(changed.count(True), 1, (row.name, changed))

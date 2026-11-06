@@ -22,7 +22,7 @@ try {
   function Wait-Service($Identity, [int]$Port, [string]$Url, [switch]$Health) {
     $until = [DateTime]::UtcNow.AddSeconds(40)
     do {
-      if ($null -eq [RiichiLauncher.ProcessJob]::Snapshot([int]$Identity.ProcessId)) { throw "端口 $Port 对应服务已退出，请检查本轮日志。" }
+      if (-not (Test-Alive $Identity)) { throw "端口 $Port 对应服务已退出，请检查本轮日志。" }
       if (Test-Http $Url -Health:$Health) {
         $listeners = @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
         if ($listeners.Count -gt 0 -and @($listeners | Where-Object { -not $job.Contains([int]$_.OwningProcess) }).Count -eq 0) { return }
@@ -39,7 +39,7 @@ try {
   Wait-Service $state.frontend 5173 'http://127.0.0.1:5173'
   $state.status = 'ready'
   Write-State $state
-  while ($null -ne [RiichiLauncher.ProcessJob]::Snapshot([int]$state.backend.ProcessId) -and $null -ne [RiichiLauncher.ProcessJob]::Snapshot([int]$state.frontend.ProcessId)) { Start-Sleep -Seconds 1 }
+  while ((Test-Alive $state.backend) -and (Test-Alive $state.frontend)) { Start-Sleep -Seconds 1 }
   throw '前端或后端进程已退出，正在回收本次启动的其他进程。'
 } catch {
   [IO.File]::WriteAllText((Join-Path $runFolder 'worker-error.log'), $_.Exception.Message, (New-Object Text.UTF8Encoding($false)))

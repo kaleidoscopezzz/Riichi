@@ -3,6 +3,7 @@ import http.cookiejar
 import json
 from pathlib import Path
 from urllib.error import HTTPError
+from urllib.parse import quote
 from urllib.request import build_opener, HTTPCookieProcessor, Request
 from datetime import datetime, timezone
 
@@ -26,7 +27,8 @@ def main():
     call('/health/')
     call('/auth/login/','POST',credentials,expected=403,csrf=False)
     call('/auth/login/','POST',credentials)
-    players=call('/players/?eligible=true')['results'];ids=[p['id'] for p in players if p['username'].startswith('f006_player')][:16]
+    # Players API exposes nicknames, never internal usernames (seed_qa.py: 验收选手01..16).
+    players=call('/players/?eligible=true&search='+quote('验收选手'))['results'];ids=[p['id'] for p in players if p['nickname'].startswith('验收选手')][:16]
     assert len(ids)==16
     machines=call('/machine-resources/')['results'];selected=[m['machine_id'] for m in machines if m['assignable']][:4];assert len(selected)==4
     t=call('/tournaments/','POST',{'name':'HTTP 验收 · 16人6轮','round_count':6,'participant_ids':ids},201)

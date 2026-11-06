@@ -42,6 +42,12 @@ class AccountFlowTests(TestCase):
   for values in [{'password_confirm':'different'},{'password':'12345678','password_confirm':'12345678'},{'password':'short','password_confirm':'short'}]:
    self.assertFalse(RegisterSerializer(data=self.payload|values).is_valid())
 
+ def test_display_name_rejects_invisible_and_bidi_text(self):
+  for nick in ['\u200b','\u202e管理员','管\x07理','\u2066\u2069']:
+   serializer=RegisterSerializer(data=self.payload|{'nickname':nick})
+   self.assertFalse(serializer.is_valid());self.assertIn('nickname',serializer.errors)
+  self.assertTrue(RegisterSerializer(data=self.payload|{'nickname':'老板\U0001f004'}).is_valid())
+
  def test_strict_privilege_injection_cannot_register(self):
   for f in ['is_staff','is_superuser','is_active','id','groups']:
    self.assertEqual(self.write('auth/register/',self.payload|{f:True}).status_code,403)
@@ -71,7 +77,11 @@ class AccountFlowTests(TestCase):
   u.is_active=False;u.save()
   self.assertEqual(self.write('auth/login/',{'username':u.username,'password':self.payload['password']}).status_code,400)
   u.is_active=True;u.is_staff=False;u.save()
-  self.assertEqual(self.write('auth/login/',{'username':u.username,'password':self.payload['password']}).status_code,403)
+  # Formerly 403 admin_required, which revealed a correct password; now identical to a wrong password.
+  wrong=self.write('auth/login/',{'username':u.username,'password':'wrong'})
+  correct=self.write('auth/login/',{'username':u.username,'password':self.payload['password']})
+  self.assertEqual(correct.status_code,400);self.assertEqual(correct.json(),wrong.json())
+  self.assertEqual(correct.json()['error'],{'code':'invalid_credentials','message':'用户名或密码错误，或账号不可用。','fields':{}})
   self.assertEqual(self.client.get('/api/v1/auth/me/').status_code,403)
 
  def test_anonymous_denied_health_public(self):

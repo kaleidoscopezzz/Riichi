@@ -53,6 +53,7 @@ namespace RiichiLauncher {
         [DllImport("kernel32.dll", SetLastError=true)] static extern bool TerminateProcess(IntPtr process,uint code);
         [DllImport("kernel32.dll")] static extern uint WaitForSingleObject(IntPtr handle,uint milliseconds);
         [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr handle);
+        [DllImport("ntdll.dll")] static extern int NtQuerySystemInformation(int information,IntPtr buffer,int length,out int needed);
         IntPtr job;
         public ProcessJob() {
             job=CreateJobObject(IntPtr.Zero,null);
@@ -94,14 +95,39 @@ namespace RiichiLauncher {
             if(handle==IntPtr.Zero) {
                 int error=Marshal.GetLastWin32Error();
                 if(error==87) return null;
+                // A reused PID may belong to a process this user cannot open.
+                if(error==5) return Listed(pid);
                 throw new Win32Exception(error);
             }
             try {
                 if(WaitForSingleObject(handle,0)==0) return null;
                 try { return ReadIdentity(handle,pid); }
-                catch { if(WaitForSingleObject(handle,0)==0) return null; throw; }
+                catch { if(WaitForSingleObject(handle,0)==0) return null; return Listed(pid); }
             }
             finally { CloseHandle(handle); }
+        }
+        // Creation time from the kernel process list, which needs no process
+        // handle. ImagePath stays null, so a matching creation time alone is
+        // never accepted as identity; a different one proves PID reuse.
+        static Identity Listed(int pid) {
+            int length=1<<20;
+            while(true) {
+                IntPtr buffer=Marshal.AllocHGlobal(length);
+                try {
+                    int needed;
+                    int status=NtQuerySystemInformation(5,buffer,length,out needed);
+                    if(status==unchecked((int)0xC0000004)) { length=Math.Max(length*2,needed+65536); continue; }
+                    if(status<0) throw new InvalidOperationException("Process list unavailable: 0x"+status.ToString("X8",CultureInfo.InvariantCulture));
+                    for(int offset=0;;) {
+                        IntPtr entry=IntPtr.Add(buffer,offset);
+                        if(Marshal.ReadIntPtr(entry,IntPtr.Size==8 ? 80 : 68).ToInt64()==pid)
+                            return new Identity {ProcessId=pid,CreationTime=Marshal.ReadInt64(entry,32).ToString(CultureInfo.InvariantCulture)};
+                        int next=Marshal.ReadInt32(entry);
+                        if(next==0) return null;
+                        offset+=next;
+                    }
+                } finally { Marshal.FreeHGlobal(buffer); }
+            }
         }
         // The same kernel handle is used for revalidation and termination, closing
         // the PID-reuse race between a command-line check and Stop-Process.
@@ -116,7 +142,10 @@ namespace RiichiLauncher {
                 Identity current;
                 try { current=ReadIdentity(handle,pid); }
                 catch { if(WaitForSingleObject(handle,0)==0) return; throw; }
-                if(current.CreationTime!=creation || !String.Equals(current.ImagePath,image,StringComparison.OrdinalIgnoreCase))
+                // A different creation time proves the recorded process already
+                // exited and its PID was reused: nothing to stop, never touch it.
+                if(current.CreationTime!=creation) return;
+                if(!String.Equals(current.ImagePath,image,StringComparison.OrdinalIgnoreCase))
                     throw new InvalidOperationException("Process identity changed; refusing termination.");
                 if(!TerminateProcess(handle,0)) {
                     if(WaitForSingleObject(handle,0)==0) return;

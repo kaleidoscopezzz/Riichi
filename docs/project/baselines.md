@@ -56,3 +56,15 @@ F0-06开发许可已正式生效，完整核心工作流已形成未提交候选
 ## UAT-FIX-01 候选起点与基线暂缓
 
 Owner确认F0-06 GitHub候选为`b9e83bb0c8e31ab660b37e7e0a46c1f0bb424e65`，Planner源码及测试证据审查通过；本轮开发前main/HEAD一致、工作区干净。Owner人工验收提出四项整改，暂缓建立baseline/F0-06。UAT修复不commit/tag/push，保留所有旧Tag/报告/证据；Owner提交候选、Planner复核、Owner再次点击验收通过后才能建立正式基线。本轮实际证据见[整改报告](UAT-FIX-01-verification.md)。
+
+## 2026-11-06 远端引用只读核对（审查修复轮）
+
+`git fetch` 后核对，以下为事实记录，不改判任何验收结论：
+
+| 引用 | 解引用Commit | 说明 |
+| --- | --- | --- |
+| Tag `baseline/F0-06` | `b9e83bb0c8e31ab660b37e7e0a46c1f0bb424e65` | 附注Tag，2026-11-04 14:09（+0800）创建，说明“Riichi F0-06 complete tournament lifecycle approved”；早于上节UAT整改，与“UAT再次验收后才建立”表述不一致，含义待Owner确认 |
+| Tag `checkpoint/UAT-FIX-01` | `c9d7bb87d4c8badb33513a38a147c9a24807c924` | 2026-11-04 16:27创建，“UAT-FIX-01 owner review checkpoint” |
+| `main` | `b882ef065bbd9ebae55f6a04ea324675ee41e3fb` | 依次合入UAT-FIX-01、Windows启动器（`49febeb`）、选手联想（`4bc28e5`）及PR #1 Docker生产部署（`babac8f`） |
+
+审查问题修复在本地分支`fix/review-findings`进行，未commit/tag/push，见[修复报告](review-findings-fix-verification.md)。

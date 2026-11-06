@@ -33,8 +33,10 @@ export function PlayerPicker({
   const anchor = useRef<HTMLDivElement>(null)
   const list = useId()
   const hint = useId()
+  const archivedHint = useId()
   const isSelected = (id: number) => selected.some((p) => p.player_id === id)
   const unavailable = (p: Player) => !p.is_active || isSelected(p.id) || selected.length >= 16
+  const archived = selected.filter((p) => !p.is_active)
 
   useEffect(() => {
     if (!open || disabled || composing) return
@@ -94,14 +96,17 @@ export function PlayerPicker({
         id: 0,
         player_id: player.id,
         display_name: player.nickname,
-        username: player.username || '',
         is_active: true,
         display_name_snapshot: '',
       },
     ])
-    setQuery('')
-    setPage(1)
-    setActive(-1)
+    // Only the selection changes: once further pages are loaded, the rows, page,
+    // query and active option stay put so picking can continue in place. On the
+    // first page a typed query is still cleared for the next quick search.
+    if (page === 1 && query) {
+      setQuery('')
+      setActive(-1)
+    }
     setOpen(true)
     input.current?.focus()
   }
@@ -122,10 +127,17 @@ export function PlayerPicker({
               type="button"
               key={p.player_id}
               disabled={disabled}
-              aria-label={`移除 ${p.display_name}（选手 #${p.player_id}）`}
+              className={p.is_active ? undefined : 'archived'}
+              aria-label={`移除 ${p.display_name}（选手 #${p.player_id}${p.is_active ? '' : '，已归档'}）`}
+              aria-describedby={p.is_active ? undefined : archivedHint}
               onClick={() => change(selected.filter((v) => v.player_id !== p.player_id))}
             >
               <span>{p.display_name}</span>
+              {!p.is_active && (
+                <span className="archived-mark" aria-hidden="true">
+                  已归档
+                </span>
+              )}
               <X size={13} aria-hidden="true" />
             </button>
           ))
@@ -133,6 +145,13 @@ export function PlayerPicker({
           <span className="field-hint">尚未选择选手</span>
         )}
       </div>
+      {archived.length > 0 && (
+        <p id={archivedHint} className="archived-warning">
+          名单中有 {archived.length} 位已归档选手（
+          {archived.map((p) => `${p.display_name} #${p.player_id}`).join('、')}
+          ）。已归档选手不能参赛，保存草稿会被拒绝，请点击带“已归档”标记的选手将其移除后再保存。
+        </p>
+      )}
       <Popover.Root open={open && !disabled} onOpenChange={setOpen}>
         <Popover.Anchor asChild>
           <div ref={anchor} className="machine-search player-combobox-search">

@@ -1,15 +1,15 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 import { Moon, Sun, ArrowRight, ShieldCheck } from 'lucide-react'
 import { useAuth } from '@/components/auth-context'
 import { useTheme } from '@/components/theme-context'
 import { FormFeedback } from '@/components/form-feedback'
 import { Button } from '@/components/ui/button'
+import { safeReturnPath } from '@/lib/redirect'
 
 export function AuthPage() {
   const auth = useAuth()
   const { theme, setTheme } = useTheme()
-  const navigate = useNavigate()
   const location = useLocation()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<Error | null>(null)
@@ -28,15 +28,19 @@ export function AuthPage() {
     }
     setBusy(true)
     try {
+      // Success re-renders with the signed-in admin; the single redirect below
+      // then returns to the page the guard came from.
       await auth.signIn(username, password)
-      navigate(location.state?.from || '/dashboard', { replace: true })
     } catch (problem) {
       setError(problem instanceof Error ? problem : new Error('登录失败。'))
     } finally {
       setBusy(false)
     }
   }
-  if (auth.user?.is_staff) return <Navigate to="/dashboard" replace />
+  if (auth.user?.is_staff)
+    return (
+      <Navigate to={safeReturnPath((location.state as { from?: unknown } | null)?.from)} replace />
+    )
   return (
     <main className="auth-shell">
       <section className="auth-story">
