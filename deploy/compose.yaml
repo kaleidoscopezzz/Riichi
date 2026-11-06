@@ -119,7 +119,11 @@ networks:
   proxy:
     internal: true
     ipam:
-      config: [{subnet: "${PROXY_SUBNET:-172.30.80.0/28}"}]
+      # Reserve the lower half for the gateway and Caddy. Otherwise Docker can
+      # dynamically give Caddy's static address to Nginx, which starts first.
+      config:
+        - subnet: ${PROXY_SUBNET:-172.30.80.0/28}
+          ip_range: ${PROXY_DYNAMIC_RANGE:-172.30.80.8/29}
   web: {internal: true}
   data: {internal: true}
 volumes:

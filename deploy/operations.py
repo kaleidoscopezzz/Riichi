@@ -101,17 +101,35 @@ class Deployment:
         if labels.get('com.docker.compose.project') != self.project:
             raise RuntimeError('Database project mismatch.')
         mounts = [m for m in info['Mounts'] if m['Destination'] == '/var/lib/postgresql/data']
-        if len(mounts) != 1 or mounts[0]['Type'] != 'volume':
+        if (len(mounts) != 1 or mounts[0]['Type'] != 'volume'
+                or mounts[0]['Name'] != self.config['volumes']['postgres_data']['name']):
             raise RuntimeError('Expected the inventoried PostgreSQL named volume.')
         actual = self.dc('exec', '-T', 'db', 'sh', '-eu', '-c',
-                         'psql -X -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At -v ON_ERROR_STOP=1 -c "SELECT current_database(), oid FROM pg_database WHERE datname=current_database()"')
-        name, oid = actual.strip().split('|')
+                         'psql -X -U "$POSTGRES_USER" -d "$POSTGRES_DB" -At -v ON_ERROR_STOP=1 -c "SELECT current_database(), oid, system_identifier FROM pg_database CROSS JOIN pg_control_system() WHERE datname=current_database()"')
+        name, oid, cluster = actual.strip().split('|')
         if name != self.db:
             raise RuntimeError('Actual database identity differs from the selected target.')
-        return {'project': self.project, 'database': name, 'oid': oid, 'volume': mounts[0].get('Name', mounts[0]['Source'])}
+        return {'project': self.project, 'database': name, 'oid': oid, 'cluster': cluster, 'volume': mounts[0]['Name']}
 
     def migration_plan(self):
         return self.api('python', 'manage.py', 'migrate', '--plan')
+
+    def image_id(self, reference):
+        return self.run(['docker', 'image', 'inspect', '--format', '{{.Id}}', reference]).strip()
+
+    def candidate_images(self):
+        return {name: self.image_id(self.config['services'][name]['image']) for name in ('api', 'nginx')}
+
+    def live_images(self):
+        images = {}
+        for name in ('api', 'nginx'):
+            identifier = self.dc('ps', '-q', name).strip()
+            if identifier:
+                images[name] = self.run(['docker', 'inspect', '--format', '{{.Image}}', identifier]).strip()
+        return images
+
+    def schema(self):
+        return json.loads(self.api('python', '-m', 'verification.schema_manifest'))
 
     def published_port_checks(self):
         owned = set()
@@ -150,14 +168,18 @@ class Deployment:
         config_name = caddy_env.get('CADDY_CONFIG', 'Caddyfile')
         if not self.qa and (config_name != 'Caddyfile' or caddy_env.get('ACME_CA') != 'https://acme-v02.api.letsencrypt.org/directory'):
             raise RuntimeError('Production must use the reviewed public Let\'s Encrypt configuration.')
+        if self.qa and config_name != 'Caddyfile.qa':
+            raise RuntimeError('QA must use the isolated internal CA configuration.')
         public_ports = services['caddy'].get('ports', [])
         tcp = {int(p['published']) for p in public_ports if p.get('protocol', 'tcp') == 'tcp'}
         if (not self.qa and tcp != {80, 443}) or (self.qa and any(p.get('host_ip') != '127.0.0.1' for p in public_ports)):
             raise RuntimeError('Unexpected ingress port binding.')
         proxy = self.config['networks']['proxy']
-        subnet = ipaddress.ip_network(proxy['ipam']['config'][0]['subnet'])
+        ipam = proxy['ipam']['config'][0]
+        subnet = ipaddress.ip_network(ipam['subnet'])
+        dynamic = ipaddress.ip_network(ipam['ip_range'])
         address = ipaddress.ip_address(services['caddy']['networks']['proxy']['ipv4_address'])
-        if address not in subnet or address in (subnet.network_address, subnet.broadcast_address):
+        if not dynamic.subnet_of(subnet) or address in dynamic or address not in subnet or address in (subnet.network_address, subnet.network_address + 1, subnet.broadcast_address):
             raise RuntimeError('Caddy proxy address does not belong to the configured network.')
         network_ids = self.run(['docker', 'network', 'ls', '-q']).split()
         if network_ids:
@@ -168,7 +190,7 @@ class Deployment:
                             raise RuntimeError('Proxy subnet overlaps another existing Docker network.')
         target = self.target()
         self.published_port_checks()
-        snapshot = json.loads(self.api('python', '-m', 'verification.schema_manifest'))
+        snapshot = self.schema()
         migration_names = {(row['app'], row['name']) for row in snapshot['migration_state']}
         has_business_rows = any(row['count'] for table, row in snapshot['tables'].items()
                                 if table.startswith(('accounts_', 'players_', 'machines_', 'tournaments_')))
@@ -182,7 +204,7 @@ class Deployment:
         if free < 4 * size + 2 * 1024**3:
             raise RuntimeError('Insufficient free disk space for backup, restored DB and images.')
         return {'result': 'PASS', 'target': target, 'database_bytes': size, 'docker_disk_free_bytes': free,
-                'environment_sha256': sha256(self.env_file), 'qa': self.qa,
+                'environment_sha256': sha256(self.env_file), 'config_sha256': canonical_hash(self.config), 'qa': self.qa,
                 'public_entry': 'Caddy only', 'proxy_subnet': str(subnet),
                 'external_ports_dns_tls': 'separate external verification required'}
 
@@ -204,9 +226,16 @@ def prepare(arguments):
     plan = deployment.migration_plan()
     result = {'format': 1, 'sha': arguments.sha, 'qa': arguments.qa, 'target': checks['target'],
               'environment_sha256': checks['environment_sha256'], 'migration_plan_sha256': canonical_hash(plan),
+              'config_sha256': checks['config_sha256'], 'candidate_images': deployment.candidate_images(),
               'migration_plan': plan, 'prepared_at': datetime.now(timezone.utc).isoformat()}
     write_json(arguments.output, result)
     print('Prepared target-bound release plan. No migration or administrator initialization performed.')
+
+
+def project_lock(deployment):
+    # Independent of operator home/evidence location. All invocations for a
+    # project on the same Linux Docker host share the lock.
+    return (Path('/run/lock') / ('riichi-release-' + deployment.project + '.lock')).open('a')
 
 
 def apply(arguments):
@@ -222,16 +251,16 @@ def apply(arguments):
     deployment = Deployment(arguments.qa, plan['sha'])
     lock_dir = Path(os.environ.get('RIICHI_RELEASE_DIR', Path.home() / 'riichi-releases')).resolve()
     lock_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
-    lock_path = lock_dir / (deployment.project + '.lock')
-    with lock_path.open('a') as lock:
-        os.chmod(lock_path, 0o600)
+    with project_lock(deployment) as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         receipt_path = manifest_path.with_suffix('.receipt.json')
         if receipt_path.exists():
             raise RuntimeError('This release was already attempted; inspect its receipt and prepare a new plan.')
         check_source(deployment, plan['sha'])
         checks = deployment.preflight()
-        if checks['target'] != plan['target'] or checks['environment_sha256'] != plan['environment_sha256'] or canonical_hash(deployment.migration_plan()) != plan['migration_plan_sha256']:
+        if (checks['target'] != plan['target'] or checks['environment_sha256'] != plan['environment_sha256']
+                or checks['config_sha256'] != plan['config_sha256'] or deployment.candidate_images() != plan['candidate_images']
+                or canonical_hash(deployment.migration_plan()) != plan['migration_plan_sha256']):
             raise RuntimeError('Target, environment or migration plan drifted; no changes applied.')
         work = lock_dir / (datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + secrets.token_hex(4))
         work.mkdir(mode=0o700)
@@ -242,6 +271,8 @@ def apply(arguments):
         # Backups, credentials and private operation logs remain outside this mount.
         receipt = {'sha': plan['sha'], 'target': plan['target'], 'state': 'APPLYING', 'private_artifacts': str(work), 'qa': arguments.qa}
         receipt['environment_sha256'] = plan['environment_sha256']
+        receipt['config_sha256'] = plan['config_sha256']
+        receipt['candidate_images'] = plan['candidate_images']
         receipt['previous_images'] = {}
         for service in ('api', 'nginx'):
             identifier = deployment.dc('ps', '-q', service).strip()
@@ -273,8 +304,8 @@ def apply(arguments):
             archive = json.loads(backup_receipt.read_text())
             if sha256(archive['archive']) != archive['sha256']:
                 raise RuntimeError('Final backup checksum mismatch.')
-            baseline = deployment.api('python', '-m', 'verification.schema_manifest')
-            (projection / 'before.json').write_text(baseline, encoding='utf-8')
+            baseline = deployment.schema()
+            (projection / 'before.json').write_text(json.dumps(baseline), encoding='utf-8')
             os.chmod(projection / 'before.json', 0o644)
             target = deployment.db + '_restore_' + secrets.token_hex(4)[:63-len(deployment.db)-9]
             deployment.run(['bash', str(DEPLOY / 'restore.sh'), archive['archive'], target],
@@ -284,18 +315,27 @@ def apply(arguments):
                     deployment.api('python', 'manage.py', 'migrate', '--noinput', database=target, output=work / 'rehearsal-migrate.log')
                 deployment.api('python', '-m', 'verification.schema_manifest', '--compare', '/release/before.json', database=target, directory=projection, output=work / (stage + '.json'))
             deployment.api('python', '-m', 'verification.data_manifest', database=target, output=work / 'restored-current.json')
-            if sha256(archive['archive']) != archive['sha256'] or deployment.target() != plan['target'] or canonical_hash(deployment.migration_plan()) != plan['migration_plan_sha256']:
+            if (sha256(archive['archive']) != archive['sha256'] or deployment.target() != plan['target']
+                    or canonical_hash(deployment.migration_plan()) != plan['migration_plan_sha256']
+                    or deployment.candidate_images() != plan['candidate_images']):
                 raise RuntimeError('Final target/plan/backup changed; refusing production migration.')
             deployment.api('python', 'manage.py', 'migrate', '--noinput', output=work / 'migrate.log')
             deployment.api('python', 'manage.py', 'migrate', '--check', output=work / 'migration-check.log')
-            deployment.api('python', '-m', 'verification.schema_manifest', '--compare', '/release/before.json', directory=projection, output=work / 'production-projection.json')
+            upgraded = json.loads(deployment.api('python', '-m', 'verification.schema_manifest', '--compare', '/release/before.json', directory=projection, output=work / 'production-projection.json'))
+            receipt['migration_state_sha256'] = canonical_hash(upgraded['migration_state'])
+            receipt['schema_changed'] = baseline['migration_state'] != upgraded['migration_state']
             current = deployment.api('python', '-m', 'verification.data_manifest')
             if json.loads(current) != json.loads((work / 'restored-current.json').read_text()):
                 raise RuntimeError('Migrated production differs from the verified rehearsal.')
             (work / 'production-current.json').write_text(current, encoding='utf-8')
-            deployment.dc('up', '-d', '--wait', '--wait-timeout', '180', output=work / 'start.log')
-            deployment.dc('exec', '-T', 'caddy', 'caddy', 'reload', '--config', '/etc/caddy/' + normal, '--adapter', 'caddyfile', output=work / 'normal.log')
             deployment.api('python', 'manage.py', 'check', '--deploy', output=work / 'deploy-check.log')
+            for service in ('api', 'nginx'):
+                deployment.dc('up', '-d', '--no-deps', '--no-build', '--wait', '--wait-timeout', '180', service, output=work / (service + '-start.log'))
+            if deployment.live_images() != plan['candidate_images'] or deployment.target() != plan['target']:
+                raise RuntimeError('Running images or database do not match the reviewed candidate and target.')
+            if not caddy:
+                deployment.dc('up', '-d', '--no-deps', '--no-build', '--wait', '--wait-timeout', '180', 'caddy', output=work / 'start-ingress.log')
+            deployment.dc('exec', '-T', 'caddy', 'caddy', 'reload', '--config', '/etc/caddy/' + normal, '--adapter', 'caddyfile', output=work / 'normal.log')
             if not arguments.qa:
                 deployment.run([sys.executable, str(DEPLOY / 'smoke_production.py'), '--url', 'https://' + deployment.server], output=work / 'public-smoke.json')
             receipt.update(state='DEPLOYED', backup=archive, restore_database=target,
@@ -306,6 +346,10 @@ def apply(arguments):
                 deployment.dc('exec', '-T', 'caddy', 'caddy', 'reload', '--config', '/etc/caddy/' + maintenance, '--adapter', 'caddyfile', output=work / 'failed-maintenance.log')
             except Exception:
                 receipt['maintenance'] = 'could not confirm; inspect private logs'
+            try:
+                deployment.dc('stop', 'nginx', 'api', output=work / 'failed-stop-writers.log')
+            except Exception:
+                receipt['writers'] = 'could not confirm stopped; inspect service status'
             # Never restore an older DB automatically or erase evidence after uncertainty.
             write_json(receipt_path, receipt, exclusive=False)
             raise
@@ -320,13 +364,18 @@ def rollback(arguments):
     receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
     if receipt.get('qa') is not arguments.qa or receipt.get('state') not in ('DEPLOYED', 'FAILED_MAINTENANCE_REQUIRED'):
         raise RuntimeError('Rollback requires an attempted release receipt in the matching mode.')
-    deployment = Deployment(arguments.qa)
+    deployment = Deployment(arguments.qa, receipt['sha'])
     work = Path(receipt['private_artifacts']).resolve()
-    lock_root = work.parent
-    with (lock_root / (deployment.project + '.lock')).open('a') as lock:
+    with project_lock(deployment) as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        if deployment.target() != receipt['target'] or sha256(deployment.env_file) != receipt['environment_sha256']:
+        check_source(deployment, receipt['sha'])
+        checks = deployment.preflight()
+        if (checks['target'] != receipt['target'] or checks['environment_sha256'] != receipt['environment_sha256']
+                or checks['config_sha256'] != receipt['config_sha256']):
             raise RuntimeError('Rollback target/environment drifted; refusing to guess.')
+        if (receipt.get('schema_changed') is not False or deployment.live_images() != receipt['candidate_images']
+                or canonical_hash(deployment.schema()['migration_state']) != receipt['migration_state_sha256']):
+            raise RuntimeError('Rollback requires the current candidate and unchanged, verified migration state.')
         images = receipt.get('previous_images', {})
         if set(images) != {'api', 'nginx'} or receipt.get('previous_ingress'):
             raise RuntimeError('No compatible previous Caddy stack. Keep maintenance; use the inventoried old deployment bundle for legacy ingress.')
@@ -342,7 +391,10 @@ def rollback(arguments):
         deployment.dc('stop', 'api', 'nginx')
         # Read-only schema compatibility check with the previous API image.
         deployment.run(command + ['run', '--rm', '--no-deps', '-T', 'api', 'python', 'manage.py', 'migrate', '--check'])
-        deployment.run(command + ['up', '-d', '--no-build', '--wait', '--wait-timeout', '180', 'api', 'nginx'])
+        for service in ('api', 'nginx'):
+            deployment.run(command + ['up', '-d', '--no-deps', '--no-build', '--wait', '--wait-timeout', '180', service])
+        if deployment.target() != receipt['target'] or deployment.live_images() != {name: image['id'] for name, image in images.items()}:
+            raise RuntimeError('Rollback service identity could not be verified; keep maintenance.')
         deployment.dc('exec', '-T', 'caddy', 'caddy', 'reload', '--config', '/etc/caddy/' + normal, '--adapter', 'caddyfile')
         receipt['state'] = 'ROLLED_BACK_IMAGES_ONLY'
         write_json(receipt_path, receipt, exclusive=False)

@@ -20,6 +20,7 @@ def main():
         "POSTGRES_ADMIN_PASSWORD": secrets.token_hex(32),
         "PUBLIC_BIND_IP": "127.0.0.1", "CADDY_CONFIG": "Caddyfile.qa",
         "PROXY_SUBNET": f"172.30.{network_octet}.0/28",
+        "PROXY_DYNAMIC_RANGE": f"172.30.{network_octet}.8/29",
         "CADDY_PROXY_IP": f"172.30.{network_octet}.2",
         "HTTP_PORT": "18080", "HTTPS_PORT": "18443",
     }

@@ -20,7 +20,7 @@ def load_qa(env_file, root, url=None):
         raise ValueError("Dedicated riichi-docker-qa project required")
     # Compose gives the invoking shell precedence over --env-file. Fail closed
     # instead of allowing inherited production variables to redirect a QA run.
-    identity_keys = (*required, "COMPOSE_PROJECT_NAME", "PROXY_SUBNET", "CADDY_PROXY_IP", "HTTP_PORT", "HTTPS_PORT")
+    identity_keys = (*required, "COMPOSE_PROJECT_NAME", "PROXY_SUBNET", "PROXY_DYNAMIC_RANGE", "CADDY_PROXY_IP", "HTTP_PORT", "HTTPS_PORT")
     if any(key in os.environ and os.environ[key] != values.get(key) for key in identity_keys):
         raise ValueError("Inherited environment overrides the isolated QA target")
     if url:

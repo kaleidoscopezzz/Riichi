@@ -2,6 +2,10 @@
 # Disposable Linux QA only. Never sources a production .env or deletes volumes.
 set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.."
+for key in DOCKER_HOST DOCKER_CONTEXT COMPOSE_PROJECT_NAME POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD POSTGRES_ADMIN_USER POSTGRES_ADMIN_PASSWORD SERVER_NAME PUBLIC_BIND_IP HTTP_PORT HTTPS_PORT PROXY_SUBNET PROXY_DYNAMIC_RANGE CADDY_PROXY_IP CADDY_CONFIG CSRF_TRUSTED_ORIGINS SECRET_KEY; do
+    [[ ! -v "$key" ]] || { echo "Unset inherited $key before isolated QA." >&2; exit 1; }
+done
+[[ "$(docker context inspect --format '{{.Endpoints.docker.Host}}')" == unix:///var/run/docker.sock ]] || { echo 'QA requires the local Linux Docker socket.' >&2; exit 1; }
 qa_relative="$(python3 deploy/tests/prepare_qa.py | sed -n 's/^QA prepared: //p')"
 [[ "$qa_relative" == .verification/docker-qa-* ]] || { echo 'Unexpected QA path' >&2; exit 1; }
 qa_dir="$PWD/$qa_relative"
@@ -14,7 +18,10 @@ capture_status() {
     compose ps --all > "$qa_dir/container-status.txt" 2>&1 || true
     # No .env, inspect/config output, CA private keys, dumps or credentials in artifacts.
     compose logs --no-color --tail=100 > "$qa_dir/private-container.log" 2>&1 || true
-    if [[ "$result" -ne 0 ]]; then echo 'QA failed; private logs and data were retained.' >&2; fi
+    if [[ "$result" -ne 0 ]]; then
+        cat "$qa_dir/container-status.txt" >&2
+        echo 'QA failed; the runner retains private logs until teardown.' >&2
+    fi
     exit "$result"
 }
 trap capture_status EXIT
@@ -33,6 +40,8 @@ compose up -d --wait --wait-timeout 180
 compose exec -T nginx nginx -t
 compose run --rm --no-deps -T api python manage.py check --deploy
 docker compose --env-file "$RIICHI_ENV_FILE" -f deploy/compose.yaml -f deploy/tests/compose.qa.yaml run --rm --no-deps -T api python manage.py test --settings=verification.postgres --noinput
+# These variables belong to the database container.
+# shellcheck disable=SC2016
 compose exec -T db sh -eu -c 'createdb -U "$POSTGRES_USER" -O "$RIICHI_DB_USER" riichi_qa_legacy'
 compose run --rm --no-deps -T -e POSTGRES_DB=riichi_qa_legacy api python -m verification.postgres_migration_check > "$qa_dir/migration-summary.json"
 # Rehearse the same release safety gates on QA, at this exact committed source.
