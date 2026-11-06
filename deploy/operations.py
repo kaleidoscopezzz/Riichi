@@ -77,6 +77,11 @@ class Deployment:
             Path(output).write_text(text, encoding='utf-8')
             os.chmod(output, 0o600)
         if result.returncode:
+            if self.qa and hasattr(self, 'identity_secrets'):
+                detail = result.stderr[-1800:]
+                for secret in self.identity_secrets:
+                    detail = detail.replace(secret, '[REDACTED]')
+                print(detail, file=sys.stderr)
             # Docker stderr can include environment interpolation values; never echo it.
             raise RuntimeError(f'{Path(command[0]).name} failed (exit {result.returncode}); inspect private logs or service status.')
         return result.stdout
@@ -204,7 +209,7 @@ class Deployment:
         network_ids = self.run(['docker', 'network', 'ls', '-q']).split()
         if network_ids:
             for network in json.loads(self.run(['docker', 'network', 'inspect', *network_ids])):
-                for item in network.get('IPAM', {}).get('Config', []):
+                for item in (network.get('IPAM', {}).get('Config') or []):
                     if item.get('Subnet') and ipaddress.ip_network(item['Subnet']).version == subnet.version:
                         if subnet.overlaps(ipaddress.ip_network(item['Subnet'])) and network['Name'] != proxy['name']:
                             raise RuntimeError('Proxy subnet overlaps another existing Docker network.')
@@ -335,7 +340,8 @@ def apply(arguments):
                 if stage.endswith('after-migration'):
                     deployment.api('python', 'manage.py', 'migrate', '--noinput', database=target, output=work / 'rehearsal-migrate.log')
                 deployment.api('python', '-m', 'verification.schema_manifest', '--compare', '/release/before.json', database=target, directory=projection, output=work / (stage + '.json'))
-            deployment.api('python', '-m', 'verification.data_manifest', database=target, output=work / 'restored-current.json')
+            restored = json.loads(deployment.api('python', '-m', 'verification.data_manifest', database=target))
+            write_json(work / 'restored-current.json', restored)
             if (sha256(archive['archive']) != archive['sha256'] or deployment.target() != plan['target']
                     or canonical_hash(deployment.migration_plan()) != plan['migration_plan_sha256']
                     or deployment.candidate_images() != plan['candidate_images']):
@@ -346,7 +352,7 @@ def apply(arguments):
             receipt['migration_state_sha256'] = canonical_hash(upgraded['migration_state'])
             receipt['schema_changed'] = baseline['migration_state'] != upgraded['migration_state']
             current = deployment.api('python', '-m', 'verification.data_manifest')
-            if json.loads(current) != json.loads((work / 'restored-current.json').read_text()):
+            if json.loads(current) != restored:
                 raise RuntimeError('Migrated production differs from the verified rehearsal.')
             (work / 'production-current.json').write_text(current, encoding='utf-8')
             deployment.api('python', 'manage.py', 'check', '--deploy', output=work / 'deploy-check.log')

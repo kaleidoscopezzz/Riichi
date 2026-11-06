@@ -51,11 +51,19 @@ compose run --rm --no-deps -T -e POSTGRES_DB=riichi_qa_legacy api python -m veri
 # Rehearse the same release safety gates on QA, at this exact committed source.
 export RIICHI_VERSION="$sha"
 bash deploy/release.sh prepare --sha "$sha" --output "$qa_dir/release-plan.json" --qa
-if HSTS_SECONDS=300 bash deploy/release.sh apply --manifest "$qa_dir/release-plan.json" --qa; then
+if HSTS_SECONDS=300 bash deploy/release.sh apply --manifest "$qa_dir/release-plan.json" --qa > "$qa_dir/drift-rejection.txt" 2>&1; then
     echo 'Release wrongly accepted effective environment drift.' >&2
     exit 1
 fi
+grep -F 'Existing Caddy differs' "$qa_dir/drift-rejection.txt"
+test ! -e "$qa_dir/release-plan.receipt.json"
 bash deploy/release.sh apply --manifest "$qa_dir/release-plan.json" --qa
+python3 - "$qa_dir/release-plan.receipt.json" <<'PY'
+import json, sys
+from pathlib import Path
+receipt = json.loads(Path(sys.argv[1]).read_text())
+assert all(receipt['candidate_images'][name] != receipt['previous_images'][name]['id'] for name in ('api', 'nginx'))
+PY
 bash deploy/rollback.sh --receipt "$qa_dir/release-plan.receipt.json" --qa
 # Browser fixture credentials never leave ignored storage or enter the command line.
 compose restart nginx
