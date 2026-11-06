@@ -29,7 +29,10 @@ services:
     logging: *logging
   api:
     image: riichi-api:${RIICHI_VERSION:-local}
-    build: {context: .., dockerfile: deploy/Dockerfile.backend}
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+      labels: {org.opencontainers.image.revision: "${RIICHI_VERSION:-local}"}
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
       RIICHI_LOAD_DOTENV: "False"
@@ -60,7 +63,10 @@ services:
     logging: *logging
   nginx:
     image: riichi-nginx:${RIICHI_VERSION:-local}
-    build: {context: .., dockerfile: deploy/Dockerfile.frontend}
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.frontend
+      labels: {org.opencontainers.image.revision: "${RIICHI_VERSION:-local}"}
     environment:
       SERVER_NAME: ${SERVER_NAME:?Set a real SERVER_NAME}
       CADDY_PROXY_IP: ${CADDY_PROXY_IP:-172.30.80.2}

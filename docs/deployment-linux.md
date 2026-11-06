@@ -61,7 +61,7 @@ export RIICHI_VERSION="$RIICHI_DEPLOY_SHA"
 | POSTGRES_ADMIN_USER / POSTGRES_ADMIN_PASSWORD | 独立维护角色，仅数据库服务接收，不传API |
 | PUBLIC_BIND_IP / HTTP_PORT / HTTPS_PORT | 生产入口80/443，仅Caddy发布；QA另用loopback端口 |
 | CADDY_CONFIG / ACME_CA | 生产为Caddyfile和正式Let's Encrypt目录；禁止QA内部CA配置 |
-| PROXY_SUBNET / CADDY_PROXY_IP | 专用内部proxy网络与固定Caddy地址；无重叠且地址属于该子网 |
+| PROXY_SUBNET / PROXY_DYNAMIC_RANGE / CADDY_PROXY_IP | 专用内部代理网段、Docker 动态地址池、固定 Caddy 地址。动态池须位于子网内，Caddy 地址须位于池外 |
 | HSTS_SECONDS | 初期0；稳定后可先300再延长，includeSubDomains/preload保持关闭 |
 | SESSION_COOKIE_AGE | 默认28800秒；Secure、HttpOnly Session及SameSite=Lax |
 | *_MEMORY_LIMIT / *_CPUS及Gunicorn/DB参数 | 仅资源起点，按主机和运行观察调整，不代表压测保证 |
@@ -74,6 +74,7 @@ export RIICHI_VERSION="$RIICHI_DEPLOY_SHA"
 
 ```bash
 compose() { docker compose --env-file "$RIICHI_ENV_FILE" -f deploy/compose.yaml "$@"; }
+export RIICHI_VERSION="$RIICHI_DEPLOY_SHA"
 compose config --quiet
 compose build
 # 只启动已盘点目标db；首次空卷由官方入口正常初始化库和角色。
@@ -92,7 +93,7 @@ bash deploy/release.sh apply --manifest "$RIICHI_RELEASE_DIR/first-install.json"
 bash deploy/status.sh
 ```
 
-`prepare`要求db已运行、镜像已构建、checkout干净且与所选完整SHA及远程main一致。它不迁移，仅绑定目标身份、env指纹和迁移计划。`apply`为有副作用操作，须在已授权部署窗口运行：再次核对计划/来源，取得项目锁并记录一次性receipt；停止写入，最终备份；恢复到新的`当前库_restore_...`库，比对旧schema投影，正常迁移演练，再比对；原库迁移后与演练完整manifest一致，才启动、退出维护并做健康/公开只读检查。
+`prepare`要求数据库已运行、镜像以目标 SHA 为标签构建，且干净的 checkout 与已核验的远程 main 一致。计划绑定实际 Compose 配置、镜像 ID、目标库和迁移指纹。`apply` 取得宿主机项目锁并记录一次性回执，停写后做最终备份，将备份恢复到新验证库，核对原列与迁移状态并演练迁移。正式迁移后比对演练清单，确认应用和数据库身份，再开放入口并做公开只读检查。已有业务数据且尚未应用 `0004` 的库需单独演练兼容迁移。
 
 计划24小时过期、环境/迁移图/库身份漂移、并发锁冲突、已有尝试receipt等均拒绝。失败保留备份、恢复库、私有日志和维护态，不删除数据库，不自动逆迁移或重复apply。查明失败位置和实际写入状态后重新prepare，不删除receipt绕过。
 
@@ -120,7 +121,15 @@ compose up -d --wait --wait-timeout 180
 compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
 ```
 
-失败状态先保留维护入口，查私有receipt、容器日志、migrate状态与数据清单。仅当旧代码与当前schema兼容时，选择先前保留的旧应用镜像/SHA并重建服务；不要正常运行逆迁移。0004不可逆，0006复制回填的reverse为noop；因此数据库回退必须走备份恢复到新库的路径，而非migrate到旧编号。
+失败时先保留维护入口，查私有回执、容器日志、迁移状态与数据清单。变更现有 Caddy 的域名、HSTS、绑定地址、代理 IP 或镜像需要单独安排入口切换，常规发布会在停写前拒绝此类漂移。
+
+当回执匹配当前候选、迁移状态未变，且前一版也使用 Caddy 时，可回退应用镜像并保留当前数据库：
+
+```bash
+bash deploy/rollback.sh --receipt "$RIICHI_RELEASE_DIR/upgrade.receipt.json"
+```
+
+首次发布、旧 Nginx TLS 入口、迁移已改变 schema 或候选身份无法复验时，使用已盘点的旧部署资料安排手工恢复。`0004` 不可逆。数据库恢复须使用下节的新库流程。
 
 若必须恢复数据：在停写窗口将最后可信备份恢复到新的独立库，核对manifest/迁移/关系和业务历史，复核切换计划后才修改私有配置指向验证库，保留原业务库和所有备份。只有经过授权的切换才能继续；不能覆盖旧库、drop/flush、fake或删卷。切库后重建API及db配置并核对实际库身份；旧卷不会因POSTGRES_DB改变自动创建空库。保留切换前后时间、SHA、旧/新库、备份指纹和结果。
 

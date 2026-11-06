@@ -84,7 +84,8 @@ def main():
                        headers=("X-Forwarded-Proto: http", "X-Forwarded-Proto: https"))[0] == 200
         assert request("spoof-malformed-proto", client_a,
                        headers=("X-Forwarded-Proto: http, https",))[0] == 200
-        assert request("unknown-host", client_a, headers=("Host: evil.invalid",))[0] in (400, 404, 421)
+        unknown_status, _ = request("unknown-host", client_a, headers=("Host: evil.invalid",))
+        assert unknown_status == 421, f"Unexpected mismatched Host/SNI status: {unknown_status}"
         # The internal attacker's forwarded claims do not make its original TCP
         # peer trusted. Nginx 444 closes the connection (curl code 52/HTTP 000).
         assert request("untrusted-peer", attacker, direct=True,

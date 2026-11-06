@@ -1,6 +1,9 @@
 # Isolated loopback QA only. Production preflight must reject this filename.
 {
     admin 127.0.0.1:2019
+    servers :443 {
+        strict_sni_host on
+    }
     auto_https disable_redirects
     skip_install_trust
 }

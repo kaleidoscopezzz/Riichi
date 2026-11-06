@@ -118,6 +118,7 @@ jobs:
         with:
           name: production-launch-qa
           if-no-files-found: ignore
+          include-hidden-files: true
           path: |
             .verification/docker-qa-*/http-summary.json
             .verification/docker-qa-*/operations-summary.json

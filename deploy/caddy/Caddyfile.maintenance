@@ -1,5 +1,8 @@
 {
     admin 127.0.0.1:2019
+    servers :443 {
+        strict_sni_host on
+    }
 }
 import /etc/caddy/common.caddy
 {$SERVER_NAME} {

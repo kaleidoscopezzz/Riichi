@@ -1,6 +1,9 @@
 # Isolated loopback QA only; shares the QA CA/certificate storage.
 {
     admin 127.0.0.1:2019
+    servers :443 {
+        strict_sni_host on
+    }
     auto_https disable_redirects
     skip_install_trust
 }

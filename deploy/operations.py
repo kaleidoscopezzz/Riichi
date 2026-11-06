@@ -120,16 +120,36 @@ class Deployment:
     def candidate_images(self):
         return {name: self.image_id(self.config['services'][name]['image']) for name in ('api', 'nginx')}
 
-    def live_images(self):
+    def live_images(self, *, include_stopped=False):
         images = {}
         for name in ('api', 'nginx'):
-            identifier = self.dc('ps', '-q', name).strip()
+            options = ['--all'] if include_stopped else []
+            identifier = self.dc('ps', *options, '-q', name).strip()
             if identifier:
                 images[name] = self.run(['docker', 'inspect', '--format', '{{.Image}}', identifier]).strip()
         return images
 
     def schema(self):
         return json.loads(self.api('python', '-m', 'verification.schema_manifest'))
+
+    def check_existing_ingress(self):
+        identifier = self.dc('ps', '-q', 'caddy').strip()
+        if not identifier:
+            return
+        actual = json.loads(self.run(['docker', 'inspect', identifier]))[0]
+        desired = self.config['services']['caddy']
+        environment = dict(item.split('=', 1) for item in actual['Config']['Env'])
+        actual_ports = {(key, value['HostIp'], int(value['HostPort']))
+                        for key, values in actual['HostConfig']['PortBindings'].items() for value in values}
+        expected_ports = {(f"{p['target']}/{p.get('protocol', 'tcp')}", p.get('host_ip', '0.0.0.0'), int(p['published']))
+                          for p in desired['ports']}
+        proxy_name = self.config['networks']['proxy']['name']
+        proxy_ip = actual['NetworkSettings']['Networks'].get(proxy_name, {}).get('IPAddress')
+        config_dir = next((m['Source'] for m in actual['Mounts'] if m['Destination'] == '/etc/caddy'), None)
+        if (actual['Image'] != self.image_id(desired['image']) or actual_ports != expected_ports
+                or any(environment.get(key) != str(value) for key, value in desired['environment'].items())
+                or proxy_ip != desired['networks']['proxy']['ipv4_address'] or config_dir != str(DEPLOY / 'caddy')):
+            raise RuntimeError('Existing Caddy differs from the selected image, environment, ports or network. Plan a separate ingress cutover before application release.')
 
     def published_port_checks(self):
         owned = set()
@@ -190,6 +210,7 @@ class Deployment:
                             raise RuntimeError('Proxy subnet overlaps another existing Docker network.')
         target = self.target()
         self.published_port_checks()
+        self.check_existing_ingress()
         snapshot = self.schema()
         migration_names = {(row['app'], row['name']) for row in snapshot['migration_state']}
         has_business_rows = any(row['count'] for table, row in snapshot['tables'].items()
@@ -373,7 +394,7 @@ def rollback(arguments):
         if (checks['target'] != receipt['target'] or checks['environment_sha256'] != receipt['environment_sha256']
                 or checks['config_sha256'] != receipt['config_sha256']):
             raise RuntimeError('Rollback target/environment drifted; refusing to guess.')
-        if (receipt.get('schema_changed') is not False or deployment.live_images() != receipt['candidate_images']
+        if (receipt.get('schema_changed') is not False or deployment.live_images(include_stopped=True) != receipt['candidate_images']
                 or canonical_hash(deployment.schema()['migration_state']) != receipt['migration_state_sha256']):
             raise RuntimeError('Rollback requires the current candidate and unchanged, verified migration state.')
         images = receipt.get('previous_images', {})

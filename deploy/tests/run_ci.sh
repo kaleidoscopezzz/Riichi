@@ -31,7 +31,11 @@ compose run --rm --no-deps -T caddy caddy validate --config /etc/caddy/Caddyfile
 compose run --rm --no-deps -T caddy caddy validate --config /etc/caddy/Caddyfile.maintenance --adapter caddyfile
 compose run --rm --no-deps -T --entrypoint nginx nginx -V
 compose up -d --wait db
-printf 'MIGRATE riichi_qa\n' | bash deploy/migrate.sh
+sha="$(git rev-parse HEAD)"
+RIICHI_VERSION="$sha" compose build
+bash deploy/release.sh prepare --sha "$sha" --output "$qa_dir/first-install.json" --qa
+bash deploy/release.sh apply --manifest "$qa_dir/first-install.json" --qa
+# Establish a distinct previous image revision for the upgrade/rollback trial.
 bash deploy/up.sh
 compose exec -T caddy cat /data/caddy/pki/authorities/local/root.crt > "$qa_dir/qa-root.crt"
 python3 deploy/tests/qa_runtime.py --env-file "$RIICHI_ENV_FILE" --ca "$qa_dir/qa-root.crt" --url https://localhost:18443 > "$qa_dir/http-summary.json"
@@ -45,10 +49,12 @@ docker compose --env-file "$RIICHI_ENV_FILE" -f deploy/compose.yaml -f deploy/te
 compose exec -T db sh -eu -c 'createdb -U "$POSTGRES_USER" -O "$RIICHI_DB_USER" riichi_qa_legacy'
 compose run --rm --no-deps -T -e POSTGRES_DB=riichi_qa_legacy api python -m verification.postgres_migration_check > "$qa_dir/migration-summary.json"
 # Rehearse the same release safety gates on QA, at this exact committed source.
-sha="$(git rev-parse HEAD)"
 export RIICHI_VERSION="$sha"
-compose build
 bash deploy/release.sh prepare --sha "$sha" --output "$qa_dir/release-plan.json" --qa
+if HSTS_SECONDS=300 bash deploy/release.sh apply --manifest "$qa_dir/release-plan.json" --qa; then
+    echo 'Release wrongly accepted effective environment drift.' >&2
+    exit 1
+fi
 bash deploy/release.sh apply --manifest "$qa_dir/release-plan.json" --qa
 bash deploy/rollback.sh --receipt "$qa_dir/release-plan.receipt.json" --qa
 # Browser fixture credentials never leave ignored storage or enter the command line.
