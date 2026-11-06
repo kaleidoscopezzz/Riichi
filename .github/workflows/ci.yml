@@ -93,6 +93,8 @@ jobs:
           SECRET_KEY: ci-validate-only
           SERVER_NAME: riichi.example
           CSRF_TRUSTED_ORIGINS: https://riichi.example
+          # Interpolation only; the path is never mounted or read by `config`.
+          TLS_CERT_DIR: /etc/ssl/riichi
         run: docker compose -f deploy/compose.yaml config --quiet
 
   launcher:
