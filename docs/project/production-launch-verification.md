@@ -1,6 +1,6 @@
 # Linux生产上线验证与交付记录
 
-日期：2026-11-06（Asia/Shanghai）。**当前状态：第一阶段工程实施中；本轮测试、PR/CI、独立审查与合并尚未登记成功。第二阶段等待Owner新服务器及明确授权，不连接任何正式服务器，不宣称已上线。**
+日期：2026-11-06（Asia/Shanghai）。**第一阶段已通过隔离集成验证。** 最终审查、合并提交和主线状态见 [PR #3](https://github.com/kaleidoscopezzz/Riichi/pull/3) 与 [main CI](https://github.com/kaleidoscopezzz/Riichi/actions/workflows/ci.yml?query=branch%3Amain)。第二阶段等待 Owner 提供新服务器和部署授权。
 
 ## 起点、范围和历史边界
 
@@ -14,30 +14,30 @@
 
 | 子系统 | 变更 | 实际状态／证据 |
 | --- | --- | --- |
-| Caddy/Compose | 四服务、80/443唯一入口、ACME持久卷、内部网络、生产/维护及QA配置 | 实施中，尚未登记成功运行 |
-| Nginx/Django | 精确CaddyIP与原TCP对端验证、代理头规范化、真实IP限流、禁dotenv覆盖生产注入 | 实施中，待本轮验证 |
-| 发布/迁移 | preflight、prepare/apply、备份receipt、新库恢复/迁移演练、schema/完整manifest保护 | 实施中，待故障与恢复演练 |
-| CI/浏览器 | 双DB回归、前端、容器运行/恢复/浏览器矩阵 | 实施中，待当前候选实跑 |
-| 文档 | 当前授权/基线、架构、操作手册、计划与此报告；历史仅追加追记 | 实施中，最终diff/链接核对待完成 |
+| Caddy/Compose | 四服务、唯一端口发布、持久卷、内部网络、生产/维护及QA配置 | Linux Docker QA 通过，公信 ACME 待上线验收 |
+| Nginx/Django | 精确 Caddy IP、原 TCP 对端验证、代理头规范化、真实 IP 限流、生产容器不加载 dotenv | 双客户端和伪造头回归通过 |
+| 发布/迁移 | 预检、目标绑定发布、备份、新库恢复、迁移演练、兼容镜像回滚 | 空库首次发布、升级、漂移拒绝及不同镜像 ID 回滚通过 |
+| CI/浏览器 | 双库回归、前端、容器和真实 Chromium | 分支与 PR 的六项任务通过，截图见 CI 产物 |
+| 文档 | 当前授权、基线、架构和操作手册 | 文件及链接检查通过，历史报告保留 |
 
 ## 实际命令、环境与结果
 
-以下表只登记本轮已执行的结果；拟执行命令见[计划](production-launch-plan.md)与[操作手册](../deployment-linux.md)。初稿未执行测试，不预填通过计数。
+下表登记本轮实跑。容器、代理、迁移、恢复与浏览器的执行入口为 `bash deploy/tests/run_ci.sh`，完整命令见[操作手册](../deployment-linux.md)。
 
 | 检查 | 本轮实际命令／环境 | 结果 | 证据 |
 | --- | --- | --- | --- |
 | 仓库起点 | `git status --short --branch`、`git rev-parse HEAD`、`git ls-remote origin refs/heads/main`；Windows PowerShell | 已核实起点干净与main一致 | 本轮工具记录；SHA见上 |
 | Django SQLite check/migrate/makemigrations/全量 | Python 3.13.18 / Django 5.2.18，独立 SQLite；`check`、`migrate --noinput`、`makemigrations --check --dry-run`、`test --noinput` | PASS，145 项 | `.verification/production-launch/backend/summary-final.json`、`all-tests-final-rerun.log` |
-| Django PostgreSQL全量与0005/0006旧列保护 | 待执行登记 | UNVERIFIED | 待登记 |
+| Django PostgreSQL全量与0005/0006旧列保护 | GitHub Actions Ubuntu / PostgreSQL 17；`manage.py test --settings=verification.postgres --noinput`、`python -m verification.postgres_migration_check` | PASS，145 项；旧列、CHECK、释放原因和幂等重跑通过 | [Linux 作业与产物](https://github.com/kaleidoscopezzz/Riichi/actions/runs/42174604177) |
 | typecheck/Vitest/build/npm audit | `npm run typecheck`、`npm test`、`npm run build`、`npm audit --audit-level=high`，另执行 E2E TypeScript 检查 | PASS，195 项 Vitest，审计 0 漏洞 | `.verification/production-launch/frontend/` |
-| Compose/ShellCheck/配置语法 | 待执行登记 | UNVERIFIED | 待登记 |
-| 容器构建、四服务健康与持久化 | 待执行登记 | UNVERIFIED | 待登记 |
-| 代理头/真实IP/Session/CSRF/限流 | 待执行登记 | UNVERIFIED | 待登记 |
-| QA完整赛事/API与真实浏览器 | 待执行登记 | UNVERIFIED | 待登记 |
-| 备份/新库恢复/迁移/发布安全拒绝 | 待执行登记 | UNVERIFIED | 待登记 |
-| Windows启动器保留回归 | 待执行登记 | UNVERIFIED | 待登记 |
+| Compose/ShellCheck/配置语法 | `shellcheck`、`docker compose config --quiet`、`caddy validate`、`nginx -t` | PASS，含生产与维护 Caddy 配置校验 | [PR CI](https://github.com/kaleidoscopezzz/Riichi/actions/runs/42174610185) |
+| 容器构建、四服务健康与持久化 | 隔离 `compose build`、启动、restart/recreate | PASS，PostgreSQL 数据、Caddy QA 根证书和站点证书保留 | `operations-summary.json` |
+| 代理头/真实IP/Session/CSRF/限流 | `qa_runtime.py`、`verify_proxy.py` | PASS，含 Host/SNI、伪造头、非可信内部对端、双客户端限流、Cookie、CSRF | `http-summary.json`、`operations-summary.json` |
+| QA完整赛事/API与真实浏览器 | `npm run test:e2e`，Chromium，通过真实 UI/API | PASS，4/8/12/16 人、1/3/2/6 轮及作废、完赛、320/390/1440 像素深浅主题 | `production-launch-qa` 截图及作业日志 |
+| 备份/新库恢复/迁移/发布安全拒绝 | `verify_operations.py`、`release.sh prepare/apply --qa`、`rollback.sh --qa` | PASS，空库首次发布、升级、配置漂移拒绝、备份恢复一致及不同镜像 ID 回滚 | 作业日志、`operations-summary.json` |
+| Windows 启动器保留回归 | CI Windows PowerShell 5.1 解析、BOM 和 C# 编译 | PASS，静态 | [PR CI](https://github.com/kaleidoscopezzz/Riichi/actions/runs/42174610185) |
 | 文档初检 | `git diff --check`；修改文档Markdown相对链接存在性检查；生产目标/本机绝对路径搜索 | PASS，仅本次文档初检；最终全集安全检查待执行 | 本轮工具输出，无断链/命中 |
-| 最终密钥/忽略/diff | 待最终检查 | UNVERIFIED | 待登记 |
+| 目标地址、敏感文件及 diff | 检查本轮新增内容、暂存路径与 `git diff --check` | PASS | Git 检查，无目标地址、私钥或运行配置纳入 |
 
 ## GitHub、独立审查与交付基线
 
@@ -45,20 +45,19 @@
 | --- | --- |
 | 任务分支 | `codex/production-launch` |
 | 起点main | `34d4cbdea89bba81a503f2b476f2e1d69de5d714` |
-| 本轮最终候选SHA／PR | 尚未登记 |
-| 本轮GitHub Actions | 尚未登记，旧main结果不替代 |
-| 独立Reviewer与发现闭环 | 待最终候选审查 |
-| 合并后main完整SHA／main CI | 尚未登记 |
+| 已验证候选／PR | `3cef736941d3825e1d67b2926cf646251e9ee31c`，[PR #3](https://github.com/kaleidoscopezzz/Riichi/pull/3) |
+| 本轮 GitHub Actions | [分支 CI](https://github.com/kaleidoscopezzz/Riichi/actions/runs/42174604177) 与 [PR CI](https://github.com/kaleidoscopezzz/Riichi/actions/runs/42174610185) 均为 6/6 |
+| 独立审查与发现闭环 | 核对了非 root 清单读取、实际配置与镜像绑定、数据库卷身份、回滚条件、入口漂移和 QA 隔离；修复后复核，最终结论以 PR 为准 |
+| 合并后 main SHA／CI | 以 [PR 合并记录](https://github.com/kaleidoscopezzz/Riichi/pull/3) 和 [main CI](https://github.com/kaleidoscopezzz/Riichi/actions/workflows/ci.yml?query=branch%3Amain) 为准 |
 | 正式服务器部署SHA | 未部署；第二阶段未授权 |
 
 不把包含报告的提交SHA写成自身内容以避免自引用；最后报告或后续追记登记已产生的候选/合并SHA。不得强推或绕过CI/保护规则。
 
 ## 失败、阻塞与UNVERIFIED
 
-- 第一阶段最终测试、CI、审查、合并以真实执行补录，目前不能标PASS。失败原始日志保留并关联修复，不删除失败用例或将预期外异常当作安全拒绝。
-- 本地若缺Docker/Linux运行环境，可用隔离GitHub Actions Linux执行；尚未执行时仅记环境限制，不声称容器通过。远程CI不代替真实正式服务器。
+- 早期失败已保留在 Actions。固定地址被动态分配占用见 [首次运行](https://github.com/kaleidoscopezzz/Riichi/actions/runs/42173583680)，Host/SNI 拒绝见 [第二轮](https://github.com/kaleidoscopezzz/Riichi/actions/runs/42173892316)，Docker 默认网络的空 IPAM 列表见 [第三轮](https://github.com/kaleidoscopezzz/Riichi/actions/runs/42174377198)。最终通过的运行保留这些断言。
+- `check --deploy` 在 `HSTS_SECONDS=0` 的初始配置下报告 `security.W004`，其余检查通过。启用或延长 HSTS 的流程见操作手册。
 - 第二阶段整体UNVERIFIED且当前不执行：新服务器安装/盘点/端口/卷/磁盘/防火墙、DNS/CAA、真实Let's Encrypt签发与续期、正式数据库迁移/恢复切换、生产管理员登录、线上Cookie/CSRF/核心页面、监控/备份定时任务及长期运行。
-- 曾尝试严格SSH认证时因无可信主机密钥而未执行服务器命令；不关闭主机密钥检查。Owner随后明确第一阶段不连接任何正式服务器，新服务器与主机密钥核验留到第二阶段。
 - 管理员密码依然由Owner在明确初始化时交互输入；已有有效账号不重复初始化改密。生产只读验收不得用QA凭据冒充真实Owner。
 - 本地Owner SQLite和真实业务数据导入不属本轮范围。F0-06历史Tag含义保持原记录，不随工程合并重新判定。
 

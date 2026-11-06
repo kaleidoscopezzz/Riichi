@@ -59,7 +59,7 @@ UAT交付继续回归F0-06完整4人1轮、8/12人多轮、16人6轮，覆盖负
 
 功能开发交付须实际执行Django check/migrate/makemigrations检查/全量测试、TypeScript/Vitest/build/npm audit、HTTP/浏览器/安全忽略检查，保存准确命令、环境、结果及UNVERIFIED。历史测试结果不能冒充本轮实际执行。F0-06之后仅集成测试、部署、安全加固、发布验收；微信、团体赛仍属未来候选。
 
-仓库CI（.github/workflows/ci.yml）在push main及PR时运行SQLite与PostgreSQL后端check/makemigrations/migrate/全量测试、前端typecheck/Vitest/build/npm audit、部署脚本ShellCheck与Compose校验、启动器PS5.1解析与BOM检查。CI通过不替代真实Windows首次安装、浏览器及生产部署验证；README不得引用未实际运行的CI结果。
+仓库 CI 在 main、`codex/**` 分支推送和 PR 时运行双库后端全量测试、前端检查、ShellCheck、Compose 校验、启动器 PS5.1 静态检查及 Linux Docker/Chromium 隔离 QA。真实 Windows 首次安装和正式服务器验收单独记录。
 
 ## Git与停止限制
 

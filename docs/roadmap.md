@@ -13,7 +13,7 @@ D0-01已CLOSED / PASS；F0-06候选已通过Planner源码/证据审查，此后U
 | F0-06 完整比赛闭环 | 成绩草稿/确认→精确计分→累计榜→后续分桌→冠军决胜/公开抽签→完赛及自动释放；同时完成赛事级选桌及非破坏性兼容 | **Planner源码/证据审查通过**；UAT-FIX-01已合入main（`checkpoint/UAT-FIX-01`，`c9d7bb8`）。远端Tag `baseline/F0-06`指向`b9e83bb`（2026-11-04 14:09，说明“approved”），是否作为正式基线待Owner确认；V1.0最后一次核心功能开发，不拆F0-07/F0-08 |
 | 集成测试与部署验收 | 全流程/迁移/并发验证、PostgreSQL验证、安全加固、部署与发布验收 | Linux Docker Compose生产部署已合入main（PR #1，`b882ef0`），容器内PostgreSQL全量测试通过；真实Ubuntu服务器与公网HTTPS仍UNVERIFIED。CI已建立（`.github/workflows/ci.yml`） |
 | 审查问题修复 | 代码审查发现的抽签、审计、兼容边界、认证/错误码、输入校验、前端交互、启动器与部署问题 | **PR #2已合并**，main `34d4cbd`；历史[修复报告](project/review-findings-fix-verification.md)保留当时测试快照；新增迁移tournaments/0005、0006 |
-| Linux生产上线第一阶段 | Caddy自动HTTPS工程、代理信任、迁移/备份恢复保护、QA浏览器、CI与独立审查、PR合并 | 实施中，合并main后停止；见[生产计划](project/production-launch-plan.md)，未实测项不标PASS |
+| Linux生产上线第一阶段 | Caddy 自动 HTTPS 工程、代理信任、迁移/恢复保护和浏览器 QA | 隔离验证通过。合并与 CI 状态见 [PR #3](https://github.com/kaleidoscopezzz/Riichi/pull/3) 和[验证报告](project/production-launch-verification.md) |
 | Linux生产上线第二阶段 | 新服务器盘点、正式main部署、真实CA/续期、线上管理员登录及运维验收 | **未授权执行**，等待Owner新服务器；不得连接旧或任何正式服务器，未实测项保持UNVERIFIED |
 | 未来版本候选 | 微信、团体赛等 | 不纳入V1.0，须另行立项 |
 

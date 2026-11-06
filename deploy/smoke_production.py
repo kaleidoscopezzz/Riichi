@@ -2,7 +2,8 @@
 import argparse
 import json
 import ssl
-from urllib.error import HTTPError
+import time
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import HTTPSHandler, HTTPRedirectHandler, Request, build_opener
 
@@ -12,7 +13,7 @@ class NoRedirect(HTTPRedirectHandler):
         return None
 
 
-def check(url):
+def check(url, wait_tls=0):
     parsed = urlsplit(url)
     if parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password or parsed.path not in ('', '/') or parsed.query or parsed.fragment:
         raise ValueError('Supply a single HTTPS origin, without credentials/path/query.')
@@ -28,8 +29,18 @@ def check(url):
         with response:
             return response.status, response.read(), response.headers
 
-    for path in ('/login', '/tournaments'):
-        status, body, headers = get(path)
+    # On first install ACME acquisition is asynchronous. Retry only transport
+    # failures during startup. An HTTP response is evaluated exactly once.
+    deadline = time.monotonic() + wait_tls
+    while True:
+        try:
+            login = get('/login')
+            break
+        except URLError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(3)
+    for status, body, headers in (login, get('/tournaments')):
         assert status == 200 and b'<div id="root">' in body, 'SPA routing failed'
         assert headers.get('X-Content-Type-Options') == 'nosniff', 'Missing security header'
     status, body, _ = get('/api/v1/health/')
@@ -56,5 +67,6 @@ def check(url):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--url', required=True)
+    parser.add_argument('--wait-tls', type=int, choices=range(181), default=0, metavar='SECONDS')
     arguments = parser.parse_args()
-    print(json.dumps(check(arguments.url), ensure_ascii=False, indent=2))
+    print(json.dumps(check(arguments.url, arguments.wait_tls), ensure_ascii=False, indent=2))

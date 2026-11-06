@@ -364,7 +364,8 @@ def apply(arguments):
                 deployment.dc('up', '-d', '--no-deps', '--no-build', '--wait', '--wait-timeout', '180', 'caddy', output=work / 'start-ingress.log')
             deployment.dc('exec', '-T', 'caddy', 'caddy', 'reload', '--config', '/etc/caddy/' + normal, '--adapter', 'caddyfile', output=work / 'normal.log')
             if not arguments.qa:
-                deployment.run([sys.executable, str(DEPLOY / 'smoke_production.py'), '--url', 'https://' + deployment.server], output=work / 'public-smoke.json')
+                deployment.run([sys.executable, str(DEPLOY / 'smoke_production.py'), '--url', 'https://' + deployment.server,
+                                '--wait-tls', '120'], output=work / 'public-smoke.log')
             receipt.update(state='DEPLOYED', backup=archive, restore_database=target,
                            finished_at=datetime.now(timezone.utc).isoformat(), admin='preserved; no initialization/reset performed')
         except Exception:

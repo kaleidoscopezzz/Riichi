@@ -74,3 +74,7 @@ Owner确认F0-06 GitHub候选为`b9e83bb0c8e31ab660b37e7e0a46c1f0bb424e65`，Pla
 | `main` | `b882ef065bbd9ebae55f6a04ea324675ee41e3fb` | 依次合入UAT-FIX-01、Windows启动器（`49febeb`）、选手联想（`4bc28e5`）及PR #1 Docker生产部署（`babac8f`） |
 
 审查问题修复在本地分支`fix/review-findings`进行，未commit/tag/push，见[修复报告](review-findings-fix-verification.md)。
+
+## 2026-11-06 Caddy 部署工程验证
+
+第一阶段从 `34d4cbdea89bba81a503f2b476f2e1d69de5d714` 开始。候选 `3cef736941d3825e1d67b2926cf646251e9ee31c` 通过六项隔离 CI。正式合并提交以 [PR #3](https://github.com/kaleidoscopezzz/Riichi/pull/3) 记录为准。实际部署 SHA 在第二阶段验收后登记。详见[验证报告](production-launch-verification.md)。
