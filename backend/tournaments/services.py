@@ -8,7 +8,8 @@ from rest_framework.exceptions import APIException, ValidationError
 
 from players.models import PlayerProfile
 from .models import Tournament, TournamentParticipant
-from .rules import canonical_uma
+from .rules import canonical_oka, canonical_uma
+from .scoring import rules
 
 
 class TournamentConflict(APIException):
@@ -37,12 +38,30 @@ def replace_entries(tournament, ids):
     TournamentParticipant.objects.bulk_create([TournamentParticipant(tournament=tournament, player_id=pk) for pk in ids])
 
 
+def configure_rules(tournament, values, previous_version=None):
+    try:
+        tournament.oka_override = canonical_oka(tournament.oka_override)
+    except ModelValidationError as exc:
+        raise ValidationError({"oka_override": exc.messages}) from None
+    # Only an explicit draft edit upgrades a legacy rule. Starting or reading a
+    # legacy tournament must never silently change its version or interpretation.
+    if "oka_override" in values and tournament.oka_override is not None and tournament.rules_version == 1 and "rules_version" not in values:
+        tournament.rules_version = 2
+    if previous_version is None:
+        tournament.rules_source = f"created_v{tournament.rules_version}"
+    elif tournament.rules_version != previous_version:
+        tournament.rules_source = f"draft_configured_v{tournament.rules_version}"
+    rules(tournament)
+
+
 def create_tournament(user, values):
     values = dict(values)
     ids = values.pop("participant_ids", [])
     try:
         with transaction.atomic():
-            tournament = Tournament.objects.create(created_by=user, **values)
+            tournament = Tournament(created_by=user, **values)
+            configure_rules(tournament, values)
+            tournament.save()
             replace_entries(tournament, ids)
             return tournament
     except OperationalError as exc:
@@ -68,9 +87,11 @@ def mutate_tournament(pk, *, values=None, participant_ids=None, start=False, rev
                 if tournament.status == "draft":
                     raise TournamentConflict("赛事草稿已被他人修改，请刷新后再保存。", "stale_tournament")
                 raise TournamentConflict("赛事已经启动，不能重复启动。" if start else "赛事已启动，配置和名单已冻结。", "already_started" if start else "tournament_frozen")
+            previous_version = tournament.rules_version
             if values is not None:
                 for key, value in values.items():
                     setattr(tournament, key, value)
+            configure_rules(tournament, values or {}, previous_version)
             if participant_ids is not None:
                 replace_entries(tournament, participant_ids)
             if start:

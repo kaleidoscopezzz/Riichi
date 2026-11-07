@@ -1,0 +1,28 @@
+{
+  "result": "PASS",
+  "vendor": "sqlite",
+  "historical_tournaments": 4,
+  "confirmed_results": 3,
+  "completed_snapshots": 1,
+  "original_columns_unchanged": true,
+  "legacy_oka_values": [
+    "20",
+    "19.996",
+    "0",
+    "-20"
+  ],
+  "new_rule_version": 2,
+  "migration_rerun_noop": true,
+  "additions": {
+    "tables": [],
+    "columns": {
+      "tournaments_tournament": [
+        "oka_override"
+      ]
+    }
+  },
+  "backup_integrity": "ok",
+  "independent_restore": "PASS",
+  "restored_upgrade": "PASS",
+  "backup_sha256": "7556345a66b15e5522c3e8c09c785c4a8ef1acddcdd69bce949ed5d08e24a4a1"
+}

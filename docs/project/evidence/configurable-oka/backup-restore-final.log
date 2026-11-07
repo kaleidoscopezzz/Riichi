@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "D:\Riichi\Riichi\.verification\configurable-oka\check_migration.py", line 53, in <module>
+    assert [(migration.name, backwards) for migration, backwards in plan] == [("0007_configurable_oka", False)]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

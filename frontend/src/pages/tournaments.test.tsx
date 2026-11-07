@@ -38,6 +38,7 @@ const row: Tournament = {
   return_points: 30000,
   uma: ['30', '10', '-10', '-30'],
   oka: '20',
+  oka_override: null,
   status: 'draft',
   created_by: 1,
   created_at: '2026-11-03T00:00:00Z',
@@ -177,6 +178,125 @@ describe('赛事工作台', () => {
         undefined,
       ),
     )
+  })
+  it('自定义 0 保存为无头名赏，开局和返还原点保持独立', async () => {
+    render(<TournamentsPage />)
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: '创建赛事' }))
+    await user.type(screen.getByLabelText('赛事名称'), '无头名赏赛事')
+    expect(screen.queryByLabelText('头名赏 Oka')).toBeNull()
+    await selectOption(user, '头名赏设置', '自定义（可为 0）')
+    expect((screen.getByLabelText('头名赏 Oka') as HTMLInputElement).value).toBe('0')
+    expect(screen.getByText('0（无头名赏）')).toBeTruthy()
+    expect(screen.getByText(/四人积分合计可能不为 0/)).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: '保存草稿' }))
+    await waitFor(() =>
+      expect(saveTournament).toHaveBeenCalledWith(
+        expect.objectContaining({
+          oka_override: '0',
+          starting_points: 25000,
+          return_points: 30000,
+        }),
+        undefined,
+      ),
+    )
+  })
+  it('编辑已保存的零头名赏，可精确保存自定义小数且不随点数变化', async () => {
+    vi.mocked(fetchTournament).mockResolvedValue({ ...row, oka: '0', oka_override: '0' })
+    render(<TournamentsPage />)
+    const user = await openDetail()
+    expect(screen.getByText('头名赏 Oka · 自定义')).toBeTruthy()
+    expect(screen.getByText('0（无头名赏）')).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: '编辑草稿' }))
+    expect(screen.getByRole('combobox', { name: '头名赏设置' }).textContent).toContain('自定义')
+    const input = screen.getByLabelText('头名赏 Oka')
+    const value = '12.123456789012345678901234567890123456789'
+    await user.clear(input)
+    await user.type(input, value)
+    await user.clear(screen.getByLabelText('开局点数'))
+    await user.type(screen.getByLabelText('开局点数'), '26000')
+    expect((input as HTMLInputElement).value).toBe(value)
+    expect(screen.getByText(value)).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: '保存草稿' }))
+    await waitFor(() =>
+      expect(saveTournament).toHaveBeenCalledWith(
+        expect.objectContaining({
+          oka_override: value,
+          starting_points: 26000,
+          return_points: 30000,
+          revision: 1,
+        }),
+        row.id,
+      ),
+    )
+  })
+  it('切回自动推导时提交 null，并恢复精确点差预览', async () => {
+    vi.mocked(fetchTournament).mockResolvedValue({
+      ...row,
+      oka: '0',
+      oka_override: '0',
+      starting_points: 25001,
+    })
+    render(<TournamentsPage />)
+    const user = await openDetail()
+    await user.click(screen.getByRole('button', { name: '编辑草稿' }))
+    await selectOption(user, '头名赏设置', '自动推导')
+    expect(screen.queryByLabelText('头名赏 Oka')).toBeNull()
+    expect(screen.getByText('+19.996')).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: '保存草稿' }))
+    await waitFor(() =>
+      expect(saveTournament).toHaveBeenCalledWith(
+        expect.objectContaining({ oka_override: null, starting_points: 25001 }),
+        row.id,
+      ),
+    )
+  })
+  it('自定义 Oka 拒绝空值、负数、科学计数法和非有限数', async () => {
+    render(<TournamentsPage />)
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: '创建赛事' }))
+    await user.type(screen.getByLabelText('赛事名称'), '严格 Oka 校验')
+    await selectOption(user, '头名赏设置', '自定义（可为 0）')
+    const input = screen.getByLabelText('头名赏 Oka')
+    for (const invalid of ['', '-1', '1e3', 'NaN', 'Infinity', '1/3']) {
+      await user.clear(input)
+      if (invalid) await user.type(input, invalid)
+      await user.click(screen.getByRole('button', { name: '保存草稿' }))
+      expect(screen.getByRole('alert').textContent).toContain('非负十进制数')
+      expect(saveTournament).not.toHaveBeenCalled()
+    }
+    expect(input.getAttribute('maxlength')).toBe('64')
+  })
+  it('Oka 的服务端字段错误以中文显示，保留当前输入供修正', async () => {
+    render(<TournamentsPage />)
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: '创建赛事' }))
+    await user.type(screen.getByLabelText('赛事名称'), '配置错误反馈')
+    await selectOption(user, '头名赏设置', '自定义（可为 0）')
+    vi.mocked(saveTournament).mockRejectedValueOnce(
+      new ApiError(400, 'invalid', '输入有误', { oka_override: ['无效的头名赏。'] }),
+    )
+    await user.click(screen.getByRole('button', { name: '保存草稿' }))
+    expect((await screen.findByRole('alert')).textContent).toContain('头名赏 Oka：无效的头名赏。')
+    expect((screen.getByLabelText('头名赏 Oka') as HTMLInputElement).value).toBe('0')
+  })
+  it('启动前确认与启动后详情显示实际的零头名赏', async () => {
+    vi.mocked(fetchTournament).mockResolvedValue({ ...row, oka: '0', oka_override: '0' })
+    render(<TournamentsPage />)
+    const user = await openDetail()
+    await user.click(screen.getByRole('button', { name: '启动前检查' }))
+    expect(screen.getByText('0（无头名赏）')).toBeTruthy()
+    expect(screen.getByText('头名赏 Oka · 自定义')).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: '暂不启动' }))
+    vi.mocked(fetchTournament).mockResolvedValue({
+      ...row,
+      status: 'started',
+      oka: '0',
+      oka_override: '0',
+    })
+    await openDetail()
+    expect(screen.getByText('0（无头名赏）')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: '编辑草稿' })).toBeNull()
   })
   it('选手分页搜索、去重和已选移除', async () => {
     vi.mocked(findPlayers).mockResolvedValue({
@@ -328,6 +448,8 @@ describe('草稿乐观并发与参赛者契约（F9）', () => {
       revision: 2,
       participants: row.participants.slice(0, 2),
       participant_count: 2,
+      oka: '0',
+      oka_override: '0',
     })
     await user.click(screen.getByRole('button', { name: '重新加载最新草稿' }))
     expect(((await screen.findByLabelText('赛事名称')) as HTMLInputElement).value).toBe(
@@ -336,10 +458,16 @@ describe('草稿乐观并发与参赛者契约（F9）', () => {
     expect(await screen.findByText(/已载入最新草稿/)).toBeTruthy()
     expect(screen.queryByRole('button', { name: '重新加载最新草稿' })).toBeNull()
     expect(screen.getByText('已选 2 / 16 人')).toBeTruthy()
+    expect((screen.getByLabelText('头名赏 Oka') as HTMLInputElement).value).toBe('0')
     await user.click(screen.getByRole('button', { name: '保存草稿' }))
     await waitFor(() =>
       expect(saveTournament).toHaveBeenLastCalledWith(
-        expect.objectContaining({ name: '他人修改后的赛事', revision: 2, participant_ids: [1, 2] }),
+        expect.objectContaining({
+          name: '他人修改后的赛事',
+          revision: 2,
+          participant_ids: [1, 2],
+          oka_override: '0',
+        }),
         1,
       ),
     )
@@ -369,6 +497,7 @@ describe('草稿乐观并发与参赛者契约（F9）', () => {
     await user.click(await screen.findByRole('button', { name: '重新加载最新草稿' }))
     expect((await screen.findByRole('alert')).textContent).toContain('已不是草稿')
     expect(screen.getByRole('button', { name: '保存草稿' }).hasAttribute('disabled')).toBe(true)
+    expect(screen.getByRole('combobox', { name: '头名赏设置' }).hasAttribute('disabled')).toBe(true)
   })
   it('参赛者详情不依赖内部用户名', async () => {
     render(<TournamentsPage />)

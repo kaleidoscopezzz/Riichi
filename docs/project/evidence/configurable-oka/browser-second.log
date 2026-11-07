@@ -1,0 +1,44 @@
+
+> riichi-frontend@0.1.0 test:e2e
+> tsc --noEmit -p tsconfig.e2e.json && playwright test --config=../.verification/configurable-oka/playwright.local.config.ts --output=../.verification/configurable-oka/browser-second e2e/configurable-oka.spec.ts
+
+
+Running 1 test using 1 worker
+
+(node:41264) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 e2e\configurable-oka.spec.ts:23:1 › configurable Oka: zero, exact decimals, automatic reset, frozen scoring and accessible themes (30.6s)
+
+
+  1) e2e\configurable-oka.spec.ts:23:1 › configurable Oka: zero, exact decimals, automatic reset, frozen scoring and accessible themes 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 409
+    Received: 403
+
+      154 |     headers: { 'X-CSRFToken': csrf.csrf_token },
+      155 |   })
+    > 156 |   expect(frozen.status()).toBe(409)
+          |                           ^
+      157 |
+      158 |   await page.goto(`/tournaments/${id}/rounds`)
+      159 |   await page.getByRole('button', { name: '选择物理桌并生成首轮' }).click()
+        at D:\Riichi\Riichi\frontend\e2e\configurable-oka.spec.ts:156:27
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\.verification\configurable-oka\browser-second\configurable-oka-configura-e5f17-oring-and-accessible-themes\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.verification\configurable-oka\browser-second\configurable-oka-configura-e5f17-oring-and-accessible-themes\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\.verification\configurable-oka\browser-second\configurable-oka-configura-e5f17-oring-and-accessible-themes\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\.verification\configurable-oka\browser-second\configurable-oka-configura-e5f17-oring-and-accessible-themes\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e\configurable-oka.spec.ts:23:1 › configurable Oka: zero, exact decimals, automatic reset, frozen scoring and accessible themes 

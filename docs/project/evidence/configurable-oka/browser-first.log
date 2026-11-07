@@ -1,0 +1,55 @@
+
+> riichi-frontend@0.1.0 test:e2e
+> tsc --noEmit -p tsconfig.e2e.json && playwright test --config=../.verification/configurable-oka/playwright.local.config.ts
+
+
+Running 2 tests using 1 worker
+
+(node:27504) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 e2e\configurable-oka.spec.ts:23:1 › configurable Oka: zero, exact decimals, automatic reset, frozen scoring and accessible themes (14.6s)
+(node:15912) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 2 e2e\production-launch.spec.ts:20:1 › real browser: roster, tournaments, scores, lotteries, completion, responsive themes (2.3m)
+
+
+  1) e2e\configurable-oka.spec.ts:23:1 › configurable Oka: zero, exact decimals, automatic reset, frozen scoring and accessible themes 
+
+    Error: expect(locator).toBeFocused() failed
+
+    Locator: getByRole('combobox', { name: '头名赏设置', exact: true })
+    Expected: focused
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeFocused" getByRole('combobox', { name: '头名赏设置', exact: true }) with timeout 5000ms
+      - waiting for getByRole('combobox', { name: '头名赏设置', exact: true })
+
+
+      115 |       })
+      116 |       await page.keyboard.press('Escape')
+    > 117 |       await expect(mode).toBeFocused()
+          |                          ^
+      118 |       await dialog(page).getByRole('button', { name: '关闭赛事表单', exact: true }).click()
+      119 |     }
+      120 |   }
+        at D:\Riichi\Riichi\frontend\e2e\configurable-oka.spec.ts:117:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\.verification\configurable-oka\browser\configurable-oka-configura-e5f17-oring-and-accessible-themes\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.verification\configurable-oka\browser\configurable-oka-configura-e5f17-oring-and-accessible-themes\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\.verification\configurable-oka\browser\configurable-oka-configura-e5f17-oring-and-accessible-themes\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\.verification\configurable-oka\browser\configurable-oka-configura-e5f17-oring-and-accessible-themes\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e\configurable-oka.spec.ts:23:1 › configurable Oka: zero, exact decimals, automatic reset, frozen scoring and accessible themes 
+  1 passed (2.7m)

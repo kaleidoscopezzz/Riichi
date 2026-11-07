@@ -8,10 +8,12 @@ import { FormFeedback } from './form-feedback'
 import { ApiError } from '@/services/api'
 import {
   fetchTournament,
+  describeOka,
   legalSize,
   previewOka,
   saveTournament,
   startTournament,
+  validCustomOka,
   type Tournament,
 } from '@/services/tournaments'
 import { PlayerPicker } from './player-picker'
@@ -32,6 +34,8 @@ export function TournamentEditor({
   const [starting, setStarting] = useState(String(tournament?.starting_points || 25000))
   const [returning, setReturning] = useState(String(tournament?.return_points || 30000))
   const [uma, setUma] = useState(tournament?.uma || ['30', '10', '-10', '-30'])
+  const [okaMode, setOkaMode] = useState(tournament?.oka_override != null ? 'custom' : 'derived')
+  const [customOka, setCustomOka] = useState(tournament?.oka_override ?? '0')
   const [selected, setSelected] = useState(tournament?.participants || [])
   // The server copy this form edits; replaced when the latest draft is reloaded.
   const [base, setBase] = useState(tournament)
@@ -41,6 +45,12 @@ export function TournamentEditor({
   const [reloading, setReloading] = useState(false)
   const [notice, setNotice] = useState('')
   const locked = !!base && base.status !== 'draft'
+  const okaPreview =
+    okaMode === 'derived'
+      ? previewOka(starting, returning)
+      : validCustomOka(customOka)
+        ? customOka
+        : '—'
   function load(row: Tournament) {
     setBase(row)
     setName(row.name)
@@ -49,6 +59,8 @@ export function TournamentEditor({
     setStarting(String(row.starting_points))
     setReturning(String(row.return_points))
     setUma(row.uma)
+    setOkaMode(row.oka_override != null ? 'custom' : 'derived')
+    setCustomOka(row.oka_override ?? '0')
     setSelected(row.participants)
   }
   async function reload() {
@@ -83,6 +95,12 @@ export function TournamentEditor({
       setError(new Error('请填写赛事名称、1～6轮、正整数点数和四项有效十进制 Uma。'))
       return
     }
+    if (okaMode === 'custom' && !validCustomOka(customOka)) {
+      setError(
+        new Error('头名赏 Oka 请填写最多64字符的非负十进制数，0 表示无头名赏，不使用科学计数法。'),
+      )
+      return
+    }
     setBusy(true)
     try {
       saved(
@@ -94,6 +112,7 @@ export function TournamentEditor({
             starting_points: Number(starting),
             return_points: Number(returning),
             uma,
+            oka_override: okaMode === 'derived' ? null : customOka,
             participant_ids: selected.map((p) => p.player_id),
             // Optimistic lock: a draft changed elsewhere is rejected with 409 stale_tournament.
             ...(base && typeof base.revision === 'number' ? { revision: base.revision } : {}),
@@ -134,7 +153,7 @@ export function TournamentEditor({
           <X />
         </Button>
         <form className="account-form tournament-form" onSubmit={(e) => void submit(e)} noValidate>
-          <fieldset disabled={busy || reloading}>
+          <fieldset disabled={busy || reloading || locked}>
             <section>
               <span className="eyebrow">01 / 基础信息</span>
               <label>
@@ -161,7 +180,7 @@ export function TournamentEditor({
                 <Select
                   aria-label="总轮数"
                   value={rounds}
-                  disabled={busy}
+                  disabled={busy || reloading || locked}
                   onValueChange={setRounds}
                   options={[1, 2, 3, 4, 5, 6].map((v) => ({ value: v, label: `${v} 轮` }))}
                 />
@@ -202,15 +221,54 @@ export function TournamentEditor({
                   </label>
                 ))}
               </div>
-              <div className="oka-preview">
-                <span>推导 Oka</span>
-                <strong>{previewOka(starting, returning)}</strong>
-                <small>4 ×（返还原点 − 开局点数）÷ 1000</small>
+              <label>
+                头名赏设置
+                <Select
+                  aria-label="头名赏设置"
+                  aria-describedby="oka-help"
+                  value={okaMode}
+                  disabled={busy || reloading || locked}
+                  onValueChange={setOkaMode}
+                  options={[
+                    { value: 'derived', label: '自动推导' },
+                    { value: 'custom', label: '自定义（可为 0）' },
+                  ]}
+                />
+              </label>
+              {okaMode === 'custom' && (
+                <label>
+                  头名赏 Oka
+                  <input
+                    inputMode="decimal"
+                    maxLength={64}
+                    value={customOka}
+                    aria-describedby="oka-help"
+                    onChange={(e) => setCustomOka(e.target.value)}
+                  />
+                </label>
+              )}
+              <p className="rule-hint" id="oka-help">
+                {okaMode === 'derived'
+                  ? '由开局点数和返还原点计算；也可选择自定义，填 0 表示无头名赏。'
+                  : '以积分为单位，填 0 表示无头名赏。自定义值独立于开局和返还原点，四人积分合计可能不为 0。'}
+              </p>
+              <div className="oka-preview" aria-live="polite">
+                <span>本场头名赏</span>
+                <strong>{describeOka(okaPreview)}</strong>
+                <small>
+                  {okaMode === 'derived'
+                    ? '4 ×（返还原点 − 开局点数）÷ 1000'
+                    : '并列第一时，按覆盖名次均分顺位奖励'}
+                </small>
               </div>
             </section>
             <section>
               <span className="eyebrow">03 / 参赛选手</span>
-              <PlayerPicker selected={selected} change={setSelected} disabled={busy || reloading} />
+              <PlayerPicker
+                selected={selected}
+                change={setSelected}
+                disabled={busy || reloading || locked}
+              />
             </section>
           </fieldset>
           <section className="tournament-summary">
@@ -269,8 +327,8 @@ export function TournamentRules({ row }: { row: Tournament }) {
         <dd>{row.uma.join(' / ')}</dd>
       </div>
       <div>
-        <dt>推导 Oka</dt>
-        <dd>{row.oka}</dd>
+        <dt>头名赏 Oka · {row.oka_override == null ? '自动推导' : '自定义'}</dt>
+        <dd>{describeOka(row.oka)}</dd>
       </div>
       <div>
         <dt>预计每轮桌数</dt>

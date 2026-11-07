@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "D:\Riichi\Riichi\.verification\configurable-oka\check_migration.py", line 40, in <module>
+    summary = rehearse_oka_migration(connection, before_upgrade=save_backup)
+  File "D:\Riichi\Riichi\backend\verification\oka_migration_check.py", line 51, in rehearse_oka_migration
+    before_upgrade(baseline)
+    ~~~~~~~~~~~~~~^^^^^^^^^^
+  File "D:\Riichi\Riichi\.verification\configurable-oka\check_migration.py", line 36, in save_backup
+    assert target.execute("PRAGMA integrity_check").fetchone() == ("ok",)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: unknown function: REGEXP()

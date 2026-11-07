@@ -12,6 +12,7 @@ const labels: Record<string, string> = {
   starting_points: '开局点数',
   return_points: '返还原点',
   uma: 'Uma',
+  oka_override: '头名赏 Oka',
   participant_ids: '参赛名单',
   round_number: '轮次',
   machine_id: '物理设备',

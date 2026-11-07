@@ -1,4 +1,4 @@
-"""Populated upgrade 0003 -> 0004 -> 0005 -> 0006 with historical app states.
+"""Populated upgrade 0003 -> 0004 -> 0005 -> 0006 -> 0007 with historical app states.
 
 0004 is deliberately irreversible, so the already-migrated test database cannot
 be rolled back to 0003. A private in-memory SQLite connection is migrated
@@ -159,4 +159,14 @@ class LegacyMigrationTests(TransactionTestCase):
         self.assertEqual(result['database_vendor'], 'sqlite')
         self.assertEqual(result['invalid_void_states_rejected'], 3)
         self.assertTrue(result['released_only_copy'])
+        self.assertTrue(result['migration_rerun_noop'])
+
+    def test_oka_upgrade_preserves_legacy_rules_results_and_completed_snapshots(self):
+        from verification.oka_migration_check import BEFORE_OKA, rehearse_oka_migration
+
+        self.migrate(BEFORE_OKA)
+        result = rehearse_oka_migration(self.db)
+        self.assertEqual(result['result'], 'PASS')
+        self.assertEqual(result['legacy_oka_values'], ['20', '19.996', '0', '-20'])
+        self.assertTrue(result['original_columns_unchanged'])
         self.assertTrue(result['migration_rerun_noop'])

@@ -1,0 +1,4 @@
+npm warn audit 404 Not Found - POST https://registry.npmmirror.com/-/npm/v1/security/advisories/bulk - [NOT_IMPLEMENTED] /-/npm/v1/security/* not implemented yet
+{ error: '[NOT_IMPLEMENTED] /-/npm/v1/security/* not implemented yet' }
+npm error audit endpoint returned an error
+npm error A complete log of this run can be found in: D:\Riichi\Riichi\frontend\.cache\npm\_logs\2026-11-06T13_23_39_820Z-debug-0.log

@@ -16,6 +16,8 @@ export type Tournament = {
   return_points: number
   uma: string[]
   oka: string
+  /** null derives Oka from points; "0" explicitly disables the top prize. */
+  oka_override: string | null
   status: 'draft' | 'started' | 'completed'
   created_by: number
   created_at: string
@@ -29,7 +31,13 @@ export type Tournament = {
 }
 export type TournamentInput = Pick<
   Tournament,
-  'name' | 'description' | 'round_count' | 'starting_points' | 'return_points' | 'uma'
+  | 'name'
+  | 'description'
+  | 'round_count'
+  | 'starting_points'
+  | 'return_points'
+  | 'uma'
+  | 'oka_override'
 > & { participant_ids: number[]; revision?: number }
 export type Page<T> = { count: number; next: string | null; previous: string | null; results: T[] }
 export const legalSize = (count: number) => [4, 8, 12, 16].includes(count)
@@ -72,3 +80,9 @@ export function previewOka(start: string, end: string) {
     .replace(/0+$/, '')
   return `${value < 0n ? '-' : '+'}${absolute / 1000n}${fraction ? `.${fraction}` : ''}`
 }
+
+export const validCustomOka = (value: string) =>
+  value.length <= 64 && /^[+]?[0-9]+(?:\.[0-9]+)?$/.test(value)
+
+export const describeOka = (value: string) =>
+  /^[+-]?0+(?:\.0+)?$/.test(value) ? '0（无头名赏）' : value

@@ -1,0 +1,50 @@
+
+> riichi-frontend@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 D:/Riichi/Riichi/frontend
+
+ ❯ src/services/health.test.ts (0 test)
+ ❯ src/services/competition.test.ts (0 test)
+ ❯ src/lib/points.test.ts (0 test)
+ ❯ src/services/api.test.ts (0 test)
+ ❯ src/lib/redirect.test.ts (0 test)
+ ❯ src/pages/tournaments.test.tsx (0 test)
+ ❯ src/components/error-boundary.test.tsx (0 test)
+ ❯ src/pages/rounds.test.tsx (0 test)
+ ❯ src/pages/players.test.tsx (0 test)
+ ❯ src/components/player-picker.test.tsx (0 test)
+ ❯ src/components/ui/select.test.tsx (0 test)
+ ❯ src/lib/field-errors.test.tsx (0 test)
+ ❯ src/pages/machines.test.tsx (0 test)
+ ❯ src/pages/accounts.test.tsx (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 14 ⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/error-boundary.test.tsx [ src/components/error-boundary.test.tsx ]
+ FAIL  src/components/player-picker.test.tsx [ src/components/player-picker.test.tsx ]
+ FAIL  src/lib/field-errors.test.tsx [ src/lib/field-errors.test.tsx ]
+ FAIL  src/pages/accounts.test.tsx [ src/pages/accounts.test.tsx ]
+ FAIL  src/pages/machines.test.tsx [ src/pages/machines.test.tsx ]
+ FAIL  src/pages/players.test.tsx [ src/pages/players.test.tsx ]
+ FAIL  src/pages/rounds.test.tsx [ src/pages/rounds.test.tsx ]
+ FAIL  src/pages/tournaments.test.tsx [ src/pages/tournaments.test.tsx ]
+ FAIL  src/components/ui/select.test.tsx [ src/components/ui/select.test.tsx ]
+Error: EPERM: operation not permitted, mkdir 'C:\Users\Admin\AppData\Local\Temp\z7cGueMrUon2jyLNO4EdH\client'
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/14]⎯
+
+ FAIL  src/lib/points.test.ts [ src/lib/points.test.ts ]
+ FAIL  src/lib/redirect.test.ts [ src/lib/redirect.test.ts ]
+ FAIL  src/services/api.test.ts [ src/services/api.test.ts ]
+ FAIL  src/services/competition.test.ts [ src/services/competition.test.ts ]
+ FAIL  src/services/health.test.ts [ src/services/health.test.ts ]
+Error: EPERM: operation not permitted, mkdir 'C:\Users\Admin\AppData\Local\Temp\z7cGueMrUon2jyLNO4EdH\ssr'
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/14]⎯
+
+
+ Test Files  14 failed (14)
+      Tests  no tests
+   Start at  21:19:14
+   Duration  8.19s (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 57.69s)
+

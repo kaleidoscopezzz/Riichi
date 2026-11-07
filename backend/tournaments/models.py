@@ -3,7 +3,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Q
 
-from .rules import default_uma, derive_oka, validate_uma
+from .rules import default_uma, derive_oka, validate_oka, validate_uma
 
 
 class Tournament(models.Model):
@@ -18,6 +18,8 @@ class Tournament(models.Model):
     starting_points = models.PositiveIntegerField(default=25000, validators=[MinValueValidator(1), MaxValueValidator(2147483647)])
     return_points = models.PositiveIntegerField(default=30000, validators=[MinValueValidator(1), MaxValueValidator(2147483647)])
     uma = models.JSONField(default=default_uma, validators=[validate_uma])
+    # NULL preserves automatic derivation, including every pre-0007 tournament.
+    oka_override = models.CharField(max_length=64, null=True, blank=True, default=None, validators=[validate_oka])
     status = models.CharField(max_length=10, choices=Status, default=Status.DRAFT)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="created_tournaments")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -26,8 +28,8 @@ class Tournament(models.Model):
     revision = models.PositiveIntegerField(default=0, editable=False)
     score_tie_policy = models.CharField(max_length=40, default="split_rank_bonus_v1")
     champion_tiebreak_policy = models.CharField(max_length=40, default="performance_v1")
-    rules_version = models.PositiveSmallIntegerField(default=1)
-    rules_source = models.CharField(max_length=80, default="created_v1")
+    rules_version = models.PositiveSmallIntegerField(default=2)
+    rules_source = models.CharField(max_length=80, default="created_v2")
     first_round_order = models.JSONField(blank=True, default=list)
     order_source = models.CharField(max_length=80, blank=True)
     resource_state = models.CharField(max_length=24, default="unselected")
@@ -44,11 +46,12 @@ class Tournament(models.Model):
             models.CheckConstraint(condition=Q(starting_points__gte=1, starting_points__lte=2147483647, return_points__gte=1, return_points__lte=2147483647), name="tournament_positive_points"),
             models.CheckConstraint(condition=Q(status="draft", started_at__isnull=True, completed_at__isnull=True, champion__isnull=True) | Q(status="started", started_at__isnull=False, completed_at__isnull=True, champion__isnull=True) | Q(status="completed", started_at__isnull=False, completed_at__isnull=False, completed_by__isnull=False, champion__isnull=False), name="tournament_lifecycle"),
             models.CheckConstraint(condition=Q(name__regex=r"\S"), name="tournament_name_nonblank"),
+            models.CheckConstraint(condition=Q(oka_override__isnull=True) | Q(rules_version=2, oka_override__regex=r"\A[+]?[0-9]+([.][0-9]+)?\Z"), name="tournament_oka_override_valid"),
         ]
 
     @property
     def oka(self):
-        return derive_oka(self.starting_points, self.return_points)
+        return self.oka_override if self.oka_override is not None else derive_oka(self.starting_points, self.return_points)
 
 
 class TournamentParticipant(models.Model):

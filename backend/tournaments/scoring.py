@@ -1,6 +1,9 @@
 """Versioned, lossless authority. JSON fractions contain decimal integer strings."""
 from fractions import Fraction
+from django.core.exceptions import ValidationError as ModelValidationError
 from rest_framework.exceptions import ValidationError
+
+from .rules import canonical_oka
 
 
 def pack(value):
@@ -13,15 +16,24 @@ def unpack(value):
 
 
 def rules(tournament):
-    if (tournament.score_tie_policy, tournament.champion_tiebreak_policy, tournament.rules_version) != ('split_rank_bonus_v1', 'performance_v1', 1):
+    if (tournament.score_tie_policy, tournament.champion_tiebreak_policy) != ('split_rank_bonus_v1', 'performance_v1') or tournament.rules_version not in (1, 2):
         raise ValidationError({'rules_version': ['不支持此冻结策略或版本。']})
-    return {key: getattr(tournament, key) for key in ['starting_points', 'return_points', 'uma', 'score_tie_policy', 'champion_tiebreak_policy', 'rules_version', 'rules_source']}
+    if tournament.rules_version == 1 and tournament.oka_override is not None:
+        raise ValidationError({'rules_version': ['自定义头名赏 Oka 需要规则版本 2。']})
+    snapshot = {key: getattr(tournament, key) for key in ['starting_points', 'return_points', 'uma', 'score_tie_policy', 'champion_tiebreak_policy', 'rules_version', 'rules_source']}
+    if tournament.rules_version == 2:
+        try:
+            override = canonical_oka(tournament.oka_override)
+        except ModelValidationError as exc:
+            raise ValidationError({'oka_override': exc.messages}) from None
+        snapshot.update(oka_override=override, oka=tournament.oka if override is None else override)
+    return snapshot
 
 
 def score(tournament, points):
-    rules(tournament)
+    snapshot = rules(tournament)
     bonus = [Fraction(x) for x in tournament.uma]
-    bonus[0] += Fraction(4 * (tournament.return_points - tournament.starting_points), 1000)
+    bonus[0] += Fraction(4 * (tournament.return_points - tournament.starting_points), 1000) if tournament.rules_version == 1 else Fraction(snapshot['oka'])
     ordered = sorted(points.items(), key=lambda row: -row[1])
     results = []
     i = 0

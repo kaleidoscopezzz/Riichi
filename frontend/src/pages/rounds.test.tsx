@@ -62,6 +62,7 @@ const t: Tournament = {
   return_points: 30000,
   uma: ['30', '10', '-10', '-30'],
   oka: '20',
+  oka_override: null,
   status: 'started',
   created_by: 1,
   created_at: date,

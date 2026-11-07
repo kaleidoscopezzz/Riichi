@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from common.api import StrictFieldsMixin
 from .models import Tournament
-from .rules import canonical_uma
+from .rules import canonical_oka, canonical_uma
 
 
 class ExactInteger(serializers.IntegerField):
@@ -21,6 +21,14 @@ class UmaField(serializers.Field):
             raise serializers.ValidationError(exc.messages) from None
 
 
+class OkaField(serializers.Field):
+    def to_internal_value(self, data):
+        try:
+            return canonical_oka(data)
+        except ModelValidationError as exc:
+            raise serializers.ValidationError(exc.messages) from None
+
+
 class TournamentWriteSerializer(StrictFieldsMixin, serializers.Serializer):
     name = serializers.CharField(max_length=120)
     description = serializers.CharField(max_length=3000, allow_blank=True, required=False)
@@ -28,9 +36,10 @@ class TournamentWriteSerializer(StrictFieldsMixin, serializers.Serializer):
     starting_points = ExactInteger(min_value=1, max_value=2147483647, required=False)
     return_points = ExactInteger(min_value=1, max_value=2147483647, required=False)
     uma = UmaField(required=False)
+    oka_override = OkaField(required=False, allow_null=True)
     score_tie_policy = serializers.ChoiceField(choices=["split_rank_bonus_v1"], required=False)
     champion_tiebreak_policy = serializers.ChoiceField(choices=["performance_v1"], required=False)
-    rules_version = ExactInteger(min_value=1, max_value=1, required=False)
+    rules_version = ExactInteger(min_value=1, max_value=2, required=False)
 
 
 class ParticipantWriteSerializer(StrictFieldsMixin, serializers.Serializer):
@@ -67,7 +76,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tournament
-        fields = ["id", "name", "description", "round_count", "starting_points", "return_points", "uma", "oka", "status", "created_by", "created_at", "updated_at", "started_at", "revision", "participant_count", "expected_table_count", "participants", "score_tie_policy", "champion_tiebreak_policy", "rules_version", "rules_source", "resource_state", "completed_at", "champion_id"]
+        fields = ["id", "name", "description", "round_count", "starting_points", "return_points", "uma", "oka", "oka_override", "status", "created_by", "created_at", "updated_at", "started_at", "revision", "participant_count", "expected_table_count", "participants", "score_tie_policy", "champion_tiebreak_policy", "rules_version", "rules_source", "resource_state", "completed_at", "champion_id"]
 
     def get_participant_count(self, obj):
         return len(obj.participants.all())
