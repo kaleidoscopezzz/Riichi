@@ -1,0 +1,49 @@
+
+> riichi-frontend@0.1.0 test:e2e
+> tsc --noEmit -p tsconfig.e2e.json && playwright test --config=../.verification/pairing-strategies/playwright.local.config.ts --output=../.verification/pairing-strategies/browser-first e2e/pairing-strategies.spec.ts
+
+
+Running 2 tests using 1 worker
+
+(node:68972) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 e2e\pairing-strategies.spec.ts:149:1 › all pairing presets, exact high-table bonuses and manual mouse/keyboard swaps (1.3m)
+  x  2 e2e\pairing-strategies.spec.ts:240:1 › sixteen-player manual touch drag scrolls from table A to offscreen D on phones (33.9s)
+
+
+  1) e2e\pairing-strategies.spec.ts:240:1 › sixteen-player manual touch drag scrolls from table A to offscreen D on phones 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 15000ms exceeded while waiting on the predicate
+
+      280 |         { timeout: 15000 },
+      281 |       )
+    > 282 |       .toBe(true)
+          |        ^
+      283 |     const target = await d.boundingBox()
+      284 |     await cdp.send('Input.dispatchTouchEvent', {
+      285 |       type: 'touchMove',
+        at D:\Riichi\Riichi\frontend\e2e\pairing-strategies.spec.ts:282:8
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\.verification\pairing-strategies\browser-first\pairing-strategies-sixteen-754e7--A-to-offscreen-D-on-phones\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.verification\pairing-strategies\browser-first\pairing-strategies-sixteen-754e7--A-to-offscreen-D-on-phones\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\.verification\pairing-strategies\browser-first\pairing-strategies-sixteen-754e7--A-to-offscreen-D-on-phones\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\.verification\pairing-strategies\browser-first\pairing-strategies-sixteen-754e7--A-to-offscreen-D-on-phones\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e\pairing-strategies.spec.ts:240:1 › sixteen-player manual touch drag scrolls from table A to offscreen D on phones 
+  1 passed (2.0m)

@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Q
 
 from .rules import default_uma, derive_oka, validate_oka, validate_uma
+from .pairing import BONUS_POLICY, CHOICES as PAIRING_CHOICES, RANKED, default_table_bonuses, validate_table_bonuses
 
 
 class Tournament(models.Model):
@@ -20,6 +21,9 @@ class Tournament(models.Model):
     uma = models.JSONField(default=default_uma, validators=[validate_uma])
     # NULL preserves automatic derivation, including every pre-0007 tournament.
     oka_override = models.CharField(max_length=64, null=True, blank=True, default=None, validators=[validate_oka])
+    pairing_strategy = models.CharField(max_length=48, choices=PAIRING_CHOICES, default=RANKED)
+    table_bonus_policy = models.CharField(max_length=40, default=BONUS_POLICY)
+    ranked_table_bonuses = models.JSONField(default=default_table_bonuses, validators=[validate_table_bonuses])
     status = models.CharField(max_length=10, choices=Status, default=Status.DRAFT)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="created_tournaments")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -47,6 +51,8 @@ class Tournament(models.Model):
             models.CheckConstraint(condition=Q(status="draft", started_at__isnull=True, completed_at__isnull=True, champion__isnull=True) | Q(status="started", started_at__isnull=False, completed_at__isnull=True, champion__isnull=True) | Q(status="completed", started_at__isnull=False, completed_at__isnull=False, completed_by__isnull=False, champion__isnull=False), name="tournament_lifecycle"),
             models.CheckConstraint(condition=Q(name__regex=r"\S"), name="tournament_name_nonblank"),
             models.CheckConstraint(condition=Q(oka_override__isnull=True) | Q(rules_version=2, oka_override__regex=r"\A[+]?[0-9]+([.][0-9]+)?\Z"), name="tournament_oka_override_valid"),
+            models.CheckConstraint(condition=Q(pairing_strategy__in=[value for value, _ in PAIRING_CHOICES]), name='tournament_pairing_strategy_valid'),
+            models.CheckConstraint(condition=Q(pairing_strategy='legacy_v1', table_bonus_policy='none') | (~Q(pairing_strategy='legacy_v1') & Q(table_bonus_policy=BONUS_POLICY)), name='tournament_table_bonus_policy_valid'),
         ]
 
     @property
@@ -87,6 +93,8 @@ class RoundTable(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     tournament_table = models.ForeignKey("TournamentTable", null=True, blank=True, on_delete=models.PROTECT, related_name="round_tables")
     machine_snapshot = models.JSONField(blank=True, default=dict)
+    base_bonus = models.CharField(max_length=64, default='0', validators=[validate_oka])
+    bonus_source = models.CharField(max_length=48, default='legacy_zero')
 
     class Meta:
         ordering = ["table_number"]

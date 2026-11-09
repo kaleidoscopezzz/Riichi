@@ -25,6 +25,7 @@ import {
 } from '@/services/competition'
 import { TableResultEditor } from './table-result-editor'
 import { ResultCorrectionHistory } from './result-correction-history'
+import { PairingBoard } from './pairing-board'
 
 export type CompetitionActionType =
   | { mode: 'generate' | 'finish' | 'review' }
@@ -247,44 +248,61 @@ export function CompetitionAction({
           <X />
         </Button>
         <div className="competition-action-body">
-          {action.mode === 'generate' && (
-            <>
-              <p>
-                {next === 1
-                  ? `为 ${t.participant_count} 位选手选择 ${needed} 张物理桌，顺序对应 A～D。`
-                  : '根据已确认累计表现排序、每四人一组；新轮次四风重新随机，物理桌保持不变。'}
-              </p>
-              {next === 1 && pickers}
-              {stage && (
-                <div className="confirmation-preview">
-                  <h3>最终确认</h3>
-                  {next === 1 ? (
-                    selected.map((pk, i) => (
-                      <p key={pk}>
-                        逻辑桌 {'ABCD'[i]} →{' '}
-                        {resources.find((m) => m.machine_id === pk)?.machine_no}
-                      </p>
-                    ))
-                  ) : (
-                    <p>将生成第 {next} 轮，不会覆盖已有座次。</p>
-                  )}
-                </div>
-              )}
-              <Button
-                disabled={busy || (next === 1 && !selectionValid)}
-                onClick={() =>
-                  stage
-                    ? void run(
-                        () => generateRound(t.id, next, next === 1 ? selected : undefined),
-                        '轮次已生成并持久化。',
-                      )
-                    : setStage(true)
-                }
-              >
-                {busy ? '正在提交…' : stage ? '确认生成轮次' : '预览并确认'}
-              </Button>
-            </>
-          )}
+          {action.mode === 'generate' &&
+            t.pairing_strategy &&
+            t.pairing_strategy !== 'legacy_v1' && (
+              <>
+                {next === 1 && pickers}
+                <PairingBoard
+                  tournament={t}
+                  next={next}
+                  machineIds={next === 1 ? selected : undefined}
+                  ready={next > 1 || selectionValid}
+                  busy={busy}
+                  error={error}
+                  run={run}
+                />
+              </>
+            )}
+          {action.mode === 'generate' &&
+            (!t.pairing_strategy || t.pairing_strategy === 'legacy_v1') && (
+              <>
+                <p>
+                  {next === 1
+                    ? `为 ${t.participant_count} 位选手选择 ${needed} 张物理桌，顺序对应 A～D。`
+                    : '根据已确认累计表现排序、每四人一组；新轮次四风重新随机，物理桌保持不变。'}
+                </p>
+                {next === 1 && pickers}
+                {stage && (
+                  <div className="confirmation-preview">
+                    <h3>最终确认</h3>
+                    {next === 1 ? (
+                      selected.map((pk, i) => (
+                        <p key={pk}>
+                          逻辑桌 {'ABCD'[i]} →{' '}
+                          {resources.find((m) => m.machine_id === pk)?.machine_no}
+                        </p>
+                      ))
+                    ) : (
+                      <p>将生成第 {next} 轮，不会覆盖已有座次。</p>
+                    )}
+                  </div>
+                )}
+                <Button
+                  disabled={busy || (next === 1 && !selectionValid)}
+                  onClick={() =>
+                    stage
+                      ? void run(
+                          () => generateRound(t.id, next, next === 1 ? selected : undefined),
+                          '轮次已生成并持久化。',
+                        )
+                      : setStage(true)
+                  }
+                >
+                  {busy ? '正在提交…' : stage ? '确认生成轮次' : '预览并确认'}
+                </Button>
+              </>
+            )}
           {table && (
             <>
               {action.mode === 'correct' && ws.lotteries.length > 0 && (

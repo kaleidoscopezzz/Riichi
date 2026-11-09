@@ -1,0 +1,29 @@
+{
+  "result": "PASS",
+  "vendor": "sqlite",
+  "legacy_tournaments": 2,
+  "legacy_results": 2,
+  "legacy_corrections": 2,
+  "original_columns_unchanged": true,
+  "legacy_zero_bonus": true,
+  "legacy_rule_snapshots_unchanged": true,
+  "idempotent_rerun": true,
+  "additions": {
+    "tables": [],
+    "columns": {
+      "tournaments_roundtable": [
+        "base_bonus",
+        "bonus_source"
+      ],
+      "tournaments_tournament": [
+        "pairing_strategy",
+        "ranked_table_bonuses",
+        "table_bonus_policy"
+      ]
+    }
+  },
+  "backup_integrity": "ok",
+  "independent_restore": "PASS",
+  "restored_upgrade": "PASS",
+  "backup_sha256": "4d5c0957c077559819c21277bc16a102dcdb72d881dcd3e85c82d6f995c37ad2"
+}

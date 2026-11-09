@@ -1,0 +1,25 @@
+Creating test database for alias 'default'...
+
+F....
+======================================================================
+FAIL: test_correction_audit_schema_preserves_populated_results_and_all_original_columns (tournaments.tests_migrations.LegacyMigrationTests.test_correction_audit_schema_preserves_populated_results_and_all_original_columns)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\Riichi\backend\tournaments\tests_migrations.py", line 184, in test_correction_audit_schema_preserves_populated_results_and_all_original_columns
+    self.assertEqual(result['additions']['columns'], {})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'tournaments_roundtable': ['base_bonus', [105 chars]cy']} != {}
++ {}
+- {'tournaments_roundtable': ['base_bonus', 'bonus_source'],
+-  'tournaments_tournament': ['pairing_strategy',
+-                             'ranked_table_bonuses',
+-                             'table_bonus_policy']}
+
+----------------------------------------------------------------------
+Ran 5 tests in 16.499s
+
+FAILED (failures=1)
+Destroying test database for alias 'default'...
+
+Found 5 test(s).
+System check identified no issues (0 silenced).

@@ -14,6 +14,8 @@ import {
   saveTournament,
   startTournament,
   validCustomOka,
+  pairingOptions,
+  type PairingStrategy,
   type Tournament,
 } from '@/services/tournaments'
 import { PlayerPicker } from './player-picker'
@@ -36,6 +38,12 @@ export function TournamentEditor({
   const [uma, setUma] = useState(tournament?.uma || ['30', '10', '-10', '-30'])
   const [okaMode, setOkaMode] = useState(tournament?.oka_override != null ? 'custom' : 'derived')
   const [customOka, setCustomOka] = useState(tournament?.oka_override ?? '0')
+  const [pairing, setPairing] = useState<PairingStrategy>(
+    tournament ? (tournament.pairing_strategy ?? 'legacy_v1') : 'ranked_v1',
+  )
+  const [tableBonuses, setTableBonuses] = useState(
+    tournament?.ranked_table_bonuses ?? ['0', '0', '0', '0'],
+  )
   const [selected, setSelected] = useState(tournament?.participants || [])
   // The server copy this form edits; replaced when the latest draft is reloaded.
   const [base, setBase] = useState(tournament)
@@ -61,6 +69,8 @@ export function TournamentEditor({
     setUma(row.uma)
     setOkaMode(row.oka_override != null ? 'custom' : 'derived')
     setCustomOka(row.oka_override ?? '0')
+    setPairing(row.pairing_strategy ?? 'legacy_v1')
+    setTableBonuses(row.ranked_table_bonuses ?? ['0', '0', '0', '0'])
     setSelected(row.participants)
   }
   async function reload() {
@@ -101,6 +111,10 @@ export function TournamentEditor({
       )
       return
     }
+    if (pairing === 'ranked_v1' && tableBonuses.some((value) => !validCustomOka(value))) {
+      setError(new Error('各桌附加基础分须为非负精确十进制数，0表示不加分。'))
+      return
+    }
     setBusy(true)
     try {
       saved(
@@ -113,6 +127,13 @@ export function TournamentEditor({
             return_points: Number(returning),
             uma,
             oka_override: okaMode === 'derived' ? null : customOka,
+            ...(pairing !== 'legacy_v1'
+              ? {
+                  pairing_strategy: pairing,
+                  ranked_table_bonuses:
+                    pairing === 'ranked_v1' ? tableBonuses : ['0', '0', '0', '0'],
+                }
+              : {}),
             participant_ids: selected.map((p) => p.player_id),
             // Optimistic lock: a draft changed elsewhere is rejected with 409 stale_tournament.
             ...(base && typeof base.revision === 'number' ? { revision: base.revision } : {}),
@@ -263,7 +284,64 @@ export function TournamentEditor({
               </div>
             </section>
             <section>
-              <span className="eyebrow">03 / 参赛选手</span>
+              <span className="eyebrow">03 / 分桌规则</span>
+              {pairing === 'legacy_v1' ? (
+                <p className="rule-hint">历史赛事沿用首轮随机、后续按累计表现分桌。</p>
+              ) : (
+                <>
+                  <label>
+                    分桌策略
+                    <Select
+                      aria-label="分桌策略"
+                      value={pairing}
+                      options={pairingOptions}
+                      disabled={busy || reloading || locked}
+                      onValueChange={(value) => setPairing(value as PairingStrategy)}
+                    />
+                  </label>
+                  <p className="rule-hint">
+                    启动后策略固定。手动模式每轮生成前拖拽排人；其余模式自动预排，四风生成时随机。
+                  </p>
+                  {pairing.startsWith('swiss_') && (
+                    <p className="rule-hint">
+                      {pairing === 'swiss_repeats_first_v1'
+                        ? '先减少重复对手，再让积分尽量接近。'
+                        : '先让积分尽量接近，再减少重复对手。'}{' '}
+                      预览显示重遇情况，无法完全避免时会明确提示。
+                    </p>
+                  )}
+                  {pairing === 'ranked_v1' && (
+                    <>
+                      <div className="uma-fields">
+                        {tableBonuses.map((value, index) => (
+                          <label key={index}>
+                            {'ABCD'[index]}桌附加基础分
+                            <input
+                              aria-label={`${'ABCD'[index]}桌附加基础分`}
+                              inputMode="decimal"
+                              maxLength={64}
+                              value={value}
+                              onChange={(event) =>
+                                setTableBonuses(
+                                  tableBonuses.map((old, position) =>
+                                    position === index ? event.target.value : old,
+                                  ),
+                                )
+                              }
+                            />
+                          </label>
+                        ))}
+                      </div>
+                      <p className="rule-hint">
+                        首轮随机，不加桌附加分。后续高高碰按排名分组，A桌为高分组；所填积分给本桌每位选手，不改变开局或返还原点。未使用的桌位配置不生效。
+                      </p>
+                    </>
+                  )}
+                </>
+              )}
+            </section>
+            <section>
+              <span className="eyebrow">04 / 参赛选手</span>
               <PlayerPicker
                 selected={selected}
                 change={setSelected}
@@ -330,6 +408,19 @@ export function TournamentRules({ row }: { row: Tournament }) {
         <dt>头名赏 Oka · {row.oka_override == null ? '自动推导' : '自定义'}</dt>
         <dd>{describeOka(row.oka)}</dd>
       </div>
+      <div>
+        <dt>分桌策略</dt>
+        <dd>
+          {pairingOptions.find((option) => option.value === row.pairing_strategy)?.label ??
+            '历史自动分桌'}
+        </dd>
+      </div>
+      {row.pairing_strategy === 'ranked_v1' && (
+        <div>
+          <dt>A～D桌附加基础分 · 每人</dt>
+          <dd>{row.ranked_table_bonuses?.join(' / ') ?? '0 / 0 / 0 / 0'}</dd>
+        </div>
+      )}
       <div>
         <dt>预计每轮桌数</dt>
         <dd>

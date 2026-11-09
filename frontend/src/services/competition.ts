@@ -195,6 +195,7 @@ export const conflictRefreshCodes: ReadonlySet<string> = new Set([
   'stale_standings',
   'stale_result',
   'tournament_not_started',
+  'stale_pairing',
 ])
 
 export function sameMembers(a: readonly number[], b: readonly number[]) {

@@ -114,6 +114,9 @@ export function TableResultEditor({
           更正会更新累计积分和后续尚未生成轮次的排序。已经生成的轮次保留现有座次，旧成绩自动留档。
         </p>
       )}
+      {table.base_bonus && table.base_bonus !== '0' && (
+        <p>本桌每位选手附加基础分 {table.base_bonus}，已计入基础分和本场积分。</p>
+      )}
       {locked && <p role="status">赛事已完赛，成绩只读。</p>}
       <fieldset className="result-editor-fields" disabled={busy || locked}>
         <div className="result-inputs">

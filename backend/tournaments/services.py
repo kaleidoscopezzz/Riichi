@@ -10,6 +10,7 @@ from players.models import PlayerProfile
 from .models import Tournament, TournamentParticipant
 from .rules import canonical_oka, canonical_uma
 from .scoring import rules
+from .pairing import LEGACY, RANKED, NEW_CHOICES, canonical_table_bonuses
 
 
 class TournamentConflict(APIException):
@@ -43,6 +44,17 @@ def configure_rules(tournament, values, previous_version=None):
         tournament.oka_override = canonical_oka(tournament.oka_override)
     except ModelValidationError as exc:
         raise ValidationError({"oka_override": exc.messages}) from None
+    if tournament.pairing_strategy == LEGACY:
+        if {'pairing_strategy', 'ranked_table_bonuses'} & values.keys():
+            raise ValidationError({'pairing_strategy': ['历史赛事沿用原规则，请创建新赛事选择自定义分桌。']})
+    elif tournament.pairing_strategy not in dict(NEW_CHOICES):
+        raise ValidationError({'pairing_strategy': ['不支持此分桌策略。']})
+    try:
+        tournament.ranked_table_bonuses = canonical_table_bonuses(tournament.ranked_table_bonuses)
+    except ModelValidationError as exc:
+        raise ValidationError({'ranked_table_bonuses': exc.messages}) from None
+    if tournament.pairing_strategy != RANKED and any(value != '0' for value in tournament.ranked_table_bonuses):
+        raise ValidationError({'ranked_table_bonuses': ['只有高高碰支持各桌附加基础分。']})
     # Only an explicit draft edit upgrades a legacy rule. Starting or reading a
     # legacy tournament must never silently change its version or interpretation.
     if "oka_override" in values and tournament.oka_override is not None and tournament.rules_version == 1 and "rules_version" not in values:

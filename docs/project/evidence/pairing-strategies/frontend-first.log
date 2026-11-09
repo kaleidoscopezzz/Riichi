@@ -1,0 +1,13 @@
+
+> riichi-frontend@0.1.0 test
+> vitest run --run src/components/pairing-board.test.tsx src/pages/tournaments.test.tsx src/pages/rounds.test.tsx
+
+
+ RUN  v4.1.12 D:/Riichi/Riichi/frontend
+
+
+ Test Files  3 passed (3)
+      Tests  75 passed (75)
+   Start at  13:15:46
+   Duration  33.65s (transform 1.04s, setup 69ms, import 4.33s, tests 51.62s, environment 5.72s)
+
