@@ -122,6 +122,45 @@ function showApp(path: string, admin = false, anonymous = false) {
 }
 
 describe('赛事工作台', () => {
+  it('创建时选择两种瑞士优先级，启动前可保存固定策略', async () => {
+    render(<TournamentsPage />)
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: '创建赛事' }))
+    await user.type(screen.getByLabelText('赛事名称'), '瑞士轮新赛事')
+    await selectOption(user, '分桌策略', '瑞士轮 · 避重优先')
+    expect(screen.getByText(/先减少重复对手/)).toBeTruthy()
+    await selectOption(user, '分桌策略', '瑞士轮 · 积分接近优先')
+    expect(screen.getByText(/先让积分尽量接近/)).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: '保存草稿' }))
+    await waitFor(() =>
+      expect(saveTournament).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pairing_strategy: 'swiss_scores_first_v1',
+          ranked_table_bonuses: ['0', '0', '0', '0'],
+        }),
+        undefined,
+      ),
+    )
+  })
+  it('高高碰各桌附加分为精确字符串，切换其他策略不携带加分', async () => {
+    render(<TournamentsPage />)
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: '创建赛事' }))
+    await user.type(screen.getByLabelText('赛事名称'), '高分桌新赛事')
+    const input = screen.getByLabelText('A桌附加基础分')
+    await user.clear(input)
+    await user.type(input, '5.12345678901234567890123456789')
+    await user.click(screen.getByRole('button', { name: '保存草稿' }))
+    await waitFor(() =>
+      expect(saveTournament).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pairing_strategy: 'ranked_v1',
+          ranked_table_bonuses: ['5.12345678901234567890123456789', '0', '0', '0'],
+        }),
+        undefined,
+      ),
+    )
+  })
   it('API加载状态、真实列表及搜索分页', async () => {
     vi.mocked(fetchTournaments).mockResolvedValueOnce({ ...page(), next: '/next' })
     render(<TournamentsPage />)

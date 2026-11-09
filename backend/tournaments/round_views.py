@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from machines.models import MahjongMachine
 from .models import Tournament, TournamentRound, RoundTable, RoundSeat, MachineAllocation
-from .round_serializers import GenerateRoundSerializer, ReassignSerializer, ReleaseSerializer, RoundSerializer, TableSerializer, AllocationSerializer
+from .round_serializers import GenerateRoundSerializer, PairingPreviewSerializer, ReassignSerializer, ReleaseSerializer, RoundSerializer, TableSerializer, AllocationSerializer
 from .round_services import change_allocation
 from .competition_services import generate, occupied_ids
 from .models import TournamentMachineReservation
@@ -38,8 +38,18 @@ class RoundListView(APIView):
     def post(self, request, pk):
         serializer = GenerateRoundSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        row = generate(pk, request.user, serializer.validated_data["round_number"], machine_ids=serializer.validated_data.get("machine_ids"))
+        row = generate(pk, request.user, serializer.validated_data["round_number"], machine_ids=serializer.validated_data.get("machine_ids"), pairing_token=serializer.validated_data.get('pairing_token'), participant_groups=serializer.validated_data.get('participant_groups'))
         return Response({"data": RoundSerializer(rounds_query().get(pk=row.pk)).data}, status=201)
+
+
+class PairingPreviewView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, pk):
+        from .pairing_plan import preview
+        serializer = PairingPreviewSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({'data': preview(pk, request.user, serializer.validated_data['round_number'])}, headers={'Cache-Control': 'no-store'})
 
 
 class RoundDetailView(APIView):

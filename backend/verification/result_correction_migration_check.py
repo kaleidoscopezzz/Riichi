@@ -60,7 +60,8 @@ def rehearse_result_correction_migration(connection, *, before_upgrade=None):
     if before_upgrade is not None:
         before_upgrade(baseline)
     executor = MigrationExecutor(connection)
-    targets = executor.loader.graph.leaf_nodes()
+    # This historical rehearsal verifies 0008, even after later migrations exist.
+    targets = [node for node in executor.loader.graph.leaf_nodes() if node[0] != 'tournaments'] + [('tournaments', '0008_result_corrections')]
     executor.migrate(targets)
     result = build_manifest(connection, baseline)
     if result['result'] != 'PASS':

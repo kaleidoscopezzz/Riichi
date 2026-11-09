@@ -182,3 +182,13 @@ class LegacyMigrationTests(TransactionTestCase):
         self.assertTrue(result['idempotent_rerun'])
         self.assertEqual(result['additions']['tables'], ['tournaments_tableresultcorrection'])
         self.assertEqual(result['additions']['columns'], {})
+
+    def test_pairing_fields_preserve_old_rules_results_corrections_and_identities(self):
+        from verification.pairing_migration_check import BEFORE_PAIRING, rehearse_pairing_migration
+        self.migrate(BEFORE_PAIRING)
+        result = rehearse_pairing_migration(self.db)
+        self.assertEqual(result['result'], 'PASS')
+        self.assertTrue(result['original_columns_unchanged'])
+        self.assertTrue(result['legacy_rule_snapshots_unchanged'])
+        self.assertTrue(result['legacy_zero_bonus'])
+        self.assertTrue(result['idempotent_rerun'])

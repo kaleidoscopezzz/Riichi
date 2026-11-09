@@ -1,0 +1,16 @@
+
+> riichi-frontend@0.1.0 test:e2e
+> tsc --noEmit -p tsconfig.e2e.json && playwright test --config=../.verification/pairing-strategies/playwright.local.config.ts --output=../.verification/pairing-strategies/browser-full
+
+
+Running 5 tests using 1 worker
+
+(node:72064) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 e2e\configurable-oka.spec.ts:23:1 › configurable Oka: zero, exact decimals, automatic reset, frozen scoring and accessible themes (33.1s)
+  ok 2 e2e\pairing-strategies.spec.ts:149:1 › all pairing presets, exact high-table bonuses and manual mouse/keyboard swaps (1.3m)
+  ok 3 e2e\pairing-strategies.spec.ts:240:1 › sixteen-player manual touch drag scrolls from table A to offscreen D on phones (35.9s)
+  ok 4 e2e\production-launch.spec.ts:24:1 › real browser: roster, tournaments, scores, lotteries, completion, responsive themes (2.4m)
+  ok 5 e2e\score-corrections.spec.ts:23:1 › correct earlier results while a later round is underway, preview exact scores and preserve play history (28.1s)
+
+  5 passed (5.5m)

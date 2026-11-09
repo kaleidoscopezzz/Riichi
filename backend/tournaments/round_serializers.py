@@ -7,6 +7,12 @@ from .models import MachineAllocation, RoundTable, TournamentRound
 class GenerateRoundSerializer(StrictFieldsMixin, serializers.Serializer):
     round_number = ExactInteger(min_value=1, max_value=6)
     machine_ids = serializers.ListField(child=ExactInteger(min_value=1), max_length=4, required=False)
+    pairing_token = serializers.CharField(max_length=24000, required=False)
+    participant_groups = serializers.ListField(child=serializers.ListField(child=ExactInteger(min_value=1), min_length=4, max_length=4), min_length=1, max_length=4, required=False)
+
+
+class PairingPreviewSerializer(StrictFieldsMixin, serializers.Serializer):
+    round_number = ExactInteger(min_value=1, max_value=6)
 
 
 class ReassignSerializer(StrictFieldsMixin, serializers.Serializer):
@@ -37,7 +43,7 @@ class TableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RoundTable
-        fields = ["id", "round_id", "round_number", "tournament_id", "table_number", "seats", "active_allocation", "allocation_history", "created_at", "tournament_table_id", "machine_snapshot", "result"]
+        fields = ["id", "round_id", "round_number", "tournament_id", "table_number", "seats", "active_allocation", "allocation_history", "created_at", "tournament_table_id", "machine_snapshot", "base_bonus", "bonus_source", "result"]
 
     def get_result(self, obj):
         from .competition_services import result_data

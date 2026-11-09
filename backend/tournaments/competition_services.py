@@ -20,6 +20,7 @@ from .models import (Tournament, TournamentRound, RoundTable, RoundSeat, Machine
                      TournamentTable, TournamentMachineReservation as Reservation, TableResult, TableResultCorrection, LotteryRecord)
 from .services import TournamentConflict, database_busy
 from .scoring import pack, unpack, score, rules
+from .pairing import LEGACY, RANDOM, RANKED, MANUAL, SWISS_REPEATS, SWISS_SCORES, repeated_pairs, swiss_groups
 
 WINDS = list(RoundSeat.Wind.values)
 
@@ -146,22 +147,28 @@ def select_machines(t, machines, ids, user):
     t.save(update_fields=['resource_state'])
 
 
-def create_round(t, user, number, participants, *, rng=None):
+def create_round(t, user, number, participants, *, rng=None, pairing_info=None, signed_preview=False):
     rng = rng or random.SystemRandom()
     fixed_tables = check_mapping(t)
     generated = TournamentRound.objects.create(tournament=t, round_number=number, generated_by=user, generation_snapshot={'source_versions': source_versions(t), 'first_round_order': t.first_round_order, 'rules': rules(t), 'sorted_participants': [p.pk for p in participants]})
+    if pairing_info is not None:
+        generated.generation_snapshot['pairing'] = pairing_info
+        generated.save(update_fields=['generation_snapshot'])
     for index, fixed in enumerate(fixed_tables):
         active = fixed.reservations.get(status='active')
-        table = RoundTable.objects.create(round=generated, table_number=fixed.ordinal, tournament_table=fixed, machine_snapshot={'machine_id': active.machine_id, 'machine_no': active.machine_no_snapshot, 'reservation_id': active.pk})
+        bonus = t.ranked_table_bonuses[index] if t.pairing_strategy == RANKED and number > 1 else '0'
+        table = RoundTable.objects.create(round=generated, table_number=fixed.ordinal, tournament_table=fixed, base_bonus=bonus,
+                                        bonus_source='ranked_event_config_v1' if t.pairing_strategy == RANKED and number > 1 else ('legacy_zero' if t.pairing_strategy == LEGACY else 'not_applicable_v1'),
+                                        machine_snapshot={'machine_id': active.machine_id, 'machine_no': active.machine_no_snapshot, 'reservation_id': active.pk})
         group = participants[index*4:index*4+4]
-        if number > 1:
+        if number > 1 or signed_preview:
             rng.shuffle(group)
         RoundSeat.objects.bulk_create([RoundSeat(round=generated, table=table, participant=p, seat_wind=w) for p, w in zip(group, WINDS, strict=True)])
     structure(generated)
     return generated
 
 
-def generate(tournament_id, user, number, *, machine_ids=None, rng=None):
+def generate(tournament_id, user, number, *, machine_ids=None, rng=None, pairing_token=None, participant_groups=None):
     with locked(tournament_id) as (t, machines):
         bridge_legacy(t, user)
         if t.rounds.filter(round_number=number).exists():
@@ -173,12 +180,21 @@ def generate(tournament_id, user, number, *, machine_ids=None, rng=None):
         participants = list(t.participants.all())
         if len(participants) not in (4, 8, 12, 16) or any(not p.display_name_snapshot for p in participants):
             raise ValidationError({'participants': ['冻结名单不完整。']})
+        groups, first_order = None, None
+        if pairing_token is not None:
+            if t.pairing_strategy == LEGACY:
+                raise ValidationError({'pairing_token': ['历史赛事沿用原分桌规则。']})
+            from .pairing_plan import load
+            groups, first_order = load(t, user, number, pairing_token, participant_groups)
+        elif participant_groups is not None or t.pairing_strategy == MANUAL:
+            raise ValidationError({'pairing_token': ['手动分桌须先预览，并提交预览及确认名单。']})
         if number == 1:
             if machine_ids is None:
                 raise ValidationError({'machine_ids': ['须明确选择并确认物理桌A～D。']})
             select_machines(t, machines, machine_ids, user)
-            (rng or random.SystemRandom()).shuffle(participants)
-            t.first_round_order = [p.pk for p in participants]
+            if groups is None:
+                (rng or random.SystemRandom()).shuffle(participants)
+            t.first_round_order = first_order if first_order is not None else [p.pk for p in participants]
             t.order_source = 'persisted_shuffle_v1'
             t.save(update_fields=['first_round_order', 'order_source'])
         else:
@@ -192,7 +208,26 @@ def generate(tournament_id, user, number, *, machine_ids=None, rng=None):
             standings.sort(key=lambda x: (metric(x), -order[x['participant_id']]), reverse=True)
             by_id = {p.pk: p for p in participants}
             participants = [by_id[x['participant_id']] for x in standings]
-        return create_round(t, user, number, participants, rng=rng)
+        if groups is not None:
+            by_id = {p.pk: p for p in participants}
+            participants = [by_id[pk] for group in groups for pk in group]
+        elif number > 1 and t.pairing_strategy == RANDOM:
+            (rng or random.SystemRandom()).shuffle(participants)
+        elif number > 1 and t.pairing_strategy in (SWISS_REPEATS, SWISS_SCORES):
+            from .pairing_plan import meetings_for
+            seed = [p.pk for p in participants]
+            scores = {row['participant_id']: unpack(row['total']) for row in standings}
+            groups = swiss_groups(seed, scores, meetings_for(t, number), repeats_first=t.pairing_strategy == SWISS_REPEATS)
+            by_id = {p.pk: p for p in participants}
+            participants = [by_id[pk] for group in groups for pk in group]
+        info = None
+        if t.pairing_strategy != LEGACY:
+            from .pairing_plan import meetings_for
+            final_groups = [[p.pk for p in participants[index:index+4]] for index in range(0, len(participants), 4)]
+            info = {'strategy': t.pairing_strategy, 'groups': final_groups, 'manual': t.pairing_strategy == MANUAL,
+                    'table_bonuses': t.ranked_table_bonuses[:len(final_groups)] if number > 1 and t.pairing_strategy == RANKED else ['0'] * len(final_groups),
+                    **repeated_pairs(final_groups, meetings_for(t, number))}
+        return create_round(t, user, number, participants, rng=rng, pairing_info=info, signed_preview=pairing_token is not None)
 
 
 def require_round_confirmed(round):
@@ -243,12 +278,12 @@ def preview_result(table_id, version, points):
     if version != current_version:
         conflict('成绩版本已变化，请载入最新成绩后核对。', 'stale_result')
     values = parse_result_points(table, points)
-    snapshot = rules(t)
+    snapshot = rules(t, table=table)
     complete = len(values) == 4 and all(value is not None for value in values.values())
     total = sum(value for value in values.values() if value is not None)
-    scores = score(t, values) if complete else [
+    scores = score(t, values, table=table) if complete else [
         {'participant_id': pk, 'raw_points': values.get(str(pk)), 'rank': None, 'tied': False,
-         'base': pack(Fraction(values[str(pk)] - t.return_points, 1000)) if values.get(str(pk)) is not None else None,
+         'base': pack(Fraction(values[str(pk)] - t.return_points, 1000) + Fraction(snapshot.get('table_base_bonus', '0'))) if values.get(str(pk)) is not None else None,
          'bonus': None, 'score': None}
         for pk in table.seats.values_list('participant_id', flat=True)
     ]
@@ -281,7 +316,7 @@ def correct_result(table_id, user, version, *, points, reason=''):
         if values == row.points:
             return result_data(table)
         before = result_snapshot(row)
-        row.points, row.scores, row.rule_snapshot = values, score(t, values), rules(t)
+        row.points, row.scores, row.rule_snapshot = values, score(t, values, table=table), rules(t, table=table)
         row.version += 1
         row.edited_by, row.confirmed_by, row.confirmed_at = user, user, timezone.now()
         row.save()
@@ -326,8 +361,8 @@ def write_result(table_id, user, version, *, points=None, confirm=False):
             row.edited_by = user
         if confirm:
             validate_confirmed_points(t, table, row.points)
-            row.scores = score(t, row.points)
-            row.rule_snapshot = rules(t)
+            row.scores = score(t, row.points, table=table)
+            row.rule_snapshot = rules(t, table=table)
             row.status, row.confirmed_by, row.confirmed_at = 'confirmed', user, timezone.now()
         if points is None and row.pk:
             # Confirmation only: the draft editor and edited_at (auto_now) stay untouched.

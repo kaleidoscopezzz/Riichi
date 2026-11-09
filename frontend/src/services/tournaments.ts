@@ -7,6 +7,20 @@ export type Participant = {
   is_active: boolean
   display_name_snapshot: string
 }
+export type PairingStrategy =
+  | 'legacy_v1'
+  | 'random_v1'
+  | 'ranked_v1'
+  | 'manual_v1'
+  | 'swiss_repeats_first_v1'
+  | 'swiss_scores_first_v1'
+export const pairingOptions = [
+  { value: 'ranked_v1', label: '高高碰' },
+  { value: 'random_v1', label: '完全随机' },
+  { value: 'manual_v1', label: '手动拖拽分桌' },
+  { value: 'swiss_repeats_first_v1', label: '瑞士轮 · 避重优先' },
+  { value: 'swiss_scores_first_v1', label: '瑞士轮 · 积分接近优先' },
+] as const
 export type Tournament = {
   id: number
   name: string
@@ -18,6 +32,8 @@ export type Tournament = {
   oka: string
   /** null derives Oka from points; "0" explicitly disables the top prize. */
   oka_override: string | null
+  pairing_strategy?: PairingStrategy
+  ranked_table_bonuses?: string[]
   status: 'draft' | 'started' | 'completed'
   created_by: number
   created_at: string
@@ -38,7 +54,12 @@ export type TournamentInput = Pick<
   | 'return_points'
   | 'uma'
   | 'oka_override'
-> & { participant_ids: number[]; revision?: number }
+> & {
+  participant_ids: number[]
+  revision?: number
+  pairing_strategy?: PairingStrategy
+  ranked_table_bonuses?: string[]
+}
 export type Page<T> = { count: number; next: string | null; previous: string | null; results: T[] }
 export const legalSize = (count: number) => [4, 8, 12, 16].includes(count)
 export const fetchTournaments = (

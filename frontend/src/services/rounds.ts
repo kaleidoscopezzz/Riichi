@@ -1,5 +1,6 @@
 import { api } from './api'
 import type { Result } from './competition'
+import type { PairingStrategy } from './tournaments'
 
 export type Allocation = {
   id: number
@@ -29,6 +30,7 @@ export type RoundTable = {
   tournament_id: number
   table_number: number
   result?: Result
+  base_bonus?: string
   machine_snapshot?: { machine_id?: number; machine_no?: string }
   seats: RoundSeat[]
   active_allocation: Allocation | null
@@ -63,10 +65,36 @@ export const fetchRounds = (id: number, signal?: AbortSignal) =>
   api<{ results: TournamentRound[] }>(`/tournaments/${id}/rounds/`, { signal })
 export const fetchResources = (signal?: AbortSignal) =>
   api<{ results: MachineResource[] }>('/machine-resources/', { signal })
-export const generateRound = (id: number, round_number = 1, machine_ids?: number[]) =>
+export type PairingPlan = {
+  round_number: number
+  strategy: PairingStrategy
+  strategy_label: string
+  manual: boolean
+  token: string
+  participants: {
+    id: number
+    display_name: string
+    total: { numerator: string; denominator: string }
+  }[]
+  tables: { ordinal: number; label: string; participant_ids: number[]; base_bonus: string }[]
+  repeat_pairs: number
+  repeat_encounters: number
+}
+export const previewPairing = (id: number, round_number: number, signal?: AbortSignal) =>
+  api<PairingPlan>(`/tournaments/${id}/rounds/preview/`, {
+    method: 'POST',
+    body: { round_number },
+    signal,
+  })
+export const generateRound = (
+  id: number,
+  round_number = 1,
+  machine_ids?: number[],
+  plan?: { pairing_token: string; participant_groups?: number[][] },
+) =>
   api<TournamentRound>(`/tournaments/${id}/rounds/`, {
     method: 'POST',
-    body: { round_number, ...(machine_ids ? { machine_ids } : {}) },
+    body: { round_number, ...(machine_ids ? { machine_ids } : {}), ...plan },
   })
 export const fetchTable = (id: number) => api<RoundTable>(`/round-tables/${id}/`)
 export const fetchAllocationHistory = (id: number) =>

@@ -3887,6 +3887,79 @@ a:focus-visible {
   padding: 0;
   margin: 0;
 }
+.pairing-board {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.pairing-tables {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.pairing-tables > article {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  min-width: 0;
+}
+.pairing-tables header {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.pairing-tables header span {
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.pairing-card {
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--secondary);
+  min-width: 0;
+}
+.pairing-person {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.pairing-person strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.pairing-person > span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.pairing-card [data-pair-handle] {
+  touch-action: none;
+  cursor: grab;
+}
+.pairing-card [data-slot='select-trigger'] {
+  margin-top: 8px;
+}
+.pairing-card.dragging {
+  opacity: 0.55;
+}
+.pairing-card.drop-target {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+.pairing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+@media (max-width: 540px) {
+  .pairing-tables {
+    grid-template-columns: 1fr;
+  }
+}
 .result-score-preview,
 .result-correction-history {
   display: grid;
