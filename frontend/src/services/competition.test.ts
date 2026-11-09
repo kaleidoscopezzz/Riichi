@@ -2,6 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { generateRound } from './rounds'
 import {
   saveResult,
+  correctResult,
+  previewResult,
+  fetchResultCorrections,
   displayScore,
   completeTournament,
   voidLottery,
@@ -12,17 +15,66 @@ import {
 
 afterEach(() => vi.unstubAllGlobals())
 describe('赛事 API 契约和无损展示', () => {
-  it('首轮发送明确机器顺序，后续轮次不重新选桌', async () => {
+  it('试算与更正使用独立接口、当前版本和CSRF，历史读取不写入', async () => {
     const fetcher = vi
       .fn()
       .mockImplementation(
         async (url: string) =>
           new Response(
             JSON.stringify({
-              data: url.endsWith('/auth/csrf/') ? { csrf_token: 'test-only' } : { id: 1 },
+              data: url.endsWith('/auth/csrf/') ? { csrf_token: 'test-only' } : {},
             }),
           ),
       )
+    vi.stubGlobal('fetch', fetcher)
+    const controller = new AbortController()
+    const points = [{ participant_id: 1, raw_points: 0 }]
+    await previewResult(20, 2, points, controller.signal)
+    expect(fetcher.mock.calls[0][1].signal).toBe(controller.signal)
+    expect(fetcher.mock.calls[1][0]).toBe('/api/v1/round-tables/20/result/preview/')
+    expect(fetcher.mock.calls[1][1]).toMatchObject({
+      method: 'POST',
+      signal: controller.signal,
+      credentials: 'include',
+    })
+    expect(JSON.parse(fetcher.mock.calls[1][1].body)).toEqual({ version: 2, points })
+    await correctResult(20, 2, points, '抄录修正')
+    expect(fetcher.mock.calls[3][0]).toBe('/api/v1/round-tables/20/result/correct/')
+    expect(JSON.parse(fetcher.mock.calls[3][1].body)).toEqual({
+      version: 2,
+      points,
+      reason: '抄录修正',
+    })
+    expect(fetcher.mock.calls[3][1].headers['X-CSRFToken']).toBe('test-only')
+    await fetchResultCorrections(20, controller.signal)
+    expect(fetcher.mock.calls[4][0]).toBe('/api/v1/round-tables/20/result/corrections/')
+    expect(fetcher.mock.calls[4][1].method).toBe('GET')
+  })
+  it('取消试算也取消获取CSRF，不继续发送试算请求', async () => {
+    const fetcher = vi.fn().mockImplementation(
+      (_url: string, options: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          options.signal!.addEventListener('abort', () =>
+            reject(new DOMException('cancelled', 'AbortError')),
+          )
+        }),
+    )
+    vi.stubGlobal('fetch', fetcher)
+    const controller = new AbortController()
+    const request = previewResult(20, 2, [], controller.signal)
+    controller.abort()
+    await expect(request).rejects.toMatchObject({ name: 'AbortError' })
+    expect(fetcher).toHaveBeenCalledTimes(1)
+  })
+  it('首轮发送明确机器顺序，后续轮次不重新选桌', async () => {
+    const fetcher = vi.fn().mockImplementation(
+      async (url: string) =>
+        new Response(
+          JSON.stringify({
+            data: url.endsWith('/auth/csrf/') ? { csrf_token: 'test-only' } : { id: 1 },
+          }),
+        ),
+    )
     vi.stubGlobal('fetch', fetcher)
     await generateRound(7, 1, [5, 2, 3, 6])
     expect(JSON.parse(fetcher.mock.calls[1][1].body)).toEqual({
@@ -58,16 +110,14 @@ describe('赛事 API 契约和无损展示', () => {
     expect(fetcher).toHaveBeenCalledTimes(2)
   })
   it('完赛携带来源版本与明确确认，不提交冠军', async () => {
-    const fetcher = vi
-      .fn()
-      .mockImplementation(
-        async (url: string) =>
-          new Response(
-            JSON.stringify({
-              data: url.endsWith('/auth/csrf/') ? { csrf_token: 'test-only' } : {},
-            }),
-          ),
-      )
+    const fetcher = vi.fn().mockImplementation(
+      async (url: string) =>
+        new Response(
+          JSON.stringify({
+            data: url.endsWith('/auth/csrf/') ? { csrf_token: 'test-only' } : {},
+          }),
+        ),
+    )
     vi.stubGlobal('fetch', fetcher)
     await completeTournament(4, [{ table_id: 3, version: 2 }])
     expect(JSON.parse(fetcher.mock.calls[1][1].body)).toEqual({

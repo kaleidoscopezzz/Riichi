@@ -5,6 +5,7 @@ reservation before reads. No transaction retries an uncertain write.
 """
 import random
 from contextlib import contextmanager
+from copy import deepcopy
 from fractions import Fraction
 from itertools import groupby
 
@@ -16,7 +17,7 @@ from rest_framework.exceptions import ValidationError
 
 from machines.locking import lock_machine_pool
 from .models import (Tournament, TournamentRound, RoundTable, RoundSeat, MachineAllocation,
-                     TournamentTable, TournamentMachineReservation as Reservation, TableResult, LotteryRecord)
+                     TournamentTable, TournamentMachineReservation as Reservation, TableResult, TableResultCorrection, LotteryRecord)
 from .services import TournamentConflict, database_busy
 from .scoring import pack, unpack, score, rules
 
@@ -52,7 +53,13 @@ def structure(round):
     validate_round_structure(round)
 
 
-def source_versions(t):
+def confirmed_result_rows(t):
+    return list(TableResult.objects.filter(table__round__tournament=t, status='confirmed').select_related('table__round').order_by('table__round__round_number', 'table__table_number'))
+
+
+def source_versions(t, *, results=None):
+    if results is not None:
+        return [{'table_id': row.table_id, 'version': row.version} for row in results]
     return list(TableResult.objects.filter(table__round__tournament=t, status='confirmed').order_by('table__round__round_number', 'table__table_number').values('table_id', 'version'))
 
 
@@ -196,7 +203,106 @@ def require_round_confirmed(round):
 
 def result_data(table):
     row = TableResult.objects.filter(table=table).first()
-    return {'table_id': table.pk, 'version': row.version if row else 0, 'status': row.status if row else 'draft', 'points': row.points if row else {}, 'scores': row.scores if row else [], 'rules': row.rule_snapshot if row else {}, 'edited_by': row.edited_by_id if row else None, 'edited_at': row.edited_at if row else None, 'confirmed_by': row.confirmed_by_id if row else None, 'confirmed_at': row.confirmed_at if row else None}
+    return {'table_id': table.pk, 'version': row.version if row else 0, 'status': row.status if row else 'draft', 'points': row.points if row else {}, 'scores': row.scores if row else [], 'rules': row.rule_snapshot if row else {}, 'edited_by': row.edited_by_id if row else None, 'edited_at': row.edited_at if row else None, 'confirmed_by': row.confirmed_by_id if row else None, 'confirmed_at': row.confirmed_at if row else None, 'correction_count': row.corrections.count() if row else 0}
+
+
+def parse_result_points(table, points):
+    if not isinstance(points, list) or len(points) > 4:
+        raise ValidationError({'points': ['点数最多包含本桌四名选手。']})
+    allowed = set(table.seats.values_list('participant_id', flat=True))
+    values = {}
+    for item in points:
+        if not isinstance(item, dict) or set(item) != {'participant_id', 'raw_points'}:
+            raise ValidationError({'points': ['每项仅接受参赛选手和原始点数。']})
+        participant, raw = item['participant_id'], item['raw_points']
+        if type(participant) is not int or participant not in allowed or str(participant) in values:
+            raise ValidationError({'points': ['重复选手或选手不属于本桌。']})
+        if raw is not None and (type(raw) is not int or abs(raw) > 2**53 - 1):
+            raise ValidationError({'points': ['点数必须是安全范围内的整数或空值。']})
+        values[str(participant)] = raw
+    return values
+
+
+def validate_confirmed_points(t, table, values):
+    allowed = {str(pk) for pk in table.seats.values_list('participant_id', flat=True)}
+    if set(values) != allowed or len(allowed) != 4 or any(type(value) is not int for value in values.values()):
+        raise ValidationError({'points': ['确认须完整填写本桌四名选手的整数点数。']})
+    if sum(values.values()) != 4 * t.starting_points:
+        raise ValidationError({'points': ['总点数必须等于四倍开局点数；异常可保存草稿。']})
+
+
+def preview_result(table_id, version, points):
+    """Read-only Fraction calculation, including incomplete/imbalanced input."""
+    table = get_object_or_404(RoundTable.objects.select_related('round__tournament'), pk=table_id)
+    t = table.round.tournament
+    if t.status != 'started':
+        conflict('仅进行中的赛事可以试算或更正成绩。', 'tournament_not_started')
+    structure(table.round)
+    row = TableResult.objects.filter(table=table).first()
+    current_version = row.version if row else 0
+    if version != current_version:
+        conflict('成绩版本已变化，请载入最新成绩后核对。', 'stale_result')
+    values = parse_result_points(table, points)
+    snapshot = rules(t)
+    complete = len(values) == 4 and all(value is not None for value in values.values())
+    total = sum(value for value in values.values() if value is not None)
+    scores = score(t, values) if complete else [
+        {'participant_id': pk, 'raw_points': values.get(str(pk)), 'rank': None, 'tied': False,
+         'base': pack(Fraction(values[str(pk)] - t.return_points, 1000)) if values.get(str(pk)) is not None else None,
+         'bonus': None, 'score': None}
+        for pk in table.seats.values_list('participant_id', flat=True)
+    ]
+    return {'table_id': table.pk, 'version': current_version, 'complete': complete,
+            'valid_total': complete and total == 4 * t.starting_points,
+            'total': str(total), 'expected_total': str(4 * t.starting_points),
+            'difference': str(total - 4 * t.starting_points), 'scores': scores, 'rules': snapshot}
+
+
+def result_snapshot(row):
+    return deepcopy({'table_id': row.table_id, 'version': row.version, 'status': row.status,
+                     'points': row.points, 'scores': row.scores, 'rules': row.rule_snapshot,
+                     'edited_by': row.edited_by_id, 'edited_at': row.edited_at.isoformat() if row.edited_at else None,
+                     'confirmed_by': row.confirmed_by_id, 'confirmed_at': row.confirmed_at.isoformat() if row.confirmed_at else None})
+
+
+def correct_result(table_id, user, version, *, points, reason=''):
+    table = get_object_or_404(RoundTable.objects.select_related('round'), pk=table_id)
+    with locked(table.round.tournament_id) as (t, _):
+        structure(table.round)
+        row = get_object_or_404(TableResult, table=table)
+        if row.status != 'confirmed':
+            conflict('未确认成绩请使用草稿录入。', 'result_not_confirmed')
+        if version != row.version:
+            conflict('成绩版本已变化，请载入最新成绩后核对。', 'stale_result')
+        if not isinstance(reason, str) or len(reason.strip()) > 500:
+            raise ValidationError({'reason': ['更正说明最多500字符。']})
+        values = parse_result_points(table, points)
+        validate_confirmed_points(t, table, values)
+        if values == row.points:
+            return result_data(table)
+        before = result_snapshot(row)
+        row.points, row.scores, row.rule_snapshot = values, score(t, values), rules(t)
+        row.version += 1
+        row.edited_by, row.confirmed_by, row.confirmed_at = user, user, timezone.now()
+        row.save()
+        TableResultCorrection.objects.create(result=row, from_version=before['version'], to_version=row.version,
+                                             before_snapshot=before, after_snapshot=result_snapshot(row),
+                                             corrected_by=user, reason=reason.strip())
+        # Ranking reads current confirmed scores. Existing rounds and lotteries
+        # retain their original snapshots; obsolete lottery versions no longer rank.
+        return result_data(table)
+
+
+def result_corrections(table_id):
+    table = get_object_or_404(RoundTable, pk=table_id)
+    rows = TableResultCorrection.objects.filter(result__table=table).select_related('corrected_by')
+    return {'table_id': table.pk, 'corrections': [
+        {'id': row.pk, 'from_version': row.from_version, 'to_version': row.to_version,
+         'before': row.before_snapshot, 'after': row.after_snapshot,
+         'corrected_by': row.corrected_by_id, 'corrected_by_username': row.corrected_by.username,
+         'corrected_at': row.corrected_at, 'reason': row.reason}
+        for row in rows
+    ]}
 
 
 def write_result(table_id, user, version, *, points=None, confirm=False):
@@ -206,11 +312,9 @@ def write_result(table_id, user, version, *, points=None, confirm=False):
         if t.resource_state == 'review_required':
             conflict('请先复核旧赛事资源。', 'resource_review_required')
         structure(table.round)
-        if table.round.round_number != t.rounds.order_by('-round_number').first().round_number:
-            conflict('只能录入当前轮次。', 'round_locked')
         row = TableResult.objects.filter(table=table).first()
         if row and row.status == 'confirmed':
-            conflict('成绩已确认并锁定。', 'result_locked')
+            conflict('成绩已确认，请使用成绩更正入口。', 'result_locked')
         if version != (row.version if row else 0):
             conflict('成绩版本已变化，请刷新后核对。', 'stale_result')
         if row is None:
@@ -218,19 +322,10 @@ def write_result(table_id, user, version, *, points=None, confirm=False):
         else:
             row.version += 1
         if points is not None:
-            if any(x['raw_points'] is not None and (type(x['raw_points']) is not int or abs(x['raw_points']) > 2**53-1) for x in points):
-                raise ValidationError({'points': ['点数必须是安全范围内的整数或空值。']})
-            allowed = {s.participant_id for s in table.seats.all()}
-            if {item['participant_id'] for item in points} - allowed or len(points) != len({x['participant_id'] for x in points}):
-                raise ValidationError({'points': ['重复选手或选手不属于本桌。']})
-            row.points = {str(item['participant_id']): item['raw_points'] for item in points}
+            row.points = parse_result_points(table, points)
             row.edited_by = user
         if confirm:
-            allowed = {str(s.participant_id) for s in table.seats.all()}
-            if set(row.points) != allowed or any(type(x) is not int for x in row.points.values()):
-                raise ValidationError({'points': ['确认须完整填写本桌四名选手的整数点数。']})
-            if sum(row.points.values()) != 4 * t.starting_points:
-                raise ValidationError({'points': ['总点数必须等于四倍开局点数；异常可保存草稿。']})
+            validate_confirmed_points(t, table, row.points)
             row.scores = score(t, row.points)
             row.rule_snapshot = rules(t)
             row.status, row.confirmed_by, row.confirmed_at = 'confirmed', user, timezone.now()
@@ -246,10 +341,11 @@ def metric(row):
     return (unpack(row['total']), row['first_count'], row['second_count'], *[unpack(r['score']) for r in reversed(row['rounds'])])
 
 
-def ranking(t):
+def ranking(t, *, results=None):
+    results = confirmed_result_rows(t) if results is None else results
     entries = list(t.participants.all())
     rows = {p.pk: {'participant_id': p.pk, 'display_name': p.display_name_snapshot, 'rounds': [], 'first_count': 0, 'second_count': 0, 'total': pack(0), 'confirmed_rounds': 0} for p in entries}
-    for result in TableResult.objects.filter(table__round__tournament=t, status='confirmed').select_related('table__round').order_by('table__round__round_number', 'table__table_number'):
+    for result in results:
         for item in result.scores:
             row = rows[item['participant_id']]
             row['rounds'].append({**item, 'round_number': result.table.round.round_number, 'table_id': result.table_id})
@@ -259,7 +355,7 @@ def ranking(t):
             row['total'] = pack(unpack(row['total']) + unpack(item['score']))
     ordered = sorted(rows.values(), key=metric, reverse=True)
     groups = []
-    versions = source_versions(t)
+    versions = source_versions(t, results=results)
     position = 1
     for _, values in groupby(ordered, metric):
         values = list(values)
@@ -280,25 +376,35 @@ def ranking(t):
     return ordered, groups
 
 
-def ready_final(t):
-    if list(t.rounds.values_list('round_number', flat=True)) != list(range(1, t.round_count+1)):
+def ready_final(t, *, results=None):
+    rounds = list(t.rounds.all())
+    if [round.round_number for round in rounds] != list(range(1, t.round_count+1)):
         conflict('配置轮次尚未全部生成。', 'rounds_incomplete')
-    for round in t.rounds.all():
-        require_round_confirmed(round)
+    if results is None:
+        for round in rounds:
+            require_round_confirmed(round)
+    else:
+        expected_tables = set()
+        for round in rounds:
+            structure(round)
+            expected_tables.update(round.tables.values_list('pk', flat=True))
+        if {result.table_id for result in results} != expected_tables:
+            conflict('本轮尚有未确认成绩。', 'results_incomplete')
 
 
-def preview(pk):
-    t = get_object_or_404(Tournament, pk=pk)
+def preview(pk, *, tournament=None):
+    t = tournament if tournament is not None else get_object_or_404(Tournament, pk=pk)
     if t.status == 'completed':
         return {'status': 'completed', **t.final_snapshot}
-    rows, groups = ranking(t)
+    results = confirmed_result_rows(t)
+    rows, groups = ranking(t, results=results)
     ready = False
     try:
-        ready_final(t)
+        ready_final(t, results=results)
         ready = t.resource_state in ('fixed', 'historical_only')
     except TournamentConflict:
         pass
-    return {'status': t.status, 'standings': rows, 'unresolved_groups': groups if ready else [], 'ready': ready and not groups, 'all_results_confirmed': ready, 'source_versions': source_versions(t), 'rules': rules(t)}
+    return {'status': t.status, 'standings': rows, 'unresolved_groups': groups if ready else [], 'ready': ready and not groups, 'all_results_confirmed': ready, 'source_versions': source_versions(t, results=results), 'rules': rules(t)}
 
 
 def record_lottery(pk, user, values):
@@ -418,7 +524,7 @@ def finish(pk, user, versions):
             conflict('未确定唯一冠军。', 'champion_unresolved')
         t.status, t.completed_by, t.completed_at = 'completed', user, timezone.now()
         t.champion_id = rows[0]['participant_id']
-        t.final_snapshot = {'standings': rows, 'champion_id': t.champion_id, 'rules': rules(t), 'source_versions': versions, 'lottery_ids': [x.pk for x in t.lotteries.filter(confirmed_at__isnull=False)], 'completed_at': t.completed_at.isoformat(), 'completed_by': user.pk}
+        t.final_snapshot = {'standings': rows, 'champion_id': t.champion_id, 'rules': rules(t), 'source_versions': versions, 'lottery_ids': sorted({row['lottery_id'] for row in rows if row.get('lottery_id') is not None}), 'completed_at': t.completed_at.isoformat(), 'completed_by': user.pk}
         t.save()
         for row in Reservation.objects.filter(table__tournament=t, status='active'):
             release_reservation(row, user, '正式完赛自动释放')

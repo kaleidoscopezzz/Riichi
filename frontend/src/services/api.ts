@@ -21,7 +21,7 @@ export async function api<T>(
   const method = options.method || 'GET'
   let token: string | undefined
   if (method !== 'GET') {
-    const csrf = await api<{ csrf_token: string }>('/auth/csrf/')
+    const csrf = await api<{ csrf_token: string }>('/auth/csrf/', { signal: options.signal })
     token = csrf.csrf_token
   }
   let response: Response

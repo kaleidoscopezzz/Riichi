@@ -6,9 +6,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { FormFeedback } from './form-feedback'
 import { ApiError } from '@/services/api'
 import type { Tournament } from '@/services/tournaments'
-import { generateRound, windLabels, type MachineResource, type RoundTable } from '@/services/rounds'
+import { generateRound, type MachineResource, type RoundTable } from '@/services/rounds'
 import {
-  saveResult,
   completeTournament,
   recordLottery,
   confirmLottery,
@@ -24,11 +23,12 @@ import {
   type FixedTable,
   type Lottery,
 } from '@/services/competition'
-import { parsePoints } from '@/lib/points'
+import { TableResultEditor } from './table-result-editor'
+import { ResultCorrectionHistory } from './result-correction-history'
 
 export type CompetitionActionType =
   | { mode: 'generate' | 'finish' | 'review' }
-  | { mode: 'result'; table: RoundTable }
+  | { mode: 'result' | 'correct' | 'result-history'; table: RoundTable }
   | { mode: 'replace'; fixed: FixedTable }
   | { mode: 'history'; fixed: FixedTable }
   | { mode: 'lottery'; members: number[] }
@@ -84,32 +84,8 @@ export function CompetitionAction({
   const [voidTarget, setVoidTarget] = useState<number | null>(null)
   const [voidReason, setVoidReason] = useState('')
   const [voidStage, setVoidStage] = useState(false)
-  const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [attempted, setAttempted] = useState(false)
-  const table = action.mode === 'result' ? action.table : null
-  const [points, setPoints] = useState<Record<string, string>>(() =>
-    Object.fromEntries(
-      table?.seats.map((s) => [
-        String(s.participant_id),
-        table.result?.points[s.participant_id]?.toString() ?? '',
-      ]) || [],
-    ),
-  )
-  const [version, setVersion] = useState(table?.result?.version || 0)
+  const table = action.mode === 'result' || action.mode === 'correct' ? action.table : null
   const needed = t.expected_table_count || 0
-  // One parser feeds the draft payload, the running total and the confirm check.
-  const seats = (table?.seats || []).map((seat) => ({
-    seat,
-    parsed: parsePoints(points[seat.participant_id] ?? ''),
-  }))
-  const invalidCount = seats.filter(({ parsed }) => !parsed.ok).length
-  const entered = seats.flatMap(({ parsed }) =>
-    parsed.ok && parsed.value !== null ? [parsed.value] : [],
-  )
-  const filled = entered.length
-  const sum = entered.reduce((n, v) => n + BigInt(v), 0n)
-  const expected = BigInt(t.starting_points) * 4n
-  const valid = invalidCount === 0 && filled === 4 && sum === expected
   const free = resources.filter(
     (m) =>
       m.assignable ||
@@ -138,6 +114,8 @@ export function CompetitionAction({
   const title = {
     generate: next === 1 ? '确认选桌与首轮' : `确认生成第 ${next} 轮`,
     result: '半庄成绩',
+    correct: '更正半庄成绩',
+    'result-history': '成绩更正记录',
     finish: '确认正式完赛',
     replace: '故障替换物理桌',
     history: '物理桌占用历史',
@@ -162,27 +140,6 @@ export function CompetitionAction({
     } finally {
       setBusy(false)
     }
-  }
-  async function result(confirm: boolean) {
-    if (!table) return
-    setAttempted(true)
-    if (invalidCount) {
-      setError(new Error('点数必须是安全范围内的整数，请按选手格子下方的提示修改后再保存。'))
-      setErrorSource('local')
-      return
-    }
-    if (confirm && !valid) return
-    const values = seats.map(({ seat, parsed }) => ({
-      participant_id: seat.participant_id,
-      raw_points: parsed.ok ? parsed.value : null,
-    }))
-    await run(
-      async () => {
-        const row = await saveResult(table.id, version, values, confirm)
-        setVersion(row.version)
-      },
-      confirm ? '成绩已正式确认并锁定。' : '草稿已保存，可刷新后继续填写。',
-    )
   }
   function record() {
     if (!members) return
@@ -275,9 +232,7 @@ export function CompetitionAction({
         showCloseButton={false}
       >
         <SheetHeader>
-          <span className="eyebrow">
-            {action.mode === 'result' ? 'TABLE RESULT' : 'CONFIRM OPERATION'}
-          </span>
+          <span className="eyebrow">{table ? 'TABLE RESULT' : 'CONFIRM OPERATION'}</span>
           <SheetTitle>{title}</SheetTitle>
           <SheetDescription>{t.name} · 操作不会自动重试</SheetDescription>
         </SheetHeader>
@@ -332,69 +287,22 @@ export function CompetitionAction({
           )}
           {table && (
             <>
-              <p>
-                第 {table.round_number} 轮 · 逻辑桌 {'ABCD'[table.table_number - 1]}
-                。允许负数与零，未确认前可保存部分草稿。
-              </p>
-              <div className="result-inputs">
-                {seats.map(({ seat: s, parsed }) => {
-                  const errorId = `${fieldId}-points-${s.participant_id}`
-                  const message =
-                    !parsed.ok && (attempted || touched[s.participant_id]) ? parsed.error : ''
-                  return (
-                    <label key={s.id} className="round-field">
-                      <span>
-                        {windLabels[s.seat_wind]} · {s.display_name}
-                      </span>
-                      <input
-                        autoComplete="off"
-                        inputMode="text"
-                        aria-label={`${s.display_name} 终局点数`}
-                        aria-invalid={message ? true : undefined}
-                        aria-describedby={message ? errorId : undefined}
-                        value={points[s.participant_id]}
-                        onBlur={() => setTouched((v) => ({ ...v, [s.participant_id]: true }))}
-                        onChange={(e) => {
-                          setStage(false)
-                          if (errorSource === 'local') setError(null)
-                          setPoints((v) => ({ ...v, [s.participant_id]: e.target.value }))
-                        }}
-                        placeholder="整数点数"
-                      />
-                      {message && (
-                        <span id={errorId} className="field-error">
-                          {message}
-                        </span>
-                      )}
-                    </label>
-                  )
-                })}
-              </div>
-              <div className={`points-total ${valid ? 'valid' : ''}`} aria-live="polite">
+              {action.mode === 'correct' && ws.lotteries.length > 0 && (
                 <p>
-                  已填写 {filled} / 4 · 实录合计 {sum.toString()}
+                  成绩变更后，原有抽签不再用于本次排名；仍然并列时需依据新成绩重新记录公开抽签，原记录保留。
                 </p>
-                {invalidCount > 0 && <p>{invalidCount} 位选手的点数格式有误，未计入合计。</p>}
-                <p>
-                  标准合计 {expected.toString()} · 差额 {(sum - expected).toString()}
-                </p>
-              </div>
-              <p>
-                {valid
-                  ? '总点数检查通过。确认后结果锁定，不可修改。'
-                  : '须四人整数点数且总和等于标准合计，异常只能保存草稿。'}
-              </p>
-              <Button variant="outline" disabled={busy} onClick={() => void result(false)}>
-                保存成绩草稿
-              </Button>
-              <Button
-                disabled={busy || !valid}
-                onClick={() => (stage ? void result(true) : setStage(true))}
-              >
-                {busy ? '正在提交…' : stage ? '再次确认并锁定成绩' : '确认成绩'}
-              </Button>
+              )}
+              <TableResultEditor
+                table={table}
+                tournament={t}
+                correction={action.mode === 'correct'}
+                busy={busy}
+                error={error}
+                run={run}
+              />
             </>
           )}
+          {action.mode === 'result-history' && <ResultCorrectionHistory table={action.table} />}
           {action.mode === 'history' && (
             <div className="allocation-history">
               {action.fixed.history.length ? (

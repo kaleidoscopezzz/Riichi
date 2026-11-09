@@ -170,7 +170,7 @@ test('configurable Oka: zero, exact decimals, automatic reset, frozen scoring an
   for (const [index, value] of ['40000', '30000', '20000', '10000'].entries())
     await points.nth(index).fill(value)
   await dialog(page).getByRole('button', { name: '确认成绩', exact: true }).click()
-  await dialog(page).getByRole('button', { name: '再次确认并锁定成绩' }).click()
+  await dialog(page).getByRole('button', { name: '再次确认成绩' }).click()
   await expect(dialog(page)).toHaveCount(0)
   const workspace = await read(page, `/tournaments/${id}/workspace/`)
   expect(workspace.rules).toMatchObject({ oka: '0', oka_override: '0', rules_version: 2 })

@@ -198,6 +198,25 @@ class TableResult(models.Model):
         constraints = [models.CheckConstraint(condition=Q(status='draft', confirmed_at__isnull=True, confirmed_by__isnull=True) | Q(status='confirmed', confirmed_at__isnull=False, confirmed_by__isnull=False), name='result_confirmation_state')]
 
 
+class TableResultCorrection(models.Model):
+    result = models.ForeignKey(TableResult, on_delete=models.PROTECT, related_name='corrections')
+    from_version = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    to_version = models.PositiveIntegerField(validators=[MinValueValidator(2)])
+    before_snapshot = models.JSONField()
+    after_snapshot = models.JSONField()
+    corrected_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='result_corrections')
+    corrected_at = models.DateTimeField(auto_now_add=True)
+    reason = models.CharField(max_length=500, blank=True, default='')
+
+    class Meta:
+        ordering = ['-to_version', '-id']
+        constraints = [
+            models.UniqueConstraint(fields=['result', 'from_version'], name='unique_result_correction_from'),
+            models.UniqueConstraint(fields=['result', 'to_version'], name='unique_result_correction_to'),
+            models.CheckConstraint(condition=Q(from_version__gte=1, to_version=models.F('from_version') + 1), name='result_correction_version_step'),
+        ]
+
+
 class LotteryRecord(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.PROTECT, related_name='lotteries')
     source_versions = models.JSONField()

@@ -1,0 +1,20 @@
+Creating test database for alias 'default'...
+
+.F.................................................
+======================================================================
+FAIL: test_correction_after_second_round_and_readonly_history_contract (tournaments.tests_result_corrections.ResultCorrectionApiTests.test_correction_after_second_round_and_readonly_history_contract)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\Riichi\backend\tournaments\tests_result_corrections.py", line 240, in test_correction_after_second_round_and_readonly_history_contract
+    self.assertEqual(self.client.delete(url).status_code, 405)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 403 != 405
+
+----------------------------------------------------------------------
+Ran 51 tests in 6.954s
+
+FAILED (failures=1)
+Destroying test database for alias 'default'...
+
+Found 51 test(s).
+System check identified no issues (0 silenced).

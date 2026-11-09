@@ -22,6 +22,10 @@ import {
 import {
   fetchWorkspace,
   saveResult,
+  previewResult,
+  correctResult,
+  fetchResult,
+  fetchResultCorrections,
   completeTournament,
   recordLottery,
   confirmLottery,
@@ -45,6 +49,10 @@ vi.mock('@/services/competition', async (original) => ({
   ...(await original<typeof import('@/services/competition')>()),
   fetchWorkspace: vi.fn(),
   saveResult: vi.fn(),
+  previewResult: vi.fn(),
+  correctResult: vi.fn(),
+  fetchResult: vi.fn(),
+  fetchResultCorrections: vi.fn(),
   completeTournament: vi.fn(),
   recordLottery: vi.fn(),
   confirmLottery: vi.fn(),
@@ -177,6 +185,24 @@ beforeEach(() => {
   vi.mocked(fetchWorkspace).mockResolvedValue(ws)
   vi.mocked(generateRound).mockResolvedValue(round)
   vi.mocked(saveResult).mockResolvedValue({ ...table.result!, version: 1 })
+  vi.mocked(previewResult).mockResolvedValue({
+    table_id: table.id,
+    version: 0,
+    complete: false,
+    valid_total: false,
+    total: '0',
+    expected_total: '100000',
+    difference: '-100000',
+    scores: [],
+  })
+  vi.mocked(correctResult).mockResolvedValue({
+    ...table.result!,
+    version: 2,
+    status: 'confirmed',
+    correction_count: 1,
+  })
+  vi.mocked(fetchResult).mockResolvedValue(table.result!)
+  vi.mocked(fetchResultCorrections).mockResolvedValue({ table_id: table.id, corrections: [] })
   vi.mocked(recordLottery).mockResolvedValue({
     id: 10,
     members: [1, 2, 3, 4],
@@ -363,7 +389,7 @@ describe('完整比赛工作台', () => {
       await u.type(screen.getByLabelText(`快照选手${i + 1} 终局点数`), String(p))
     await u.click(screen.getByRole('button', { name: '确认成绩' }))
     expect(saveResult).not.toHaveBeenCalled()
-    await u.click(screen.getByRole('button', { name: '再次确认并锁定成绩' }))
+    await u.click(screen.getByRole('button', { name: '再次确认成绩' }))
     await waitFor(() => expect(saveResult).toHaveBeenCalledWith(20, 0, expect.any(Array), true))
   })
   it('非法小数不可保存，不将显示近似值用于排序', async () => {
@@ -425,8 +451,7 @@ describe('完整比赛工作台', () => {
     show()
     const u = userEvent.setup()
     await u.click(await screen.findByRole('button', { name: '记录公开抽签 1' }))
-    for (let i = 0; i < 4; i++)
-      await selectOption(u, `抽签顺位 ${i + 1}`, `快照选手${4 - i}`)
+    for (let i = 0; i < 4; i++) await selectOption(u, `抽签顺位 ${i + 1}`, `快照选手${4 - i}`)
     await u.type(screen.getByLabelText('抽签方式'), '现场签条')
     await u.type(screen.getByLabelText('实际抽签时间'), '2026-11-04T12:00')
     await u.type(screen.getByLabelText('公开过程说明'), '全员公开监督')
@@ -473,6 +498,220 @@ describe('完整比赛工作台', () => {
     expect(screen.getByText('1 轮')).toBeTruthy()
   })
 })
+describe('进行中前轮成绩更正', () => {
+  function prepare(confirmed = true) {
+    const firstTable: RoundTable = {
+      ...table,
+      result: {
+        ...table.result!,
+        version: confirmed ? 1 : 0,
+        status: confirmed ? 'confirmed' : 'draft',
+        points: confirmed ? { '1': 40000, '2': 30000, '3': 20000, '4': 10000 } : {},
+      },
+    }
+    const later: TournamentRound = {
+      ...round,
+      id: 7,
+      round_number: 2,
+      tables: [{ ...table, id: 21, round_id: 7, round_number: 2 }],
+    }
+    vi.mocked(fetchRounds).mockResolvedValue({
+      results: [{ ...round, tables: [firstTable] }, later],
+    })
+    return { firstTable, later }
+  }
+  async function openFirst() {
+    show()
+    const user = userEvent.setup()
+    await screen.findByRole('combobox', { name: '查看轮次' })
+    await selectOption(user, '查看轮次', '第 1 轮')
+    await user.click(screen.getByRole('button', { name: '更正第1轮第1桌成绩' }))
+    return user
+  }
+  it('第二轮开始后仍可更正第一轮，保存后保持查看第一轮', async () => {
+    const { firstTable, later } = prepare()
+    const user = await openFirst()
+    expect((screen.getByLabelText('快照选手1 终局点数') as HTMLInputElement).value).toBe('40000')
+    await user.clear(screen.getByLabelText('快照选手1 终局点数'))
+    await user.type(screen.getByLabelText('快照选手1 终局点数'), '35000')
+    expect(screen.getByRole('button', { name: '保存更正' }).hasAttribute('disabled')).toBe(true)
+    await user.clear(screen.getByLabelText('快照选手2 终局点数'))
+    await user.type(screen.getByLabelText('快照选手2 终局点数'), '35000')
+    vi.mocked(fetchRounds).mockResolvedValue({
+      results: [
+        {
+          ...round,
+          tables: [
+            {
+              ...firstTable,
+              result: {
+                ...firstTable.result!,
+                version: 2,
+                correction_count: 1,
+                points: { '1': 35000, '2': 35000, '3': 20000, '4': 10000 },
+              },
+            },
+          ],
+        },
+        later,
+      ],
+    })
+    await user.click(screen.getByRole('button', { name: '保存更正' }))
+    await waitFor(() =>
+      expect(correctResult).toHaveBeenCalledWith(
+        20,
+        1,
+        [
+          { participant_id: 1, raw_points: 35000 },
+          { participant_id: 2, raw_points: 35000 },
+          { participant_id: 3, raw_points: 20000 },
+          { participant_id: 4, raw_points: 10000 },
+        ],
+        '',
+      ),
+    )
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(screen.getByRole('combobox', { name: '查看轮次' }).textContent).toContain('第 1 轮')
+    expect(await screen.findByText('已确认 · 更正 1 次')).toBeTruthy()
+    expect(saveResult).not.toHaveBeenCalled()
+  })
+  it('更正拒绝空值与非法数字，允许全角负数和零', async () => {
+    prepare()
+    const user = await openFirst()
+    const field = screen.getByLabelText('快照选手1 终局点数')
+    await user.clear(field)
+    expect(screen.getByRole('button', { name: '保存更正' }).hasAttribute('disabled')).toBe(true)
+    await user.type(field, '-1.5')
+    await user.tab()
+    expect(field.getAttribute('aria-invalid')).toBe('true')
+    expect(correctResult).not.toHaveBeenCalled()
+    for (const [index, value] of ['-１０００', '0', '51000', '50000'].entries()) {
+      const input = screen.getByLabelText(`快照选手${index + 1} 终局点数`)
+      await user.clear(input)
+      await user.type(input, value)
+    }
+    await user.click(screen.getByRole('button', { name: '保存更正' }))
+    await waitFor(() =>
+      expect(correctResult).toHaveBeenCalledWith(
+        20,
+        1,
+        [
+          { participant_id: 1, raw_points: -1000 },
+          { participant_id: 2, raw_points: 0 },
+          { participant_id: 3, raw_points: 51000 },
+          { participant_id: 4, raw_points: 50000 },
+        ],
+        '',
+      ),
+    )
+  })
+  it('旧版本更正失败后不自动重试，载入最新值后使用新版本提交', async () => {
+    const { firstTable } = prepare()
+    const user = await openFirst()
+    for (const [index, value] of ['35000', '35000'].entries()) {
+      const input = screen.getByLabelText(`快照选手${index + 1} 终局点数`)
+      await user.clear(input)
+      await user.type(input, value)
+    }
+    vi.mocked(correctResult).mockRejectedValueOnce(
+      new ApiError(409, 'stale_result', '成绩版本已变化。'),
+    )
+    await user.click(screen.getByRole('button', { name: '保存更正' }))
+    await screen.findByRole('button', { name: '重新加载最新成绩' })
+    expect(correctResult).toHaveBeenCalledTimes(1)
+    vi.mocked(fetchResult).mockResolvedValueOnce({
+      ...firstTable.result!,
+      version: 2,
+      points: { '1': 35000, '2': 35000, '3': 20000, '4': 10000 },
+    })
+    await user.click(screen.getByRole('button', { name: '重新加载最新成绩' }))
+    await waitFor(() =>
+      expect((screen.getByLabelText('快照选手1 终局点数') as HTMLInputElement).value).toBe('35000'),
+    )
+    for (const [index, value] of ['40000', '30000'].entries()) {
+      const input = screen.getByLabelText(`快照选手${index + 1} 终局点数`)
+      await user.clear(input)
+      await user.type(input, value)
+    }
+    await user.click(screen.getByRole('button', { name: '保存更正' }))
+    await waitFor(() => expect(vi.mocked(correctResult).mock.calls[1][1]).toBe(2))
+  })
+  it('更正提交期间禁用数字与关闭按钮', async () => {
+    prepare()
+    const user = await openFirst()
+    for (const [index, value] of ['35000', '35000'].entries()) {
+      const input = screen.getByLabelText(`快照选手${index + 1} 终局点数`)
+      await user.clear(input)
+      await user.type(input, value)
+    }
+    let finish!: (value: NonNullable<RoundTable['result']>) => void
+    vi.mocked(correctResult).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve
+      }),
+    )
+    await user.click(screen.getByRole('button', { name: '保存更正' }))
+    expect(screen.getByLabelText('快照选手1 终局点数').matches(':disabled')).toBe(true)
+    expect(screen.getByRole('button', { name: '关闭比赛操作' }).hasAttribute('disabled')).toBe(true)
+    finish({ ...table.result!, version: 2, status: 'confirmed' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+  })
+  it('完赛后只能读取更正记录，显示原点数与新点数', async () => {
+    const { firstTable } = prepare()
+    vi.mocked(fetchTournament).mockResolvedValue({ ...t, status: 'completed' })
+    vi.mocked(fetchResultCorrections).mockResolvedValueOnce({
+      table_id: 20,
+      corrections: [
+        {
+          id: 1,
+          from_version: 1,
+          to_version: 2,
+          before: firstTable.result!,
+          after: {
+            ...firstTable.result!,
+            points: { '1': 35000, '2': 35000, '3': 20000, '4': 10000 },
+          },
+          corrected_by: 7,
+          corrected_at: date,
+          reason: '抄录修正',
+        },
+      ],
+    })
+    show()
+    const user = userEvent.setup()
+    await screen.findByRole('combobox', { name: '查看轮次' })
+    await selectOption(user, '查看轮次', '第 1 轮')
+    expect(screen.queryByRole('button', { name: '更正第1轮第1桌成绩' })).toBeNull()
+    await user.click(screen.getByRole('button', { name: '查看第1轮第1桌成绩更正记录' }))
+    expect(await screen.findByText('点数 40000 → 35000')).toBeTruthy()
+    expect(screen.getByText('抄录修正')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: '保存更正' })).toBeNull()
+  })
+  it('已有后续轮次时，历史未确认成绩仍可录入草稿', async () => {
+    prepare(false)
+    show()
+    const user = userEvent.setup()
+    await screen.findByRole('combobox', { name: '查看轮次' })
+    await selectOption(user, '查看轮次', '第 1 轮')
+    await user.click(screen.getByRole('button', { name: '录入第1桌成绩' }))
+    await user.type(screen.getByLabelText('快照选手1 终局点数'), '-1000')
+    await user.click(screen.getByRole('button', { name: '保存成绩草稿' }))
+    await waitFor(() =>
+      expect(saveResult).toHaveBeenCalledWith(
+        20,
+        0,
+        [
+          { participant_id: 1, raw_points: -1000 },
+          { participant_id: 2, raw_points: null },
+          { participant_id: 3, raw_points: null },
+          { participant_id: 4, raw_points: null },
+        ],
+        false,
+      ),
+    )
+  })
+})
+
 const pendingLottery: Lottery = {
   id: 11,
   members: [1, 2, 3, 4],
@@ -707,7 +946,7 @@ describe('成绩点数严格解析（F3）', () => {
       await u.type(screen.getByLabelText(`快照选手${i + 1} 终局点数`), v)
     expect(screen.getByText('已填写 4 / 4 · 实录合计 100000')).toBeTruthy()
     await u.click(screen.getByRole('button', { name: '确认成绩' }))
-    await u.click(screen.getByRole('button', { name: '再次确认并锁定成绩' }))
+    await u.click(screen.getByRole('button', { name: '再次确认成绩' }))
     await waitFor(() =>
       expect(saveResult).toHaveBeenCalledWith(
         20,

@@ -4,6 +4,8 @@
 
 Riichi定位为**轻量级四人立直麻将个人赛事管理系统**，帮助管理员快速组织比赛、录入成绩、重排座次并决出冠军；设备调度不是产品主线。需求以[requirements](docs/requirements.md)为总览，F0-06详细规则以[统一功能规范](docs/F0-06-functional-spec.md)为准，技术与兼容设计见[architecture](docs/architecture.md)。
 
+Owner于2026-11-07追加授权：赛事进行中允许更正任意已有轮次的成绩，包括第二轮开始后的第一轮；编辑数字时实时展示积分。当前追加工作分支`codex/score-corrections`，基线main `06feff5`。更正保存前后完整快照及操作者/时间，说明可选；已生成轮次保留座次，累计排名和未生成轮次按新成绩处理，旧抽签按来源版本保留为历史；完赛后仍只读。实际验证见[成绩更正验证](docs/project/score-corrections-verification.md)。此项覆盖下述历史“确认后只读”限制，既有计分/冠军策略和历史验收证据保持不变。
+
 当前任务 **Linux生产上线第一阶段：Caddy工程与集成交付（分支 `codex/production-launch`）**。只读核验的起点为本地及远程 main `34d4cbdea89bba81a503f2b476f2e1d69de5d714`，工作区当时干净；PR #1 Docker生产部署和PR #2审查问题修复/CI均已合并。Owner最新范围要求：完成工程、测试、Push/PR、CI全绿、独立审查、合并main后停止；第二阶段等待Owner提供新服务器并明确授权，第一阶段绝不连接旧服务器或任何正式服务器。任务计划与进度见[生产上线计划](docs/project/production-launch-plan.md)，本轮实际命令、证据、阻塞与UNVERIFIED见[生产上线验证](docs/project/production-launch-verification.md)。旧修复分支、未提交等描述是历史阶段快照，不代表当前Git状态。
 
 本轮保留Docker、Nginx静态资源/API代理/登录限流，增加Caddy为唯一公网80/443入口，自动申请/续期Let's Encrypt并持久化ACME状态；校验Caddy→Nginx→Django的HTTPS、代理头及真实客户端IP信任。生产IP/域名仅为忽略的运行参数，不写入仓库配置、测试或通用文档。默认沿用服务器现有业务库，缺库时正常初始化空库；不导入本地Owner SQLite。完整赛事写入只在隔离QA，生产只做管理员登录、读取与安全检查，不造业务记录。
@@ -37,7 +39,7 @@ V1.0当前只供雀庄老板/管理员使用。公开注册关闭，普通用户
 - 已合并的审查修复新增tournaments/0005（LotteryRecord作废人/时间/原因及状态CHECK）与0006（Reservation.release_reason；已释放旧行复制原reason到新列，旧列不改）。生产库升级前盘点、停写、一致备份并在独立恢复库演练，核对实际迁移图和计划；不得修改这两份或更早历史迁移，不fake、不清库。本地Owner库保持不写。
 
 - 已解除四台现役上限，capacity_slot仅保留nullable legacy列和旧值，新设备NULL；单赛事显式选1～4张真实物理桌，A～D固定贯穿轮次，故障替换审计，完赛自动释放。
-- Tournament为draft/started/completed；启动冻结数字规则、策略/版本、名单和昵称。TableResult为每桌OneToOne，草稿版本、整数原始点数、确认审计及无损有理数结果；确认后只读。
+- Tournament为draft/started/completed；启动冻结数字规则、策略/版本、名单和昵称。TableResult为每桌OneToOne，草稿版本、整数原始点数、确认审计及无损有理数结果；进行中已确认成绩经显式更正入口及版本校验可修改，前后值留档，完赛后只读。
 - 新赛事用TournamentTable/Reservation；保留MachineAllocation和轮桌座全部历史及稳定ID。所有资源写入检查新预留与旧active记录，并共用物理池PK→赛事→子记录锁顺序。
 - 新增迁移回填可追溯规则来源、旧首轮序列及预留桥接，不改旧列（含updated_at）、旧迁移、原始座次或历史分配状态。原占用有效完整则继承，released/异常需复核，不自动抢回旧设备。
 - 全部配置轮次已存在、无需后续实体对局的旧赛事，可复核为historical_only后补历史成绩和正常完赛，不临时占新桌。已释放旧记录不恢复active。
