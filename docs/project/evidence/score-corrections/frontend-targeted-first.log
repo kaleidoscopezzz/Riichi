@@ -1,0 +1,13 @@
+
+> riichi-frontend@0.1.0 test
+> vitest run --run src/pages/rounds.test.tsx src/components/result-score-preview.test.tsx
+
+
+ RUN  v4.1.12 D:/Riichi/Riichi/frontend
+
+
+ Test Files  2 passed (2)
+      Tests  45 passed (45)
+   Start at  09:26:27
+   Duration  46.77s (transform 1.33s, setup 99ms, import 4.14s, tests 27.42s, environment 34.91s)
+

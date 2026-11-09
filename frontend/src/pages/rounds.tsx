@@ -224,7 +224,7 @@ export function RoundsPage() {
                             </div>
                             <Badge variant="outline">
                               {table.result?.status === 'confirmed'
-                                ? '已确认'
+                                ? `已确认${table.result.correction_count ? ` · 更正 ${table.result.correction_count} 次` : ''}`
                                 : table.result?.version
                                   ? '成绩草稿'
                                   : '待录入'}
@@ -267,9 +267,14 @@ export function RoundsPage() {
                             </Button>
                           )}
                           <footer>
-                            {!completed &&
-                            table.round_number === latest.round_number &&
-                            table.result?.status !== 'confirmed' ? (
+                            {!completed && table.result?.status === 'confirmed' ? (
+                              <Button
+                                aria-label={`更正第${table.round_number}轮第${table.table_number}桌成绩`}
+                                onClick={() => open({ mode: 'correct', table })}
+                              >
+                                更正成绩
+                              </Button>
+                            ) : !completed ? (
                               <Button
                                 disabled={ws.resource_state === 'review_required'}
                                 onClick={() => open({ mode: 'result', table })}
@@ -280,9 +285,18 @@ export function RoundsPage() {
                               <span>
                                 <CheckCircle2 size={15} />{' '}
                                 {table.result?.status === 'confirmed'
-                                  ? '成绩锁定，可在排行榜查看精确值'
+                                  ? '完赛成绩只读，可查看精确值'
                                   : '历史轮次只读'}
                               </span>
+                            )}
+                            {table.result?.status === 'confirmed' && (
+                              <Button
+                                variant="ghost"
+                                aria-label={`查看第${table.round_number}轮第${table.table_number}桌成绩更正记录`}
+                                onClick={() => open({ mode: 'result-history', table })}
+                              >
+                                更正记录
+                              </Button>
                             )}
                           </footer>
                         </article>
@@ -370,7 +384,7 @@ export function RoundsPage() {
           saved={(message) => {
             close()
             setSuccess(message)
-            setSelectedRound(null)
+            if (action.mode !== 'correct') setSelectedRound(null)
             setRevision((v) => v + 1)
           }}
         />

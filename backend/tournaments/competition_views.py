@@ -20,6 +20,10 @@ class ResultWrite(StrictFieldsMixin, serializers.Serializer):
     points = SeatPoints(many=True, required=False, max_length=4)
 
 
+class ResultPreviewWrite(ResultWrite):
+    points = SeatPoints(many=True, max_length=4)
+
+
 class Versions(StrictFieldsMixin, serializers.Serializer):
     table_id = ExactInteger(min_value=1)
     version = ExactInteger(min_value=1)
@@ -69,6 +73,11 @@ class ExactText(serializers.CharField):
         return super().to_internal_value(data)
 
 
+class ResultCorrectionWrite(ResultPreviewWrite):
+    version = ExactInteger(min_value=1)
+    reason = ExactText(max_length=500, allow_blank=True, required=False, default='')
+
+
 class VoidWrite(StrictFieldsMixin, serializers.Serializer):
     # Trimmed first; blank or over 500 characters is rejected.
     reason = ExactText(max_length=500)
@@ -95,7 +104,7 @@ class AdminView(APIView):
 class WorkspaceView(AdminView):
     def get(self, request, pk):
         t = get_object_or_404(Tournament, pk=pk)
-        return response({'resource_state': t.resource_state, 'mapping': svc.mapping(t), 'compatibility_audit': t.compatibility_audit, 'order_source': t.order_source, 'lotteries': [lottery_data(x) for x in t.lotteries.all()], **svc.preview(pk)})
+        return response({'resource_state': t.resource_state, 'mapping': svc.mapping(t), 'compatibility_audit': t.compatibility_audit, 'order_source': t.order_source, 'lotteries': [lottery_data(x) for x in t.lotteries.all()], **svc.preview(pk, tournament=t)})
 
 
 class ResultView(AdminView):
@@ -112,6 +121,21 @@ class ResultView(AdminView):
 class ConfirmResultView(AdminView):
     def post(self, request, pk):
         return response(svc.write_result(pk, request.user, confirm=True, **validated(ResultWrite, request)))
+
+
+class PreviewResultView(AdminView):
+    def post(self, request, pk):
+        return response(svc.preview_result(pk, **validated(ResultPreviewWrite, request)))
+
+
+class CorrectResultView(AdminView):
+    def post(self, request, pk):
+        return response(svc.correct_result(pk, request.user, **validated(ResultCorrectionWrite, request)))
+
+
+class ResultCorrectionsView(AdminView):
+    def get(self, request, pk):
+        return response(svc.result_corrections(pk))
 
 
 class ReplaceView(AdminView):

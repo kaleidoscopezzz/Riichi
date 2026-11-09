@@ -19,6 +19,35 @@ export type Result = {
   points: Record<string, number | null>
   scores: Score[]
   confirmed_at: string | null
+  correction_count?: number
+}
+export type TablePoints = { participant_id: number; raw_points: number | null }[]
+export type ResultPreview = {
+  table_id: number
+  version: number
+  complete: boolean
+  valid_total: boolean
+  total: string
+  expected_total: string
+  difference: string
+  scores: (Omit<Score, 'raw_points' | 'rank' | 'base' | 'bonus' | 'score'> & {
+    raw_points: number | null
+    rank: number | null
+    base: Rational | null
+    bonus: Rational | null
+    score: Rational | null
+  })[]
+}
+export type ResultCorrection = {
+  id: number
+  from_version: number
+  to_version: number
+  before: Pick<Result, 'table_id' | 'version' | 'status' | 'points' | 'scores'>
+  after: Pick<Result, 'table_id' | 'version' | 'status' | 'points' | 'scores'>
+  corrected_by: number
+  corrected_by_username?: string
+  corrected_at: string
+  reason: string
 }
 export type Standing = {
   participant_id: number
@@ -82,6 +111,29 @@ export type Workspace = {
 }
 export const fetchWorkspace = (id: number, signal?: AbortSignal) =>
   api<Workspace>(`/tournaments/${id}/workspace/`, { signal })
+export const fetchResult = (id: number, signal?: AbortSignal) =>
+  api<Result>(`/round-tables/${id}/result/`, { signal })
+export const previewResult = (
+  id: number,
+  version: number,
+  points: TablePoints,
+  signal?: AbortSignal,
+) =>
+  api<ResultPreview>(`/round-tables/${id}/result/preview/`, {
+    method: 'POST',
+    body: { version, points },
+    signal,
+  })
+export const correctResult = (id: number, version: number, points: TablePoints, reason = '') =>
+  api<Result>(`/round-tables/${id}/result/correct/`, {
+    method: 'POST',
+    body: { version, points, reason },
+  })
+export const fetchResultCorrections = (id: number, signal?: AbortSignal) =>
+  api<{ table_id: number; corrections: ResultCorrection[] }>(
+    `/round-tables/${id}/result/corrections/`,
+    { signal },
+  )
 export const saveResult = (
   id: number,
   version: number,
@@ -141,6 +193,8 @@ export const conflictRefreshCodes: ReadonlySet<string> = new Set([
   'lottery_conflict',
   'tournament_completed',
   'stale_standings',
+  'stale_result',
+  'tournament_not_started',
 ])
 
 export function sameMembers(a: readonly number[], b: readonly number[]) {

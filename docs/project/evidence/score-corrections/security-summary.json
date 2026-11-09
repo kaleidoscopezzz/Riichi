@@ -1,0 +1,9 @@
+{
+  "result": "PASS",
+  "candidate_files_scanned": 65,
+  "qa_credentials_found": false,
+  "private_keys_found": false,
+  "historical_migrations_unchanged": true,
+  "dependency_locks_unchanged": true,
+  "diff_check": "PASS"
+}

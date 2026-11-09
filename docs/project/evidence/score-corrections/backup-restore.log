@@ -1,0 +1,22 @@
+{
+  "result": "PASS",
+  "vendor": "sqlite",
+  "old_tournaments": 2,
+  "old_confirmed_results": 2,
+  "old_lotteries": 2,
+  "old_legacy_allocations": 2,
+  "old_reservations": 2,
+  "original_columns_unchanged": true,
+  "audit_initially_empty": true,
+  "idempotent_rerun": true,
+  "additions": {
+    "tables": [
+      "tournaments_tableresultcorrection"
+    ],
+    "columns": {}
+  },
+  "backup_integrity": "ok",
+  "independent_restore": "PASS",
+  "restored_upgrade": "PASS",
+  "backup_sha256": "5d2b5858b1cbb57c37685fa20625173853289a3fb15e71c409ab338ff1610690"
+}

@@ -1,0 +1,94 @@
+
+> riichi-frontend@0.1.0 test:e2e
+> tsc --noEmit -p tsconfig.e2e.json && playwright test --config=../.verification/score-corrections/playwright.local.config.ts --output=../.verification/score-corrections/browser-final
+
+
+Running 3 tests using 1 worker
+
+(node:70164) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 e2e\configurable-oka.spec.ts:23:1 › configurable Oka: zero, exact decimals, automatic reset, frozen scoring and accessible themes (33.1s)
+  x  2 e2e\production-launch.spec.ts:22:1 › real browser: roster, tournaments, scores, lotteries, completion, responsive themes (2.1m)
+(node:78148) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  3 e2e\score-corrections.spec.ts:21:1 › correct earlier results while a later round is underway, preview exact scores and preserve play history (10.0m)
+
+
+  1) e2e\production-launch.spec.ts:22:1 › real browser: roster, tournaments, scores, lotteries, completion, responsive themes 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('dialog')
+    Expected: 0
+    Received: 1
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('dialog') with timeout 5000ms
+      - waiting for getByRole('dialog')
+        14 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      123 |         await dialog(page).getByRole('button', { name: '预览并确认' }).click()
+      124 |         await dialog(page).getByRole('button', { name: '确认生成轮次' }).click()
+    > 125 |         await expect(dialog(page)).toHaveCount(0)
+          |                                    ^
+      126 |       }
+      127 |     }
+      128 |     let workspace = await read(page, `/tournaments/${id}/workspace/`)
+        at D:\Riichi\Riichi\frontend\e2e\production-launch.spec.ts:125:36
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\.verification\score-corrections\browser-final\production-launch-real-bro-48f22-ompletion-responsive-themes\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.verification\score-corrections\browser-final\production-launch-real-bro-48f22-ompletion-responsive-themes\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\.verification\score-corrections\browser-final\production-launch-real-bro-48f22-ompletion-responsive-themes\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\.verification\score-corrections\browser-final\production-launch-real-bro-48f22-ompletion-responsive-themes\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e\score-corrections.spec.ts:21:1 › correct earlier results while a later round is underway, preview exact scores and preserve play history 
+
+    Test timeout of 600000ms exceeded.
+
+    Error: locator.click: Test timeout of 600000ms exceeded.
+    Call log:
+      - waiting for getByRole('option', { name: '800 · CorrectionQA-483ee8 桌1', exact: true })
+
+
+      11 | async function select(page: Page, label: string, option: string) {
+      12 |   await page.getByRole('combobox', { name: label, exact: true }).click()
+    > 13 |   await page.getByRole('option', { name: option, exact: true }).click()
+         |                                                                 ^
+      14 | }
+      15 | async function read(page: Page, endpoint: string) {
+      16 |   const response = await page.request.get('/api/v1' + endpoint)
+        at select (D:\Riichi\Riichi\frontend\e2e\score-corrections.spec.ts:13:65)
+        at D:\Riichi\Riichi\frontend\e2e\score-corrections.spec.ts:55:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\.verification\score-corrections\browser-final\score-corrections-correct--d467d-s-and-preserve-play-history\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.verification\score-corrections\browser-final\score-corrections-correct--d467d-s-and-preserve-play-history\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\.verification\score-corrections\browser-final\score-corrections-correct--d467d-s-and-preserve-play-history\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\.verification\score-corrections\browser-final\score-corrections-correct--d467d-s-and-preserve-play-history\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Slow test file: e2e\score-corrections.spec.ts (10.0m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  2 failed
+    e2e\production-launch.spec.ts:22:1 › real browser: roster, tournaments, scores, lotteries, completion, responsive themes 
+    e2e\score-corrections.spec.ts:21:1 › correct earlier results while a later round is underway, preview exact scores and preserve play history 
+  1 passed (13.0m)
