@@ -27,12 +27,24 @@ from players.services import create_player
 from machines.models import MahjongMachine
 assert settings.DATABASES['default']['NAME'] == 'riichi_qa'
 v=json.load(sys.stdin)
-get_user_model().objects.create_superuser(username=v['username'],password=v['password'])
-for i in range(16): create_player(nickname=f"{v['prefix']} {i+1:02}")
+admin=get_user_model().objects.create_superuser(username=v['username'],password=v['password'])
+players=[create_player(nickname=f"{v['prefix']} {i+1:02}") for i in range(16)]
 for i in range(4): MahjongMachine.objects.create(machine_no=str(800+i),name=f"{v['prefix']} 桌{i+1}",status='available')
+from tournaments.models import Tournament
+from tournaments.services import create_tournament, mutate_tournament
+# Compatibility fixtures represent strategies saved before 0010. The new
+# creation endpoint must reject them; the existing-event browser flow remains.
+existing={}
+for strategy in ('swiss_repeats_first_v1','swiss_scores_first_v1'):
+    row=create_tournament(admin,{'name':f"{v['prefix']} existing {strategy}",'round_count':2,'participant_ids':[p.pk for p in players[:8]]})
+    Tournament.objects.filter(pk=row.pk).update(pairing_strategy=strategy)
+    mutate_tournament(row.pk,start=True)
+    existing[strategy]=row.pk
+sys.stdout.write(json.dumps({'existing_swiss_ids':existing}))
 '''
     command = ['docker', 'compose', '--env-file', args.env_file, '-f', str(root / 'deploy/compose.yaml'), 'exec', '-T', 'api', 'python', '-c', code]
-    subprocess.run(command, input=json.dumps(credentials), text=True, check=True)
+    seeded = subprocess.run(command, input=json.dumps(credentials), text=True, check=True, capture_output=True)
+    credentials.update(json.loads(seeded.stdout))
     output.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     with output.open('x', encoding='utf-8') as stream:
         os.chmod(output, 0o600)

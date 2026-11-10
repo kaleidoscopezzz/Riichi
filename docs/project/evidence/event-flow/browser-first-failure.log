@@ -1,0 +1,79 @@
+
+Running 4 tests using 1 worker
+
+(node:43984) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 e2e\event-flow.spec.ts:176:1 › monthly and daily events share a machine; maintenance blocks next round until explicit replacement (25.2s)
+(node:81984) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 2 e2e\event-flow.spec.ts:248:1 › sixteen players finish six configured rounds with optional elimination and readable statistics in both themes (50.2s)
+  x  3 e2e\event-flow.spec.ts:338:1 › a tied elimination boundary requires a public draw; later correction preserves eligibility and generated seats (14.7s)
+(node:7140) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 4 e2e\event-flow.spec.ts:430:1 › three new strategies and existing Swiss labels use the shared Select in desktop and phone themes (11.5s)
+
+
+  1) e2e\event-flow.spec.ts:176:1 › monthly and daily events share a machine; maintenance blocks next round until explicit replacement 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 403
+
+      202 |       await write(page, `/machines/${machine.machine_id}/`, { status: 'maintenance' }, 'PATCH')
+      203 |     ).status(),
+    > 204 |   ).toBe(200)
+          |     ^
+      205 |   try {
+      206 |     await page.reload()
+      207 |     await openGeneration(page, 2, 2)
+        at D:\Riichi\Riichi\frontend\e2e\event-flow.spec.ts:204:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\.verification\event-flow\browser-first\event-flow-monthly-and-dai-57f65--until-explicit-replacement\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.verification\event-flow\browser-first\event-flow-monthly-and-dai-57f65--until-explicit-replacement\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\.verification\event-flow\browser-first\event-flow-monthly-and-dai-57f65--until-explicit-replacement\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\.verification\event-flow\browser-first\event-flow-monthly-and-dai-57f65--until-explicit-replacement\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) e2e\event-flow.spec.ts:338:1 › a tied elimination boundary requires a public draw; later correction preserves eligibility and generated seats 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 409
+    Received: 403
+
+      355 |     confirmed: true,
+      356 |   })
+    > 357 |   expect(rejected.status()).toBe(409)
+          |                             ^
+      358 |   expect((await rejected.json()).error.code).toBe('elimination_lottery_required')
+      359 |   await page.getByRole('button', { name: '记录淘汰边界公开抽签' }).click()
+      360 |   await enterDraw(page, workspace, members)
+        at D:\Riichi\Riichi\frontend\e2e\event-flow.spec.ts:357:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\.verification\event-flow\browser-first\event-flow-a-tied-eliminat-8fc2f-ibility-and-generated-seats\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.verification\event-flow\browser-first\event-flow-a-tied-eliminat-8fc2f-ibility-and-generated-seats\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\.verification\event-flow\browser-first\event-flow-a-tied-eliminat-8fc2f-ibility-and-generated-seats\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\.verification\event-flow\browser-first\event-flow-a-tied-eliminat-8fc2f-ibility-and-generated-seats\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    e2e\event-flow.spec.ts:176:1 › monthly and daily events share a machine; maintenance blocks next round until explicit replacement 
+    e2e\event-flow.spec.ts:338:1 › a tied elimination boundary requires a public draw; later correction preserves eligibility and generated seats 
+  2 passed (1.8m)

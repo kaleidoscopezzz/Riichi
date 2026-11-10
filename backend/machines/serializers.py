@@ -12,7 +12,7 @@ class MachineSerializer(serializers.ModelSerializer):
 
 
 class MachineWriteSerializer(StrictFieldsMixin, serializers.Serializer):
-    machine_no = serializers.CharField(max_length=3)
+    machine_no = serializers.CharField(max_length=3, required=False)
     name = serializers.CharField(max_length=100)
     location = serializers.CharField(max_length=200, allow_blank=True, required=False)
     description = serializers.CharField(max_length=2000, allow_blank=True, required=False)

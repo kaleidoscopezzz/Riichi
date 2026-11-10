@@ -132,6 +132,6 @@ describe('应用级错误边界', () => {
       />,
     )
     const totals = [...document.querySelectorAll('td strong')].map((cell) => cell.textContent)
-    expect(totals).toEqual(['—', '−0.33', '0.00'])
+    expect(totals).toEqual(['— 分', '−0.33 分', '0.00 分'])
   })
 })

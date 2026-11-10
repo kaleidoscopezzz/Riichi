@@ -15,6 +15,7 @@ import {
   startTournament,
   validCustomOka,
   pairingOptions,
+  pairingLabel,
   type PairingStrategy,
   type Tournament,
 } from '@/services/tournaments'
@@ -294,7 +295,17 @@ export function TournamentEditor({
                     <Select
                       aria-label="分桌策略"
                       value={pairing}
-                      options={pairingOptions}
+                      options={
+                        base?.pairing_strategy?.startsWith('swiss_')
+                          ? [
+                              ...pairingOptions,
+                              {
+                                value: base.pairing_strategy,
+                                label: pairingLabel(base.pairing_strategy),
+                              },
+                            ]
+                          : pairingOptions
+                      }
                       disabled={busy || reloading || locked}
                       onValueChange={(value) => setPairing(value as PairingStrategy)}
                     />
@@ -410,10 +421,7 @@ export function TournamentRules({ row }: { row: Tournament }) {
       </div>
       <div>
         <dt>分桌策略</dt>
-        <dd>
-          {pairingOptions.find((option) => option.value === row.pairing_strategy)?.label ??
-            '历史自动分桌'}
-        </dd>
+        <dd>{pairingLabel(row.pairing_strategy)}</dd>
       </div>
       {row.pairing_strategy === 'ranked_v1' && (
         <div>

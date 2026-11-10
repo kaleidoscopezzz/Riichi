@@ -7,25 +7,27 @@ import {
   fetchResultCorrections,
   displayScore,
   completeTournament,
+  eliminatePlayers,
+  displayPercent,
+  sameParticipantStatuses,
   voidLottery,
   isPendingLottery,
   mergeLotteries,
   type Lottery,
+  type EliminationPlan,
 } from './competition'
 
 afterEach(() => vi.unstubAllGlobals())
 describe('赛事 API 契约和无损展示', () => {
   it('试算与更正使用独立接口、当前版本和CSRF，历史读取不写入', async () => {
-    const fetcher = vi
-      .fn()
-      .mockImplementation(
-        async (url: string) =>
-          new Response(
-            JSON.stringify({
-              data: url.endsWith('/auth/csrf/') ? { csrf_token: 'test-only' } : {},
-            }),
-          ),
-      )
+    const fetcher = vi.fn().mockImplementation(
+      async (url: string) =>
+        new Response(
+          JSON.stringify({
+            data: url.endsWith('/auth/csrf/') ? { csrf_token: 'test-only' } : {},
+          }),
+        ),
+    )
     vi.stubGlobal('fetch', fetcher)
     const controller = new AbortController()
     const points = [{ participant_id: 1, raw_points: 0 }]
@@ -151,6 +153,87 @@ const lottery: Lottery = {
   source_versions: [{ table_id: 3, version: 2 }],
 }
 describe('积分展示边界与抽签契约', () => {
+  it('百分比由无损分数展示，资格来源不会将旧空值与新淘汰状态混为相同', () => {
+    expect(displayPercent({ numerator: '2', denominator: '3' })).toBe('66.67%')
+    expect(displayPercent({ numerator: '0', denominator: '1' })).toBe('0.00%')
+    const current = [{ participant_id: 1, eliminated_after_round: 2 }]
+    expect(sameParticipantStatuses([], current)).toBe(false)
+    expect(sameParticipantStatuses(undefined, current)).toBe(false)
+    expect(sameParticipantStatuses(current, current)).toBe(true)
+  })
+  it('相同成员和成绩的淘汰抽签不作为最终名次抽签，且必须匹配轮次和资格来源', () => {
+    const row = {
+      ...lottery,
+      purpose: 'elimination' as const,
+      round_number: 2,
+      participant_statuses: [{ participant_id: 1, eliminated_after_round: 1 }],
+    }
+    expect(isPendingLottery(row, [1, 2], row.source_versions)).toBe(false)
+    expect(
+      isPendingLottery(row, [1, 2], row.source_versions, {
+        purpose: 'elimination',
+        round_number: 2,
+        participant_statuses: row.participant_statuses,
+      }),
+    ).toBe(true)
+    expect(
+      isPendingLottery(row, [1, 2], row.source_versions, {
+        purpose: 'elimination',
+        round_number: 1,
+        participant_statuses: row.participant_statuses,
+      }),
+    ).toBe(false)
+    expect(
+      isPendingLottery(row, [1, 2], row.source_versions, {
+        purpose: 'elimination',
+        round_number: 2,
+        participant_statuses: [],
+      }),
+    ).toBe(false)
+  })
+  it('淘汰和完赛提交来源资格及明确确认，淘汰仅提交已预览的四人ID', async () => {
+    const fetcher = vi
+      .fn()
+      .mockImplementation(
+        async (url: string) =>
+          new Response(
+            JSON.stringify({
+              data: url.endsWith('/auth/csrf/') ? { csrf_token: 'test-only' } : {},
+            }),
+          ),
+      )
+    vi.stubGlobal('fetch', fetcher)
+    const plan: EliminationPlan = {
+      round_number: 2,
+      active_count: 8,
+      remaining_count: 4,
+      remaining_rounds: 3,
+      ready: true,
+      candidates: [5, 6, 7, 8].map((participant_id) => ({
+        participant_id,
+      })) as EliminationPlan['candidates'],
+      standings: [],
+      unresolved_groups: [],
+      source_versions: [{ table_id: 20, version: 3 }],
+      participant_statuses: [{ participant_id: 1, eliminated_after_round: 1 }],
+    }
+    await eliminatePlayers(7, plan)
+    expect(fetcher.mock.calls[1][0]).toBe('/api/v1/tournaments/7/eliminations/')
+    expect(fetcher.mock.calls[1][1].headers['X-CSRFToken']).toBe('test-only')
+    expect(JSON.parse(fetcher.mock.calls[1][1].body)).toEqual({
+      round_number: 2,
+      participant_ids: [5, 6, 7, 8],
+      source_versions: plan.source_versions,
+      participant_statuses: plan.participant_statuses,
+      confirmed: true,
+    })
+    await completeTournament(7, plan.source_versions, plan.participant_statuses)
+    expect(JSON.parse(fetcher.mock.calls[3][1].body)).toEqual({
+      source_versions: plan.source_versions,
+      participant_statuses: plan.participant_statuses,
+      confirmed: true,
+    })
+  })
   it('舍入为零的负值不显示负号，负分母先移到分子，分母为 0 或非法时返回占位', () => {
     expect(displayScore({ numerator: '-1', denominator: '1000' })).toBe('0.00')
     expect(displayScore({ numerator: '-4', denominator: '1000' })).toBe('0.00')

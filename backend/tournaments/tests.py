@@ -187,7 +187,7 @@ class TournamentTests(TestCase):
             user.player_profile.save()
         row = self.create(participant_ids=self.ids[:4])
         for data in [row, self.client.get(f'/api/v1/tournaments/{row["id"]}/').json()["data"], self.client.get("/api/v1/tournaments/").json()["data"]["results"][0], self.write(f'{row["id"]}/start/').json()["data"]]:
-            self.assertEqual(set(data["participants"][0]), {"id", "player_id", "display_name", "is_active", "display_name_snapshot"})
+            self.assertEqual(set(data["participants"][0]), {"id", "player_id", "display_name", "is_active", "display_name_snapshot", "eliminated_after_round"})
             self.assertNotIn("entrant", str(data))
 
     def test_optional_revision_rejects_stale_draft_writes(self):

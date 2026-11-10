@@ -2,11 +2,12 @@ from django.urls import path
 from .views import TournamentListView, TournamentDetailView, TournamentParticipantsView, TournamentStartView
 from .round_views import RoundListView, RoundDetailView, PairingPreviewView
 
-from .competition_views import WorkspaceView, ReplaceView, ReviewView, LotteryView, ConfirmLotteryView, VoidLotteryView, FinishView
+from .competition_views import WorkspaceView, ReplaceView, ReviewView, LotteryView, ConfirmLotteryView, VoidLotteryView, FinishView, EliminationView
 
 urlpatterns = [
     path('<int:pk>/rounds/preview/', PairingPreviewView.as_view()),
     path("<int:pk>/workspace/", WorkspaceView.as_view()),
+    path("<int:pk>/eliminations/", EliminationView.as_view()),
     path("<int:pk>/tables/replace/", ReplaceView.as_view()),
     path("<int:pk>/compatibility-review/", ReviewView.as_view()),
     path("<int:pk>/lotteries/", LotteryView.as_view()),

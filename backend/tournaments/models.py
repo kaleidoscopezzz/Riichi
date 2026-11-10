@@ -65,10 +65,15 @@ class TournamentParticipant(models.Model):
     player = models.ForeignKey("players.PlayerProfile", on_delete=models.PROTECT, related_name="tournament_entries")
     display_name_snapshot = models.CharField(max_length=80, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Participation and all prior seats survive elimination. NULL is still in play.
+    eliminated_after_round = models.PositiveSmallIntegerField(null=True, blank=True, default=None)
 
     class Meta:
         ordering = ["id"]
-        constraints = [models.UniqueConstraint(fields=["tournament", "player"], name="unique_tournament_player")]
+        constraints = [
+            models.UniqueConstraint(fields=["tournament", "player"], name="unique_tournament_player"),
+            models.CheckConstraint(condition=Q(eliminated_after_round__isnull=True) | Q(eliminated_after_round__gte=1, eliminated_after_round__lte=5), name='participant_elimination_round_range'),
+        ]
 
 
 class TournamentRound(models.Model):
@@ -85,6 +90,20 @@ class TournamentRound(models.Model):
             models.UniqueConstraint(fields=["tournament", "round_number"], name="unique_tournament_round"),
             models.CheckConstraint(condition=Q(round_number__gte=1, round_number__lte=6), name="round_number_range"),
         ]
+
+
+class EliminationRecord(models.Model):
+    round = models.OneToOneField(TournamentRound, on_delete=models.PROTECT, related_name='elimination')
+    participant_ids = models.JSONField()
+    source_versions = models.JSONField()
+    participant_statuses = models.JSONField()
+    standings_snapshot = models.JSONField()
+    lottery_ids = models.JSONField(default=list)
+    confirmed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='confirmed_eliminations')
+    confirmed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['round__round_number']
 
 
 class RoundTable(models.Model):
@@ -183,7 +202,6 @@ class TournamentMachineReservation(models.Model):
     class Meta:
         ordering = ['id']
         constraints = [
-            models.UniqueConstraint(fields=['machine'], condition=Q(status='active'), name='unique_reserved_machine'),
             models.UniqueConstraint(fields=['table'], condition=Q(status='active'), name='unique_reserved_table'),
             models.CheckConstraint(condition=Q(status='active', released_at__isnull=True, released_by__isnull=True) | Q(status='released', released_at__isnull=False, released_by__isnull=False), name='reservation_release_state'),
         ]
@@ -238,10 +256,17 @@ class LotteryRecord(models.Model):
     confirmed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT, related_name='confirmed_lotteries')
     confirmed_at = models.DateTimeField(null=True)
     rules_version = models.PositiveSmallIntegerField(default=1)
+    purpose = models.CharField(max_length=12, choices=[('final', '最终名次'), ('elimination', '淘汰边界')], default='final')
+    elimination_round = models.ForeignKey(TournamentRound, null=True, blank=True, on_delete=models.PROTECT, related_name='elimination_lotteries')
+    # Empty only on legacy final draws made before elimination was supported.
+    participant_statuses = models.JSONField(default=list, blank=True)
     # Voided drafts stay as public audit; only confirmed records ever rank.
     voided_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT, related_name='voided_lotteries')
     voided_at = models.DateTimeField(null=True)
     void_reason = models.CharField(max_length=500, blank=True, default='')
 
     class Meta:
-        constraints = [models.CheckConstraint(condition=Q(voided_at__isnull=True, voided_by__isnull=True, void_reason='') | (Q(voided_at__isnull=False, voided_by__isnull=False, confirmed_at__isnull=True) & ~Q(void_reason='')), name='lottery_void_state')]
+        constraints = [
+            models.CheckConstraint(condition=Q(voided_at__isnull=True, voided_by__isnull=True, void_reason='') | (Q(voided_at__isnull=False, voided_by__isnull=False, confirmed_at__isnull=True) & ~Q(void_reason='')), name='lottery_void_state'),
+            models.CheckConstraint(condition=Q(purpose='final', elimination_round__isnull=True) | Q(purpose='elimination', elimination_round__isnull=False), name='lottery_purpose_round_valid'),
+        ]

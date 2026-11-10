@@ -115,15 +115,11 @@ describe('设备管理工作台', () => {
     expect(list).toHaveBeenCalledWith(1, '', '', expect.any(AbortSignal))
     expect(screen.getByRole('table', { name: '设备列表' })).toBeTruthy()
   })
-  it('新建表单拒绝编号和空白名称', async () => {
+  it('新建自动编号且不提供编号输入，拒绝空白名称', async () => {
     render(<MachinesPage />)
     const user = await openNew()
-    await user.type(screen.getByLabelText('设备编号'), 'abc')
-    await user.type(screen.getByLabelText('设备名称'), '新设备')
-    await user.click(screen.getByRole('button', { name: '创建设备' }))
-    expect(await screen.findByText('设备编号必须为 1～3 位数字。')).toBeTruthy()
-    await user.clear(screen.getByLabelText('设备编号'))
-    await user.type(screen.getByLabelText('设备编号'), '8')
+    expect(screen.queryByLabelText('设备编号')).toBeNull()
+    expect(screen.getByText('设备编号：保存后自动生成')).toBeTruthy()
     await user.clear(screen.getByLabelText('设备名称'))
     await user.type(screen.getByLabelText('设备名称'), '   ')
     await user.click(screen.getByRole('button', { name: '创建设备' }))
@@ -133,12 +129,11 @@ describe('设备管理工作台', () => {
   it('新建设备成功，刷新列表并恢复按钮焦点', async () => {
     render(<MachinesPage />)
     const user = await openNew()
-    await user.type(screen.getByLabelText('设备编号'), '8')
     await user.type(screen.getByLabelText('设备名称'), '新设备')
     await user.click(screen.getByRole('button', { name: '创建设备' }))
     expect(await screen.findByText('设备 107 已保存。')).toBeTruthy()
     expect(save).toHaveBeenCalledWith(
-      { machine_no: '8', name: '新设备', location: '', description: '', status: 'available' },
+      { name: '新设备', location: '', description: '', status: 'available' },
       undefined,
     )
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
@@ -218,7 +213,6 @@ describe('设备管理工作台', () => {
     )
     render(<MachinesPage />)
     const user = await openNew()
-    await user.type(screen.getByLabelText('设备编号'), '8')
     await user.type(screen.getByLabelText('设备名称'), '设备')
     await user.click(screen.getByRole('button', { name: '创建设备' }))
     expect(await screen.findByText('设备编号：编号冲突')).toBeTruthy()

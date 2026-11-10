@@ -29,8 +29,14 @@ class Versions(StrictFieldsMixin, serializers.Serializer):
     version = ExactInteger(min_value=1)
 
 
+class ParticipantStatus(StrictFieldsMixin, serializers.Serializer):
+    participant_id = ExactInteger(min_value=1)
+    eliminated_after_round = ExactInteger(min_value=1, max_value=5, allow_null=True)
+
+
 class FinishWrite(StrictFieldsMixin, serializers.Serializer):
     source_versions = Versions(many=True)
+    participant_statuses = ParticipantStatus(many=True, required=False, max_length=16)
     confirmed = serializers.BooleanField()
 
     def validate_confirmed(self, value):
@@ -46,12 +52,21 @@ class LotteryWrite(StrictFieldsMixin, serializers.Serializer):
     method = serializers.CharField(max_length=200)
     description = serializers.CharField(max_length=2000)
     drawn_at = serializers.DateTimeField()
+    purpose = serializers.ChoiceField(choices=['final', 'elimination'], required=False, default='final')
+    round_number = ExactInteger(min_value=1, max_value=5, required=False)
+    participant_statuses = ParticipantStatus(many=True, required=False, max_length=16)
 
 
 class ConfirmWrite(StrictFieldsMixin, serializers.Serializer):
     confirmed = serializers.BooleanField()
 
     validate_confirmed = FinishWrite.validate_confirmed
+
+
+class EliminationWrite(FinishWrite):
+    round_number = ExactInteger(min_value=1, max_value=5)
+    participant_ids = serializers.ListField(child=ExactInteger(min_value=1), min_length=4, max_length=4)
+    participant_statuses = ParticipantStatus(many=True, min_length=4, max_length=16, allow_empty=False)
 
 
 class ReplaceWrite(StrictFieldsMixin, serializers.Serializer):
@@ -94,7 +109,8 @@ def response(data, status=200):
 
 
 def lottery_data(row):
-    return {key: getattr(row, key) for key in ['id', 'members', 'order', 'method', 'description', 'drawn_at', 'created_by_id', 'created_at', 'confirmed_by_id', 'confirmed_at', 'source_versions', 'rules_version', 'voided_by_id', 'voided_at', 'void_reason']}
+    return {**{key: getattr(row, key) for key in ['id', 'members', 'order', 'method', 'description', 'drawn_at', 'created_by_id', 'created_at', 'confirmed_by_id', 'confirmed_at', 'source_versions', 'participant_statuses', 'purpose', 'rules_version', 'voided_by_id', 'voided_at', 'void_reason']},
+            'round_number': row.elimination_round.round_number if row.elimination_round_id else None}
 
 
 class AdminView(APIView):
@@ -169,4 +185,11 @@ class VoidLotteryView(AdminView):
 class FinishView(AdminView):
     def post(self, request, pk):
         values = validated(FinishWrite, request)
-        return response(svc.finish(pk, request.user, values['source_versions']))
+        return response(svc.finish(pk, request.user, values['source_versions'], values.get('participant_statuses')))
+
+
+class EliminationView(AdminView):
+    def post(self, request, pk):
+        values = validated(EliminationWrite, request)
+        values.pop('confirmed')
+        return response(svc.confirm_elimination(pk, request.user, **values), 201)

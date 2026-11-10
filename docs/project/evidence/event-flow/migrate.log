@@ -1,0 +1,4 @@
+Operations to perform:
+  Apply all migrations: accounts, auth, contenttypes, machines, players, sessions, tournaments
+Running migrations:
+  No migrations to apply.

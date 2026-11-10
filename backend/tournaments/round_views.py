@@ -8,7 +8,7 @@ from machines.models import MahjongMachine
 from .models import Tournament, TournamentRound, RoundTable, RoundSeat, MachineAllocation
 from .round_serializers import GenerateRoundSerializer, PairingPreviewSerializer, ReassignSerializer, ReleaseSerializer, RoundSerializer, TableSerializer, AllocationSerializer
 from .round_services import change_allocation
-from .competition_services import generate, occupied_ids
+from .competition_services import generate
 from .models import TournamentMachineReservation
 
 
@@ -100,13 +100,17 @@ class MachineResourceView(APIView):
 
     def get(self, request):
         active = {a.machine_id: a for a in MachineAllocation.objects.filter(status="active").select_related("table__round__tournament")}
-        reservations = {r.machine_id: r for r in TournamentMachineReservation.objects.filter(status="active").select_related("table__tournament")}
-        occupied = occupied_ids()
+        reservations = {}
+        for row in TournamentMachineReservation.objects.filter(status='active').select_related('table__tournament'):
+            reservations.setdefault(row.machine_id, []).append({'tournament_id': row.table.tournament_id,
+                'tournament_name': row.table.tournament.name, 'ordinal': row.table.ordinal})
         results = []
         for machine in MahjongMachine.objects.exclude(status="retired"):
             allocation = active.get(machine.pk)
             results.append({"machine_id": machine.pk, "machine_no": machine.machine_no, "name": machine.name, "status": machine.status,
-                "reservation": {"tournament_id": reservations[machine.pk].table.tournament_id, "tournament_name": reservations[machine.pk].table.tournament.name, "ordinal": reservations[machine.pk].table.ordinal} if machine.pk in reservations else None,
-                "assignable": machine.status == "available" and machine.pk not in occupied,
+                "reservations": reservations.get(machine.pk, []),
+                # Keep the old singular field for existing clients; the full list is authoritative.
+                "reservation": next(iter(reservations.get(machine.pk, [])), None),
+                "assignable": machine.status == "available",
                 "active_allocation": {"id": allocation.pk, "table_id": allocation.table_id, "table_number": allocation.table.table_number, "round_number": allocation.table.round.round_number, "tournament_id": allocation.table.round.tournament_id, "tournament_name": allocation.table.round.tournament.name} if allocation else None})
         return Response({"data": {"results": results}}, headers={"Cache-Control": "no-store"})

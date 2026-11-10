@@ -31,6 +31,13 @@ class Fixtures:
         t = create_tournament(self.admin, {'name': '真实领域服务测试', 'round_count': rounds, 'participant_ids': [u.player_profile.pk for u in self.users[:n]], **kw})
         return mutate_tournament(t.pk, start=True)
 
+    def existing_swiss(self, n=4, rounds=1, strategy='swiss_scores_first_v1'):
+        # Simulate a stored pre-0010 draft; new creation must no longer accept Swiss.
+        t = create_tournament(self.admin, {'name': '既有瑞士轮赛事', 'round_count': rounds,
+                             'participant_ids': [u.player_profile.pk for u in self.users[:n]]})
+        Tournament.objects.filter(pk=t.pk).update(pairing_strategy=strategy)
+        return mutate_tournament(t.pk, start=True)
+
     def first(self, t, ids=None):
         return generate(t.pk, self.admin, 1, machine_ids=ids or [m.pk for m in self.machines[:t.participants.count()//4]])
 
@@ -164,16 +171,19 @@ class CompetitionTests(Fixtures, TestCase):
             with self.assertRaises(IntegrityError), transaction.atomic():
                 Reservation.objects.create(table=table, machine=machine, created_by=self.admin, machine_no_snapshot=machine.machine_no)
 
-    def test_legacy_new_resource_pool_cannot_double_occupy(self):
+    def test_legacy_new_event_share_keeps_original_allocation(self):
         legacy = self.tournament()
         r = generate_first_round(legacy.pk, self.admin)
         allocation = r.tables.get().allocations.get()
-        with self.assertRaises(TournamentConflict):
-            self.first(self.tournament(), [allocation.machine_id])
+        shared = self.tournament()
+        self.first(shared, [allocation.machine_id])
+        allocation.refresh_from_db()
+        self.assertEqual(allocation.status, 'active')
         new = self.tournament()
         self.first(new, [self.machines[6].pk])
-        with self.assertRaises(TournamentConflict):
-            change_allocation(r.tables.get().pk, self.admin, machine_id=self.machines[6].pk)
+        replacement = change_allocation(r.tables.get().pk, self.admin, machine_id=self.machines[6].pk)
+        self.assertEqual(replacement.machine_id, self.machines[6].pk)
+        self.assertTrue(Reservation.objects.filter(table__tournament=new, status='active').exists())
 
     def test_multiple_lottery_groups_all_required(self):
         t = self.tournament(8)
@@ -204,15 +214,17 @@ class CompetitionTests(Fixtures, TestCase):
         row.refresh_from_db(); self.assertIsNotNone(row.confirmed_at)
         with self.assertRaises(TournamentConflict): finish(t.pk,self.admin,source_versions(t))
 
-    def test_fixed_resource_mutual_exclusion_and_old_release_guard(self):
+    def test_fixed_resource_shared_associations_and_old_release_guard(self):
         t=self.tournament(); table=self.first(t).tables.get()
-        with self.assertRaises(TournamentConflict): self.first(self.tournament())
-        with self.assertRaises(MachineConflict): change_machine(self.machines[0].pk,retire=True)
+        self.first(self.tournament())
+        self.assertEqual(Reservation.objects.filter(machine=self.machines[0], status='active').count(), 2)
+        change_machine(self.machines[0].pk, {'status': 'maintenance'})
         with self.assertRaises(TournamentConflict): change_allocation(table.pk,self.admin)
         before=table.machine_snapshot
         replace_machine(t.pk,1,self.admin,self.machines[5].pk,'物理故障')
         table.refresh_from_db(); self.assertEqual(table.machine_snapshot,before)
         self.assertEqual(Reservation.objects.filter(table__tournament=t,status='active').get().machine_id,self.machines[5].pk)
+        change_machine(self.machines[0].pk, {'status': 'available'})
         self.first(self.tournament())
 
     def test_legacy_valid_inherits_and_keeps_history(self):
@@ -233,7 +245,8 @@ class CompetitionTests(Fixtures, TestCase):
         other=self.tournament(); self.first(other)
         with locked(t.pk) as (t,_): bridge_legacy(t,self.admin)
         self.assertEqual(t.resource_state,'review_required')
-        with self.assertRaises(TournamentConflict): review_legacy(t.pk,self.admin,historical_only=False,machine_ids=[self.machines[0].pk],reason='不可抢占')
+        # Shared associations are now legal, but review never reclaims implicitly.
+        self.assertFalse(Reservation.objects.filter(table__tournament=t, status='active').exists())
         review_legacy(t.pk,self.admin,historical_only=True,machine_ids=[],reason='所有实体对局已结束，仅补历史成绩')
         self.confirm(table); self.resolve(t); finish(t.pk,self.admin,source_versions(t))
         self.assertTrue(Reservation.objects.filter(table__tournament=other,status='active').exists())
@@ -351,9 +364,10 @@ class CompetitionTests(Fixtures, TestCase):
         self.assertEqual(sorted(Reservation.objects.filter(status='active', source='legacy_bridge_v1').values_list('legacy_allocation_id', 'machine_id')), [(a[0], a[1]) for a in allocations])
         self.assertEqual(list(RoundSeat.objects.order_by('id').values_list('id', 'table_id', 'participant_id', 'seat_wind')), seats)
         self.assertEqual(list(MachineAllocation.objects.order_by('id').values_list('id', 'machine_id', 'status')), allocations)
-        with self.assertRaises(TournamentConflict) as error:
-            self.first(self.tournament(8), [a[1] for a in allocations])
-        self.assertEqual(error.exception.default_code, 'machine_occupied')
+        shared = self.tournament(8)
+        self.first(shared, [a[1] for a in allocations])
+        self.assertEqual(Reservation.objects.filter(table__tournament=shared, status='active').count(), 2)
+        self.assertEqual(list(MachineAllocation.objects.order_by('id').values_list('id', 'machine_id', 'status')), allocations)
         review_legacy(t.pk, self.admin, historical_only=True, machine_ids=[], reason='首轮记录异常，仅保留历史')
         t.refresh_from_db(); self.assertEqual(t.resource_state, 'historical_only')
         # Valid legacy data keeps exactly the previous bridge result.
@@ -495,7 +509,10 @@ class CompetitionConcurrencyTests(Fixtures, TransactionTestCase):
     def test_same_round_and_cross_tournament_selection(self):
         a,b=self.tournament(),self.tournament()
         result=self.race([lambda:self.first(a),lambda:self.first(b)])
-        self.assertEqual(result.count('ok'),1,result);self.assertEqual(Reservation.objects.filter(status='active').count(),1)
+        self.assertTrue(set(result) <= {'ok', 'tournament_busy'}, result)
+        for tournament in (a, b):
+            if not tournament.rounds.exists(): self.first(tournament)
+        self.assertEqual(Reservation.objects.filter(status='active').count(), 2)
 
     def test_duplicate_confirm_next_finish(self):
         t=self.tournament(rounds=2);table=self.first(t).tables.get()
@@ -511,7 +528,8 @@ class CompetitionConcurrencyTests(Fixtures, TransactionTestCase):
         result=self.race([lambda:self.first(t),lambda:change_machine(self.machines[0].pk,{'status':'maintenance'})])
         self.assertGreaterEqual(result.count('ok'),1,result)
         active=Reservation.objects.filter(status='active').select_related('machine').first()
-        if active:self.assertEqual(active.machine.status,'available')
+        # An association does not prevent subsequent maintenance; future generation rechecks state.
+        if active:self.assertIn(active.machine.status, ('available', 'maintenance'))
 
     def test_confirmation_vs_next_round(self):
         t = self.tournament(rounds=2)
@@ -546,8 +564,11 @@ class CompetitionConcurrencyTests(Fixtures, TransactionTestCase):
         self.first(a)
         target = self.machines[5].pk
         result = self.race([lambda: replace_machine(a.pk, 1, self.admin, target, '真实故障'), lambda: self.first(b, [target])])
-        self.assertEqual(result.count('ok'), 1, result)
-        self.assertEqual(Reservation.objects.filter(status='active', machine_id=target).count(), 1)
+        self.assertTrue(set(result) <= {'ok', 'tournament_busy'}, result)
+        if not Reservation.objects.filter(table__tournament=a, status='active', machine_id=target).exists():
+            replace_machine(a.pk, 1, self.admin, target, '真实故障')
+        if not b.rounds.exists(): self.first(b, [target])
+        self.assertEqual(Reservation.objects.filter(status='active', machine_id=target).count(), 2)
 
     def test_finish_competes_with_reuse(self):
         a, b = self.tournament(), self.tournament()

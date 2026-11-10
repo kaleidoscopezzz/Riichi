@@ -1,0 +1,13 @@
+
+> riichi-frontend@0.1.0 test
+> vitest run --run src/pages/machines.test.tsx
+
+
+ RUN  v4.1.12 D:/Riichi/Riichi/frontend
+
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  20:03:50
+   Duration  8.16s (transform 762ms, setup 50ms, import 1.71s, tests 4.49s, environment 1.60s)
+

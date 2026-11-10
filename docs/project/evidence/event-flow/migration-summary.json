@@ -1,0 +1,31 @@
+{
+  "result": "PASS",
+  "vendor": "sqlite",
+  "original_columns_unchanged": true,
+  "legacy_results_corrections_and_snapshots_unchanged": true,
+  "existing_swiss_strategy_unchanged": true,
+  "elimination_initially_empty": true,
+  "historical_lotteries_final": true,
+  "shared_reservation_constraint": true,
+  "per_table_unique_preserved": true,
+  "idempotent_rerun": true,
+  "additions": {
+    "tables": [
+      "tournaments_eliminationrecord"
+    ],
+    "columns": {
+      "tournaments_lotteryrecord": [
+        "elimination_round_id",
+        "participant_statuses",
+        "purpose"
+      ],
+      "tournaments_tournamentparticipant": [
+        "eliminated_after_round"
+      ]
+    }
+  },
+  "backup_integrity": "ok",
+  "independent_restore": "PASS",
+  "restored_upgrade": "PASS",
+  "backup_sha256": "1e9b324519b5457f8dd868cbcff3eface1fab8ac75eb1f9a3607bd005ab04e17"
+}

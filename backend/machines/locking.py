@@ -10,6 +10,11 @@ from .models import MahjongMachine
 
 
 def lock_machine_pool():
+    if connection.vendor == 'postgresql':
+        # Row locks cannot serialize an empty pool. One database-local advisory
+        # lock also protects first-machine numbering, and is released on rollback.
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT pg_advisory_xact_lock(%s, %s)', [0x52494348, 0x4D414348])
     if connection.vendor == "sqlite":
         # A no-op DML still obtains a SQLite write reservation, even for zero rows.
         # No timestamp/number/capacity value is changed by this reservation.

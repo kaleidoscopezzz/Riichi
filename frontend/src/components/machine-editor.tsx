@@ -24,7 +24,6 @@ export function MachineEditor({
   saved: (machine: Machine) => void
 }) {
   const [values, setValues] = useState<MachineInput>({
-    machine_no: machine?.machine_no || '',
     name: machine?.name || '',
     location: machine?.location || '',
     description: machine?.description || '',
@@ -38,10 +37,6 @@ export function MachineEditor({
   async function submit(event: FormEvent) {
     event.preventDefault()
     setError(null)
-    if (!/^[0-9]{1,3}$/.test(values.machine_no.trim())) {
-      setError(new Error('设备编号必须为 1～3 位数字。'))
-      return
-    }
     if (!values.name.trim()) {
       setError(new Error('设备名称不能为空。'))
       return
@@ -52,7 +47,6 @@ export function MachineEditor({
         await saveMachine(
           {
             ...values,
-            machine_no: values.machine_no.trim(),
             name: values.name.trim(),
             location: values.location.trim(),
             description: values.description.trim(),
@@ -81,7 +75,7 @@ export function MachineEditor({
           <SheetDescription>
             {machine
               ? `设备编号 ${machine.machine_no} · 稳定 ID #${machine.id}`
-              : '为物理麻将机建立独立档案，设备编号保存为三位数字。'}
+              : '填写设备名称等资料即可，三位设备编号在保存时由系统自动分配。'}
           </SheetDescription>
         </SheetHeader>
         <Button
@@ -96,23 +90,11 @@ export function MachineEditor({
         </Button>
         <form className="account-form machine-form" onSubmit={submit}>
           <fieldset disabled={busy || readOnly}>
-            <label>
-              设备编号
-              <input
-                autoFocus={!readOnly}
-                name="machine_no"
-                value={values.machine_no}
-                onChange={(e) => field('machine_no', e.target.value)}
-                inputMode="numeric"
-                maxLength={3}
-                required
-                placeholder="例如 007"
-              />
-            </label>
-            <p className="field-hint">编号不限于 001～004，现役设备之间不得重复。</p>
+            <p className="field-hint">设备编号：{machine?.machine_no ?? '保存后自动生成'}</p>
             <label>
               设备名称
               <input
+                autoFocus={!readOnly}
                 name="name"
                 value={values.name}
                 onChange={(e) => field('name', e.target.value)}

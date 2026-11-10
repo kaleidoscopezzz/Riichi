@@ -1,0 +1,7 @@
+{
+  "method": "task-scoped stop marker, normal helper shutdown",
+  "backend_exit_code": 0,
+  "https_exit_code": 0,
+  "forced_process_termination": false,
+  "private_qa_data_preserved": true
+}

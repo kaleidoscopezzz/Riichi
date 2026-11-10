@@ -1,0 +1,19 @@
+{
+  "health": 200,
+  "anonymous_workspace": 403,
+  "anonymous_elimination": 403,
+  "closed_registration": 403,
+  "admin_login": 200,
+  "session_secure": true,
+  "session_httponly": true,
+  "csrf_secure": true,
+  "admin_workspace": 200,
+  "private_cache_control": "no-store",
+  "admin_write_without_csrf": 403,
+  "strict_missing_fields": 400,
+  "new_swiss_rejected": 400,
+  "all_associations_exposed": true,
+  "assignable_from_device_state": true,
+  "trusted_localhost_tls": true,
+  "result": "PASS"
+}

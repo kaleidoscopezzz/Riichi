@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError as ModelValidationError
 from rest_framework.exceptions import ValidationError
 
 from .rules import canonical_oka
-from .pairing import BONUS_POLICY, LEGACY, RANKED, NEW_CHOICES, canonical_table_bonuses
+from .pairing import BONUS_POLICY, LEGACY, RANKED, SUPPORTED_CHOICES, canonical_table_bonuses
 
 
 def pack(value):
@@ -30,7 +30,7 @@ def rules(tournament, *, table=None):
         snapshot.update(oka_override=override, oka=tournament.oka if override is None else override)
     strategy = getattr(tournament, 'pairing_strategy', LEGACY)
     if strategy != LEGACY:
-        if strategy not in dict(NEW_CHOICES) or tournament.table_bonus_policy != BONUS_POLICY:
+        if strategy not in dict(SUPPORTED_CHOICES) or tournament.table_bonus_policy != BONUS_POLICY:
             raise ValidationError({'pairing_strategy': ['不支持此冻结分桌或附加积分策略。']})
         try:
             bonuses = canonical_table_bonuses(tournament.ranked_table_bonuses)

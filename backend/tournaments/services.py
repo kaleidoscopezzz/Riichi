@@ -10,7 +10,7 @@ from players.models import PlayerProfile
 from .models import Tournament, TournamentParticipant
 from .rules import canonical_oka, canonical_uma
 from .scoring import rules
-from .pairing import LEGACY, RANKED, NEW_CHOICES, canonical_table_bonuses
+from .pairing import LEGACY, RANKED, NEW_CHOICES, SUPPORTED_CHOICES, canonical_table_bonuses
 
 
 class TournamentConflict(APIException):
@@ -39,7 +39,7 @@ def replace_entries(tournament, ids):
     TournamentParticipant.objects.bulk_create([TournamentParticipant(tournament=tournament, player_id=pk) for pk in ids])
 
 
-def configure_rules(tournament, values, previous_version=None):
+def configure_rules(tournament, values, previous_version=None, previous_pairing=None):
     try:
         tournament.oka_override = canonical_oka(tournament.oka_override)
     except ModelValidationError as exc:
@@ -48,7 +48,8 @@ def configure_rules(tournament, values, previous_version=None):
         if {'pairing_strategy', 'ranked_table_bonuses'} & values.keys():
             raise ValidationError({'pairing_strategy': ['历史赛事沿用原规则，请创建新赛事选择自定义分桌。']})
     elif tournament.pairing_strategy not in dict(NEW_CHOICES):
-        raise ValidationError({'pairing_strategy': ['不支持此分桌策略。']})
+        if tournament.pairing_strategy not in dict(SUPPORTED_CHOICES) or tournament.pairing_strategy != previous_pairing:
+            raise ValidationError({'pairing_strategy': ['新赛事仅支持手动、完全随机或高高碰；既有瑞士轮赛事可保留原策略。']})
     try:
         tournament.ranked_table_bonuses = canonical_table_bonuses(tournament.ranked_table_bonuses)
     except ModelValidationError as exc:
@@ -100,10 +101,11 @@ def mutate_tournament(pk, *, values=None, participant_ids=None, start=False, rev
                     raise TournamentConflict("赛事草稿已被他人修改，请刷新后再保存。", "stale_tournament")
                 raise TournamentConflict("赛事已经启动，不能重复启动。" if start else "赛事已启动，配置和名单已冻结。", "already_started" if start else "tournament_frozen")
             previous_version = tournament.rules_version
+            previous_pairing = tournament.pairing_strategy
             if values is not None:
                 for key, value in values.items():
                     setattr(tournament, key, value)
-            configure_rules(tournament, values or {}, previous_version)
+            configure_rules(tournament, values or {}, previous_version, previous_pairing)
             if participant_ids is not None:
                 replace_entries(tournament, participant_ids)
             if start:

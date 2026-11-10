@@ -9,6 +9,8 @@ import type { Tournament } from '@/services/tournaments'
 import { generateRound, type MachineResource, type RoundTable } from '@/services/rounds'
 import {
   completeTournament,
+  eliminatePlayers,
+  displayScore,
   recordLottery,
   confirmLottery,
   voidLottery,
@@ -19,6 +21,7 @@ import {
   mergeLotteries,
   sameMembers,
   sameVersions,
+  sameParticipantStatuses,
   type Workspace,
   type FixedTable,
   type Lottery,
@@ -28,11 +31,11 @@ import { ResultCorrectionHistory } from './result-correction-history'
 import { PairingBoard } from './pairing-board'
 
 export type CompetitionActionType =
-  | { mode: 'generate' | 'finish' | 'review' }
+  | { mode: 'generate' | 'finish' | 'review' | 'eliminate' }
   | { mode: 'result' | 'correct' | 'result-history'; table: RoundTable }
   | { mode: 'replace'; fixed: FixedTable }
   | { mode: 'history'; fixed: FixedTable }
-  | { mode: 'lottery'; members: number[] }
+  | { mode: 'lottery'; members: number[]; purpose?: 'elimination'; round_number?: number }
 
 const voidReasonLimit = 500
 const formatTime = (value: string | null) =>
@@ -87,11 +90,7 @@ export function CompetitionAction({
   const [voidStage, setVoidStage] = useState(false)
   const table = action.mode === 'result' || action.mode === 'correct' ? action.table : null
   const needed = t.expected_table_count || 0
-  const free = resources.filter(
-    (m) =>
-      m.assignable ||
-      (action.mode === 'review' && ws.mapping.some((f) => f.machine_id === m.machine_id)),
-  )
+  const free = resources.filter((m) => m.status === 'available')
   const machineLabel = (pk: number) => {
     const machine = resources.find((m) => m.machine_id === pk)
     return machine ? `${machine.machine_no} · ${machine.name}` : `设备 #${pk}`
@@ -99,19 +98,38 @@ export function CompetitionAction({
   const playerName = (pk: number) =>
     ws.standings.find((s) => s.participant_id === pk)?.display_name || `选手 #${pk}`
   const members = action.mode === 'lottery' ? action.members : null
+  const lotteryContext = {
+    purpose:
+      action.mode === 'lottery' && action.purpose === 'elimination'
+        ? ('elimination' as const)
+        : ('final' as const),
+    round_number: action.mode === 'lottery' ? action.round_number : undefined,
+    participant_statuses: ws.participant_statuses,
+  }
   const groupLotteries = members
-    ? mergeLotteries(ws.lotteries, writtenLotteries).filter((l) => sameMembers(l.members, members))
+    ? mergeLotteries(ws.lotteries, writtenLotteries).filter(
+        (l) =>
+          sameMembers(l.members, members) &&
+          (l.purpose ?? 'final') === lotteryContext.purpose &&
+          (l.round_number ?? null) === (lotteryContext.round_number ?? null),
+      )
     : []
   // Earliest first: a later record can never be confirmed in place of an earlier one.
   const pendingLotteries = members
     ? groupLotteries
-        .filter((l) => isPendingLottery(l, members, ws.source_versions))
+        .filter((l) => isPendingLottery(l, members, ws.source_versions, lotteryContext))
         .sort((a, b) => a.id - b.id)
     : []
   const pending = pendingLotteries[0] || null
   const lotteryHistory = groupLotteries.filter((l) => l !== pending).sort((a, b) => b.id - a.id)
   const groupOpen =
-    !!members && (ws.unresolved_groups ?? []).some((group) => sameMembers(group, members))
+    !!members &&
+    (lotteryContext.purpose === 'elimination'
+      ? ws.elimination && ws.elimination.round_number === lotteryContext.round_number
+        ? ws.elimination.unresolved_groups
+        : []
+      : (ws.unresolved_groups ?? [])
+    ).some((group) => sameMembers(group, members))
   const title = {
     generate: next === 1 ? '确认选桌与首轮' : `确认生成第 ${next} 轮`,
     result: '半庄成绩',
@@ -119,9 +137,10 @@ export function CompetitionAction({
     'result-history': '成绩更正记录',
     finish: '确认正式完赛',
     replace: '故障替换物理桌',
-    history: '物理桌占用历史',
+    history: '物理桌关联历史',
     review: '旧赛事兼容复核',
     lottery: '公开抽签与确认',
+    eliminate: '确认本轮淘汰名单',
   }[action.mode]
   async function run(operation: () => Promise<unknown>, message: string, stay = false) {
     setBusy(true)
@@ -154,6 +173,10 @@ export function CompetitionAction({
           description: reason,
           drawn_at: new Date(drawnAt).toISOString(),
           source_versions: versions,
+          ...(ws.participant_statuses ? { participant_statuses: ws.participant_statuses } : {}),
+          ...(lotteryContext.purpose === 'elimination'
+            ? { purpose: 'elimination' as const, round_number: lotteryContext.round_number }
+            : {}),
         })
         setWrittenLotteries((rows) => [
           ...rows,
@@ -253,6 +276,7 @@ export function CompetitionAction({
             t.pairing_strategy !== 'legacy_v1' && (
               <>
                 {next === 1 && pickers}
+                {next === 1 && <p>月赛、日赛等可共享同一麻将机；本场各逻辑桌须选择不同设备。</p>}
                 <PairingBoard
                   tournament={t}
                   next={next}
@@ -328,8 +352,8 @@ export function CompetitionAction({
                   <article key={h.id}>
                     <strong>物理桌 {h.machine_no_snapshot}</strong>
                     <p>
-                      {h.status === 'active' ? '占用中' : '已释放'} · {h.source} · 稳定 machineId #
-                      {h.machine_id}
+                      {h.status === 'active' ? '关联有效' : '关联已结束'} · {h.source} · 稳定
+                      machineId #{h.machine_id}
                     </p>
                     <dl className="history-reasons">
                       <div>
@@ -354,9 +378,9 @@ export function CompetitionAction({
             <>
               <p>仅故障时替换逻辑桌 {action.fixed.label}。已生成轮次的历史映射与座次不变。</p>
               <label className="round-field">
-                目标空闲物理桌
+                目标可用物理桌
                 <Select
-                  aria-label="目标空闲物理桌"
+                  aria-label="目标可用物理桌"
                   value={target}
                   disabled={busy}
                   onValueChange={(value) => {
@@ -366,7 +390,11 @@ export function CompetitionAction({
                   options={[
                     { value: '', label: '请选择' },
                     ...resources
-                      .filter((m) => m.assignable)
+                      .filter(
+                        (m) =>
+                          m.status === 'available' &&
+                          !ws.mapping.some((f) => f.machine_id === m.machine_id),
+                      )
                       .map((m) => ({ value: m.machine_id, label: `${m.machine_no} · ${m.name}` })),
                   ]}
                 />
@@ -459,14 +487,26 @@ export function CompetitionAction({
           )}
           {members && (
             <>
+              {lotteryContext.purpose === 'elimination' && (
+                <p>
+                  用于第 {lotteryContext.round_number}{' '}
+                  轮后的淘汰边界。抽签顺序靠前者优先晋级，确认抽签后仍需另行确认淘汰名单。
+                </p>
+              )}
               <p>
                 本组所有绩效指标完全相同。请在公开抽签完成后，依次选择所得完整顺序；系统不会随机生成结果。
               </p>
               <p>并列选手：{members.map(playerName).join('、')}</p>
               {!groupOpen ? (
                 <div className="confirmation-preview">
-                  <h3>该并列组已无需抽签</h3>
-                  <p>赛事可能已完赛，或该组抽签已由其他操作确认。请关闭面板，核对最新排名。</p>
+                  <h3>
+                    {lotteryContext.purpose === 'elimination'
+                      ? '此轮抽签仅供历史查看'
+                      : '该并列组已无需抽签'}
+                  </h3>
+                  <p>
+                    当前轮次或并列组已变化。请关闭面板并从工作台重新打开抽签，原记录仍保留在下方。
+                  </p>
                 </div>
               ) : pending ? (
                 <>
@@ -656,7 +696,11 @@ export function CompetitionAction({
                         记录 #{l.id} ·{' '}
                         {lotteryState(
                           l,
-                          sameVersions(l.source_versions ?? [], ws.source_versions),
+                          sameVersions(l.source_versions ?? [], ws.source_versions) &&
+                            sameParticipantStatuses(
+                              l.participant_statuses,
+                              ws.participant_statuses,
+                            ),
                           pendingLotteries.includes(l),
                         )}
                       </strong>
@@ -677,6 +721,44 @@ export function CompetitionAction({
               )}
             </>
           )}
+          {action.mode === 'eliminate' &&
+            (ws.elimination?.ready ? (
+              <>
+                <p>
+                  第 {ws.elimination.round_number} 轮成绩已全部确认。以下四人将结束本场参赛，剩{' '}
+                  {ws.elimination.remaining_count} 人继续完成后续 {ws.elimination.remaining_rounds}{' '}
+                  轮。
+                </p>
+                <div className="confirmation-preview elimination-preview" aria-label="待淘汰四人">
+                  <h3>累计排名末四人</h3>
+                  <ul>
+                    {ws.elimination.candidates.map((row) => (
+                      <li key={row.participant_id}>
+                        <span>
+                          暂列 {row.rank} · {row.display_name}
+                        </span>
+                        <strong>{displayScore(row.total)} 分</strong>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <p>历史成绩与淘汰依据留档。之后更正旧成绩会更新积分，不会自动恢复参赛资格。</p>
+                <Button
+                  variant="destructive"
+                  disabled={busy}
+                  onClick={() =>
+                    void run(
+                      () => eliminatePlayers(t.id, ws.elimination!),
+                      '本轮已淘汰四人，后续赛程继续。',
+                    )
+                  }
+                >
+                  {busy ? '正在提交…' : '确认淘汰这四人'}
+                </Button>
+              </>
+            ) : (
+              <p>当前无法淘汰。请核对最新轮次、成绩确认状态及淘汰边界抽签。</p>
+            ))}
           {action.mode === 'finish' && (
             <>
               <Trophy size={32} />
@@ -689,7 +771,10 @@ export function CompetitionAction({
                 disabled={busy}
                 onClick={() =>
                   void run(
-                    () => completeTournament(t.id, ws.source_versions),
+                    () =>
+                      ws.participant_statuses
+                        ? completeTournament(t.id, ws.source_versions, ws.participant_statuses)
+                        : completeTournament(t.id, ws.source_versions),
                     '赛事已正式完赛，物理桌已自动释放。',
                   )
                 }

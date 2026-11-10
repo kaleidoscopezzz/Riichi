@@ -1,0 +1,43 @@
+
+> riichi-frontend@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 D:/Riichi/Riichi/frontend
+
+ ❯ src/components/error-boundary.test.tsx (4 tests | 1 failed) 527ms
+     × 异常分数（分母为 0、负分母、负零）展示不抛异常 26ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/error-boundary.test.tsx > 应用级错误边界 > 异常分数（分母为 0、负分母、负零）展示不抛异常
+AssertionError: expected [ '— 分', '−0.33 分', '0.00 分' ] to deeply equal [ '—', '−0.33', '0.00' ]
+
+- Expected
++ Received
+
+  [
+-   "—",
+-   "−0.33",
+-   "0.00",
++   "— 分",
++   "−0.33 分",
++   "0.00 分",
+  ]
+
+ ❯ src/components/error-boundary.test.tsx:135:20
+    133|     )
+    134|     const totals = [...document.querySelectorAll('td strong')].map((ce…
+    135|     expect(totals).toEqual(['—', '−0.33', '0.00'])
+       |                    ^
+    136|   })
+    137| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  1 failed | 232 passed (233)
+   Start at  12:22:02
+   Duration  46.10s (transform 2.71s, setup 541ms, import 37.92s, tests 78.76s, environment 125.84s)
+

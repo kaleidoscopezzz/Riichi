@@ -12,7 +12,7 @@ export type Machine = {
   updated_at: string
 }
 export type MachineInput = {
-  machine_no: string
+  machine_no?: string
   name: string
   location: string
   description: string
