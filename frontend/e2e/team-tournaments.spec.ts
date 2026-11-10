@@ -173,16 +173,18 @@ async function score(page: Page, row: any, b: any, info?: TestInfo) {
   }
 }
 async function confirmTeamLottery(page: Page) {
-  // Saving the draw refreshes the dialog; retry against the replacement button
-  // instead of letting a single detached node exhaust the test budget.
-  for (let attempt = 0; attempt < 30; attempt++) {
-    if ((await dialog(page).count()) === 0) return
+  // Saving the draw refreshes the dialog. A DOM click avoids waiting for a
+  // stable node that a workspace refresh can replace, then wait for the sheet
+  // to close before retrying rather than double-clicking during its animation.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const button = dialog(page).getByRole('button', { name: '二次确认团队抽签' })
+    if (!(await button.count())) break
+    await button.evaluate((element) => (element as HTMLElement).click()).catch(() => {})
     try {
-      await dialog(page)
-        .getByRole('button', { name: '二次确认团队抽签' })
-        .click({ timeout: 3000 })
+      await expect(dialog(page)).toHaveCount(0, { timeout: 3000 })
+      return
     } catch {
-      await page.waitForTimeout(200)
+      await page.waitForTimeout(300)
     }
   }
   await expect(dialog(page)).toHaveCount(0)
@@ -202,6 +204,7 @@ async function finish(page: Page, id: number) {
       .getByLabel('团队公开过程说明', { exact: true })
       .fill('隔离QA真实接口完整记录')
     await dialog(page).getByRole('button', { name: '保存公开团队抽签' }).click()
+    await expect(dialog(page).getByText(/待二次确认的团队抽签/)).toBeVisible()
     await confirmTeamLottery(page)
     await expect(dialog(page)).toHaveCount(0)
     ws = await read(page, `/tournaments/${id}/workspace/`)
