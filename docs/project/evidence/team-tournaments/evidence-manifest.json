@@ -1,0 +1,601 @@
+{
+  "result": "PASS",
+  "credential_key_database_trace_excluded": true,
+  "files": [
+    {
+      "path": "logs/backend-concurrency-second.log",
+      "bytes": 274,
+      "sha256": "cf06df80f9ecad1f9d18185e8b2d16c7eee8d31325371f200b3400db876a5eca"
+    },
+    {
+      "path": "logs/backend-coverage-final.log",
+      "bytes": 2370,
+      "sha256": "3184281fdfccfdd5235a99536d40fbf29a80eee5d809a8328ccf4b611b351d96"
+    },
+    {
+      "path": "logs/backend-full-candidate.log",
+      "bytes": 530,
+      "sha256": "912de2ae0e4dae770ee2b60ff51751f0dce50730e960b58bc40fa92e2b606eb8"
+    },
+    {
+      "path": "logs/backend-full-first.log",
+      "bytes": 22788,
+      "sha256": "1088d137431a6c6036c9e955a3828e701914271962d1c40cc5ad38e847dc1294"
+    },
+    {
+      "path": "logs/backend-full-release-candidate.log",
+      "bytes": 531,
+      "sha256": "f79bd37e9132a4c3eab430116eebbdca30b594469d2b574174983c80eebdab24"
+    },
+    {
+      "path": "logs/backend-full-second.log",
+      "bytes": 518,
+      "sha256": "34c756e2aab4e41e69c0ba8556eed9b5a260e80bca69cab2c0689ad9560afc68"
+    },
+    {
+      "path": "logs/backend-review-fixes.log",
+      "bytes": 291,
+      "sha256": "7a388872bd9212e1ef822e9a311727ef834662c37b5cac41273d4e87722aeb9a"
+    },
+    {
+      "path": "logs/browser-candidate.log",
+      "bytes": 1244,
+      "sha256": "d0cd217d6dc474b749ddf90461bb0b3c2bf4079feb85757ae021dba7e3edc83f"
+    },
+    {
+      "path": "logs/browser-final.log",
+      "bytes": 6039,
+      "sha256": "97a679a29ce6b8c4c8e7709a8ef991012efa37f7e7941e424a325620c9033071"
+    },
+    {
+      "path": "logs/browser-first.log",
+      "bytes": 3788,
+      "sha256": "6acfa70ee6c339f27394fa6dda8156c864540ef00cf8bbb9ffd08a1a113ace08"
+    },
+    {
+      "path": "logs/browser-second.log",
+      "bytes": 1066,
+      "sha256": "c35cf2c82c7140fec729debd34e53b30a929a15e2e4ce593f09f2043f865ebad"
+    },
+    {
+      "path": "logs/ci-helper-syntax.log",
+      "bytes": 61,
+      "sha256": "f71b9ea8044d01522f36be4e9849012242b03db54822a068c49e003ae605de8c"
+    },
+    {
+      "path": "logs/django-check-final.log",
+      "bytes": 49,
+      "sha256": "f87ceb15410bde28ff826ce26228e0576558258fa64d145847921a593a61ee63"
+    },
+    {
+      "path": "logs/frontend-build-candidate.log",
+      "bytes": 912,
+      "sha256": "e8cfacd1c921c70cfadbba06db5c976164ba5956656768b19be7d1fd327704ea"
+    },
+    {
+      "path": "logs/frontend-full-candidate.log",
+      "bytes": 278,
+      "sha256": "4c187060dc0d2ace87401b5662d313168d4757e2cbbe48c84c9fdacef501bded"
+    },
+    {
+      "path": "logs/frontend-review-fixes-second.log",
+      "bytes": 339,
+      "sha256": "d6ae678957c6f6c9e184b1c0e31ce30b3df9bc66f0fd442d3f779a0ceec068b4"
+    },
+    {
+      "path": "logs/frontend-review-fixes.log",
+      "bytes": 8240,
+      "sha256": "c06ccda31f638ed73d2ac9ff7f21093af2c051090d0f8e600df03db536cb2b66"
+    },
+    {
+      "path": "logs/http-security-final.log",
+      "bytes": 767,
+      "sha256": "091bfffab5b8d1c04abb1156fba4fb54f3d4ac02852444e408696f09e12a1b60"
+    },
+    {
+      "path": "logs/makemigrations-final.log",
+      "bytes": 21,
+      "sha256": "93e6e2d5be3c054add80c0f19101608803f7ca8a7df1fa41f76bbb9a1f570f4a"
+    },
+    {
+      "path": "logs/migrate-final.log",
+      "bytes": 2025,
+      "sha256": "1b929bc5328c58fa62e627915962e5f4955a556fdb9305d0730af6e49d402ea7"
+    },
+    {
+      "path": "logs/migration-plan-final.log",
+      "bytes": 1476,
+      "sha256": "4c0e943a617b4ff00272456cc31dc06349d4d0899ec9b96b08b6cb482b36593d"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-custom-1440-dark.png",
+      "bytes": 103723,
+      "sha256": "a81b59b72564fbe23ebb0180115b8f082660762ea6cfde63d592b8e76ecc346c"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-custom-1440-light.png",
+      "bytes": 104142,
+      "sha256": "3a1ad9d691eb78c78e637f16f4b37ba807c238818cec99182ff67563b430ae86"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-custom-320-dark.png",
+      "bytes": 51504,
+      "sha256": "0970223d7a2eb6ff8c00aead6fbfd09cd4b995b4a325e9c83bce8804d16fab6b"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-custom-320-light.png",
+      "bytes": 51429,
+      "sha256": "83bdae57f34330d1446246ba4811a440e11c89dd25ad5eedf124621e34ac4b6e"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-custom-390-dark.png",
+      "bytes": 54168,
+      "sha256": "f199809f5cc03cd507d3b619fe2499c54541e828134bec1051152f46c9bf11b4"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-custom-390-light.png",
+      "bytes": 54093,
+      "sha256": "a7e05afa5ce27aae74c5599e57fa7330c17947b7de0bb1900019893541ba1ff1"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-select-1440-dark.png",
+      "bytes": 107790,
+      "sha256": "5d73e11935ae34c6208469948ec7242e0c4df285e37586ead8872641c21c1dc2"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-select-1440-light.png",
+      "bytes": 108588,
+      "sha256": "93f1b1453c71649c5bbb34d70aefa9265399adea17b3f7093df752a73ece7016"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-select-320-dark.png",
+      "bytes": 57927,
+      "sha256": "1ebbada8ebb36ac90f63914a6f8478e38bb3aa5a131079bcd1461baacc78c6bd"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-select-320-light.png",
+      "bytes": 57108,
+      "sha256": "dbe839d8abe6f4b52b6ac9d12b14b743aa2b1a0bb33030f37606e26f7fbc1d3c"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-select-390-dark.png",
+      "bytes": 60226,
+      "sha256": "1a5efe7733ee1c1917e71837bf78e2762fa417b0b82b0facfed3192c91b3fdf5"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-select-390-light.png",
+      "bytes": 59655,
+      "sha256": "cc1548e741803bfb561a4c031a756387b69ea22102f7b281899c1e06f131a6b1"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-zero-completed.png",
+      "bytes": 169716,
+      "sha256": "88bb1dd1685f69a370acd8abc271c1136427b74b9508e6d34b4c688f5428166c"
+    },
+    {
+      "path": "prior-runs/browser-final/configurable-oka-configura-e5f17-oring-and-accessible-themes/oka-zero-config.png",
+      "bytes": 98433,
+      "sha256": "2230f2aa0e87b87bac41a574ba3b39b7f7264e1eb50c5c380c65ccaf186834ca"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-a-tied-eliminat-8fc2f-ibility-and-generated-seats/boundary-correction-summary.json",
+      "bytes": 121,
+      "sha256": "f541dd206b100916fbc00e95616952f2ccb83365a2bb3811e53ecda30fe2578e"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-monthly-and-dai-57f65--until-explicit-replacement/shared-machines-summary.json",
+      "bytes": 94,
+      "sha256": "d6465421e7576ab7f9ba1c70d7fe791277f29eaf8d1ec3c8f21a826ea263f6f8"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-sixteen-players-b8777-e-statistics-in-both-themes/elimination-preview-desktop-dark.png",
+      "bytes": 109430,
+      "sha256": "430decf3602d830cd53fe1283e63855b2da8eb775efa349fb375a687cd53bf94"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-sixteen-players-b8777-e-statistics-in-both-themes/elimination-preview-desktop-light.png",
+      "bytes": 110014,
+      "sha256": "f631c777683ff18fb7b9052b3c7a559f005b244f01b419fd03826a116ce1fbc4"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-sixteen-players-b8777-e-statistics-in-both-themes/six-round-elimination-summary.json",
+      "bytes": 694,
+      "sha256": "719be557681cc57979fce05bc649428ec5fedbe21574b225fc74f9006fcf8c44"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-sixteen-players-b8777-e-statistics-in-both-themes/statistics-rounds-1440-dark.png",
+      "bytes": 354692,
+      "sha256": "ebbc99ce696ec84d384c61fce19efb8a177d53978a794249172416e6cdaf051e"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-sixteen-players-b8777-e-statistics-in-both-themes/statistics-rounds-1440-light.png",
+      "bytes": 355219,
+      "sha256": "716dd25b5a18f7571c9957e46cb062a14e683b0185434923d90e91641b5c343e"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-sixteen-players-b8777-e-statistics-in-both-themes/statistics-rounds-320-dark.png",
+      "bytes": 396382,
+      "sha256": "503579a14b59d9f9b3f8ac486961d0e926fdd9cfa458724fdd8b55ba2b12a465"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-sixteen-players-b8777-e-statistics-in-both-themes/statistics-rounds-320-light.png",
+      "bytes": 394358,
+      "sha256": "331070ef167d7a47c8aee8cf55722ac1376db6ef8d1f0f019a46b92711a0043e"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-sixteen-players-b8777-e-statistics-in-both-themes/statistics-rounds-390-dark.png",
+      "bytes": 410894,
+      "sha256": "d759389aa80f5dee1d81206567958d6807343ac427721070bfa2d0d94723f7cd"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-sixteen-players-b8777-e-statistics-in-both-themes/statistics-rounds-390-light.png",
+      "bytes": 409304,
+      "sha256": "b59ea3901684b5fe7c383299178b17337289f1e779c7ddeb90a11dcfc84d8efe"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-three-new-strat-cfbfd-in-desktop-and-phone-themes/strategy-select-1440-dark.png",
+      "bytes": 101072,
+      "sha256": "44f0b0a8da01a0b153a630bda3637ea27b21a1b9ceedaaac3c7ce4c8c44d39a1"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-three-new-strat-cfbfd-in-desktop-and-phone-themes/strategy-select-1440-light.png",
+      "bytes": 122698,
+      "sha256": "7d3eb72d023eba12cc3a7d8f43c70bd9473ddf3fe92ea7b0f8b0a073082bb07f"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-three-new-strat-cfbfd-in-desktop-and-phone-themes/strategy-select-320-dark.png",
+      "bytes": 38409,
+      "sha256": "8b39e28de3522d5279b6d88a114d414e332c75e19ed1c964bbefed293c26acf7"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-three-new-strat-cfbfd-in-desktop-and-phone-themes/strategy-select-320-light.png",
+      "bytes": 38156,
+      "sha256": "7b60be87cb4d7d47a173452167cbbfb87d34b6ac339745196090d1a171be245d"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-three-new-strat-cfbfd-in-desktop-and-phone-themes/strategy-select-390-dark.png",
+      "bytes": 39235,
+      "sha256": "fca8b2ef765c5dc1c8246c7076408fad40617e561683f8325e66fa5c8096357e"
+    },
+    {
+      "path": "prior-runs/browser-final/event-flow-three-new-strat-cfbfd-in-desktop-and-phone-themes/strategy-select-390-light.png",
+      "bytes": 39066,
+      "sha256": "b3450d0aac410ffd4ec19f521b7af2d90febf5f034f685bb28eaea97f53f249f"
+    },
+    {
+      "path": "prior-runs/browser-final/pairing-strategies-new-pre-eb47d-manual-mouse-keyboard-swaps/manual-mouse-desktop.png",
+      "bytes": 125671,
+      "sha256": "cfcb2483fa72e26f81a0f8ad604a4dfcc0dc8352e8623963e92f153b12556664"
+    },
+    {
+      "path": "prior-runs/browser-final/pairing-strategies-new-pre-eb47d-manual-mouse-keyboard-swaps/manual-round2.png",
+      "bytes": 130106,
+      "sha256": "ad3d21d444454956993824d854c9331d5bfb039d4a1380ecbef48be0229b4f8c"
+    },
+    {
+      "path": "prior-runs/browser-final/pairing-strategies-new-pre-eb47d-manual-mouse-keyboard-swaps/random-round2.png",
+      "bytes": 111347,
+      "sha256": "ac7f25faeb2dad75347e71feb603345961eb9a036fa5b7679b388c6c768c73ac"
+    },
+    {
+      "path": "prior-runs/browser-final/pairing-strategies-new-pre-eb47d-manual-mouse-keyboard-swaps/ranked-round2.png",
+      "bytes": 110812,
+      "sha256": "470dec250353b11da5166c4305aa347ea7d00f832c586920b54072405bf9191c"
+    },
+    {
+      "path": "prior-runs/browser-final/pairing-strategies-new-pre-eb47d-manual-mouse-keyboard-swaps/swiss-repeats-round2.png",
+      "bytes": 113296,
+      "sha256": "09ae78be302ab6ac9aee2b99d65c4a679523e879413799be503e3acdf18e2bb3"
+    },
+    {
+      "path": "prior-runs/browser-final/pairing-strategies-new-pre-eb47d-manual-mouse-keyboard-swaps/swiss-scores-round2.png",
+      "bytes": 117539,
+      "sha256": "74b0dad77fca15da887ac297011bec662a0bb7f6ceefec2b60fb566b899c2434"
+    },
+    {
+      "path": "prior-runs/browser-final/pairing-strategies-sixteen-754e7--A-to-offscreen-D-on-phones/manual-touch-320.png",
+      "bytes": 31134,
+      "sha256": "7494d6c45a9560f939a622bad34099558257af75e4a28e0d3b1e3b2bf194dda5"
+    },
+    {
+      "path": "prior-runs/browser-final/pairing-strategies-sixteen-754e7--A-to-offscreen-D-on-phones/manual-touch-390.png",
+      "bytes": 37538,
+      "sha256": "f6215fbf4b3fe64efe3e36fba9019cc49fea5f87a697baa6d0775c27bd1dfb13"
+    },
+    {
+      "path": "prior-runs/browser-final/production-launch-real-bro-48f22-ompletion-responsive-themes/completed-12-2-14.png",
+      "bytes": 273937,
+      "sha256": "aa3a187563402d04c3427b6942ce11c2aa6936f0b1e60dca79daaebda44828ee"
+    },
+    {
+      "path": "prior-runs/browser-final/production-launch-real-bro-48f22-ompletion-responsive-themes/completed-16-6-15.png",
+      "bytes": 307850,
+      "sha256": "7759d4fea7bfa148fb1396cba5c1140d54a3a4ca136c9baafc22ff4ac26bcc15"
+    },
+    {
+      "path": "prior-runs/browser-final/production-launch-real-bro-48f22-ompletion-responsive-themes/completed-4-1-12.png",
+      "bytes": 167892,
+      "sha256": "161d6bb88c76b3da7e1ce21b2fd6c868cd643d083af9bbe499c1c24d967ff1bf"
+    },
+    {
+      "path": "prior-runs/browser-final/production-launch-real-bro-48f22-ompletion-responsive-themes/completed-4-1-16.png",
+      "bytes": 168010,
+      "sha256": "afcb6c9913c2aeeee48fe167048644fb8375b4f2ba9c30f6f554d6ad2e9a98c6"
+    },
+    {
+      "path": "prior-runs/browser-final/production-launch-real-bro-48f22-ompletion-responsive-themes/completed-8-3-13.png",
+      "bytes": 209982,
+      "sha256": "b7e713f90746edaa36c8391820bca303781f3554f0b9d4fcefad7733f26f04de"
+    },
+    {
+      "path": "prior-runs/browser-final/production-launch-real-bro-48f22-ompletion-responsive-themes/tournaments-1440-dark.png",
+      "bytes": 189106,
+      "sha256": "d8b7f5d42ec2e6c2891789d23780f42ed3dfedfeea5662f2d69f88f2236d2a0a"
+    },
+    {
+      "path": "prior-runs/browser-final/production-launch-real-bro-48f22-ompletion-responsive-themes/tournaments-1440-light.png",
+      "bytes": 190536,
+      "sha256": "dabd953b50595454884b281e70c72ac19b99439e627d2a6a2baa6ba0c9965b79"
+    },
+    {
+      "path": "prior-runs/browser-final/production-launch-real-bro-48f22-ompletion-responsive-themes/tournaments-320-dark.png",
+      "bytes": 153927,
+      "sha256": "e42d20ab7ffc80ff4fbf92459416775aaf8241b8d395ef58f8b0f6694b033ffa"
+    },
+    {
+      "path": "prior-runs/browser-final/production-launch-real-bro-48f22-ompletion-responsive-themes/tournaments-320-light.png",
+      "bytes": 156247,
+      "sha256": "7ab3d3385d5f9c67411f5e4e8c6d08d130e4fea3e12065d4f9e72e2d4d797c24"
+    },
+    {
+      "path": "prior-runs/browser-final/production-launch-real-bro-48f22-ompletion-responsive-themes/tournaments-390-dark.png",
+      "bytes": 156024,
+      "sha256": "334c4c8a0baa77c02131429a55d9e5311f0bca49e2172820b4be5707c280c8ee"
+    },
+    {
+      "path": "prior-runs/browser-final/production-launch-real-bro-48f22-ompletion-responsive-themes/tournaments-390-light.png",
+      "bytes": 158616,
+      "sha256": "a093bbafb2e772c14791510d8e94214a219cc6f87fb3eba038df7505ff95fac7"
+    },
+    {
+      "path": "prior-runs/browser-final/score-corrections-correct--d467d-s-and-preserve-play-history/correction-completed.png",
+      "bytes": 204935,
+      "sha256": "365a86d3b5d6516d074d99ffc7b7cc6fc9e05fc4c470a90f31ec55528ff52781"
+    },
+    {
+      "path": "prior-runs/browser-final/score-corrections-correct--d467d-s-and-preserve-play-history/correction-history.png",
+      "bytes": 100441,
+      "sha256": "9b620eef49f15336a7354b3c5f629090a907e903e1f3bd2ebaa6bd4193d0f24c"
+    },
+    {
+      "path": "prior-runs/browser-final/score-corrections-correct--d467d-s-and-preserve-play-history/correction-preview-1440-dark.png",
+      "bytes": 119750,
+      "sha256": "a9900549e93e110b2ec2e70d335e87df1c3e35869e4053dfcf2a350a8d7e7da3"
+    },
+    {
+      "path": "prior-runs/browser-final/score-corrections-correct--d467d-s-and-preserve-play-history/correction-preview-1440-light.png",
+      "bytes": 120609,
+      "sha256": "b07bd1f276694ff5670e2ec689323a8374c8db3b71417540fc30187936818b1c"
+    },
+    {
+      "path": "prior-runs/browser-final/score-corrections-correct--d467d-s-and-preserve-play-history/correction-preview-320-dark.png",
+      "bytes": 46825,
+      "sha256": "6115f811ef4241d98f8cf19170f4f4744902bafc18f46636de1060c09d563577"
+    },
+    {
+      "path": "prior-runs/browser-final/score-corrections-correct--d467d-s-and-preserve-play-history/correction-preview-320-light.png",
+      "bytes": 46318,
+      "sha256": "448f7a490f4872906a810122a5217db5c7a68ce2ef726642e1654f5ab57c4c21"
+    },
+    {
+      "path": "prior-runs/browser-final/score-corrections-correct--d467d-s-and-preserve-play-history/correction-preview-390-dark.png",
+      "bytes": 48186,
+      "sha256": "65175a7988897c12c10cb52f47e6402bb6cd8d49bfacc9f589c575b4809ff2e3"
+    },
+    {
+      "path": "prior-runs/browser-final/score-corrections-correct--d467d-s-and-preserve-play-history/correction-preview-390-light.png",
+      "bytes": 47782,
+      "sha256": "be0d0d3e6191ceeccac1419f1764889ec9c13e35480bbb2cc77507f176f93df3"
+    },
+    {
+      "path": "prior-runs/browser-final/team-tournaments-odd-team--aa2a5-on-and-accepts-four-matches/team-five-invalid-two-games.png",
+      "bytes": 97930,
+      "sha256": "dc9ec8b9ad7cbfb3d59210fa57ad890b83d73ba636dcb5be7b09980ac1ffb04f"
+    },
+    {
+      "path": "prior-runs/browser-final/team-tournaments-six-varia-201c9-tions-and-responsive-themes/test-failed-1.png",
+      "bytes": 113181,
+      "sha256": "7aa7755461b3ff49532f084d4c58ad2c89d4a7e0d35c77b4b85ecf2b5a0d2459"
+    },
+    {
+      "path": "prior-runs/browser-final/team-tournaments-team-edit-5893d-phone-light-and-dark-themes/team-mode-select-320-dark.png",
+      "bytes": 37956,
+      "sha256": "38acae91d3f79543faf3ba7ef50e71f652e7fab78da006bf68090282b818e84d"
+    },
+    {
+      "path": "prior-runs/browser-final/team-tournaments-team-edit-5893d-phone-light-and-dark-themes/team-mode-select-320-light.png",
+      "bytes": 37632,
+      "sha256": "bd2774d4ecb0c31d8c3ba02364ab3d8b82fe2faed698b85e5ae70e42fc9ea126"
+    },
+    {
+      "path": "prior-runs/browser-final/team-tournaments-team-edit-5893d-phone-light-and-dark-themes/team-mode-select-390-dark.png",
+      "bytes": 36489,
+      "sha256": "057b2512c4dad060a89e782b54023970baf448758ba8010f7b77b80defec9a36"
+    },
+    {
+      "path": "prior-runs/browser-final/team-tournaments-team-edit-5893d-phone-light-and-dark-themes/team-mode-select-390-light.png",
+      "bytes": 37054,
+      "sha256": "56198ea8d2e7bc3ec92c19503aff171a1ee9e9d6d11ab02333a1f2efa1d0fdbf"
+    },
+    {
+      "path": "prior-runs/browser-final/team-tournaments-two-cycle-b32f9-etain-fixed-representatives/position-team-summary.json",
+      "bytes": 347,
+      "sha256": "e123887c9cee23a6cee1dc41b9bafb8676ade0533c5ef4839c397a69fafc4604"
+    },
+    {
+      "path": "prior-runs/browser-final/team-tournaments-two-cycle-b32f9-etain-fixed-representatives/team-positions-completed.png",
+      "bytes": 617585,
+      "sha256": "b542dd9de275dbff05e7f9518ca6e1fdc9ba3a3ecdbaa2b3037e547d795a213c"
+    },
+    {
+      "path": "prior-runs/browser-final/team-tournaments-two-cycle-b32f9-etain-fixed-representatives/team-representative-select.png",
+      "bytes": 115811,
+      "sha256": "21568143c9f24dc3960003989e9cbdf360eacbde2473b226302de58e6a6186cc"
+    },
+    {
+      "path": "prior-runs/browser-first/team-tournaments-six-varia-201c9-tions-and-responsive-themes/free-team-summary.json",
+      "bytes": 913,
+      "sha256": "84ae798bbd9d39164bd590122d39a567c52c4799e6f83fd42bfa035ef1c17ad8"
+    },
+    {
+      "path": "prior-runs/browser-first/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-free-1440-dark.png",
+      "bytes": 390476,
+      "sha256": "44c669ed867f214df9d098436ecbdba39b54f2029a4d154577ad1722246029d8"
+    },
+    {
+      "path": "prior-runs/browser-first/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-free-1440-light.png",
+      "bytes": 392442,
+      "sha256": "dc6f4406a02736dd10592b77bc4f6a6c39e549069410112b109615a0c08bd9ea"
+    },
+    {
+      "path": "prior-runs/browser-first/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-free-320-dark.png",
+      "bytes": 389082,
+      "sha256": "ca018644e36ee0a6f9bc98efdc108bf835586458d6fa817dbb4e6b524d0d24e7"
+    },
+    {
+      "path": "prior-runs/browser-first/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-free-320-light.png",
+      "bytes": 388518,
+      "sha256": "269092273d5372aa596c0da5275015fbafa016317ba19bee3d186ff02b2cdac1"
+    },
+    {
+      "path": "prior-runs/browser-first/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-free-390-dark.png",
+      "bytes": 397466,
+      "sha256": "d21f369190b23bc6a4b2b235f348bccee58c09551d4d5351c9891e3139a8dd48"
+    },
+    {
+      "path": "prior-runs/browser-first/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-free-390-light.png",
+      "bytes": 398364,
+      "sha256": "6039fc2b18c0e3787dddf93fc7074081d5fce9206279a2caac6b53676a297878"
+    },
+    {
+      "path": "prior-runs/browser-first/team-tournaments-two-cycle-b32f9-etain-fixed-representatives/team-representative-select.png",
+      "bytes": 116245,
+      "sha256": "c2b3ed53cbd678f06f3119b11498be4ddb44c4f0f56af72c0c5f8306ff6b1655"
+    },
+    {
+      "path": "prior-runs/browser-first/team-tournaments-two-cycle-b32f9-etain-fixed-representatives/test-failed-1.png",
+      "bytes": 107957,
+      "sha256": "a70cffc2aebb74d43b2187e785cd303443bd2b836400e005fda86f511b8f822a"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1257,
+      "sha256": "3fa9f69dc07d49ef525d32212081fdcc1a6a332c7a99d983db67fc2b09dce50a"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-manual-fi-e0270-ives-and-equal-stage-quotas/team-manual-position-groups.png",
+      "bytes": 502734,
+      "sha256": "5589abbf580440bc787999a52b8dd4434005fb87c727bc2ee5d28eebb63f66f0"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-odd-team--aa2a5-on-and-accepts-four-matches/team-five-invalid-two-games.png",
+      "bytes": 97918,
+      "sha256": "da68ba9f6414960aaf874c8b13263cb6d56b76f385c6cc3dfc9394db944ef63d"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-six-varia-201c9-tions-and-responsive-themes/free-team-summary.json",
+      "bytes": 914,
+      "sha256": "287f438428e0e58358a72504df863cc932bb7a1c3bab3e0f20d9d4772aaf9fbe"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-free-1440-dark.png",
+      "bytes": 393065,
+      "sha256": "35c3f3b4f94ace93e91ce9b1ae664b386d71ee8a4fc6f4d921d9fccaed38b605"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-free-1440-light.png",
+      "bytes": 393589,
+      "sha256": "3dc112851b604cbdec3b64e88570577fc8e2a6a58aac8216032c7180f9b74b96"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-free-320-dark.png",
+      "bytes": 390338,
+      "sha256": "c2fb6bf410b6219ca5e8089d93a9adf955c26b0f7b3b0cecaf6f75ffc20f7ed2"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-free-320-light.png",
+      "bytes": 390428,
+      "sha256": "f4819699c04902f1c1cdfa4037e17b05d79e6fd229f3960d158b43ad4e73f94f"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-free-390-dark.png",
+      "bytes": 401212,
+      "sha256": "ab106f7962bd6245459971dd38dfa4695bd6921cb8e5942a16df046ceda2b2fc"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-free-390-light.png",
+      "bytes": 401641,
+      "sha256": "cae873cffaa3151bd05022d65f3b6e5464de1a90a2b6dcb3efed0889e499da6a"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-six-varia-201c9-tions-and-responsive-themes/team-live-score-contribution.png",
+      "bytes": 114497,
+      "sha256": "6c7f5f8f06990fe6c74c1cec16a072c7907ab9c4ce3a3e5ad0b2946b14a27ca0"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-team-edit-5893d-phone-light-and-dark-themes/team-mode-select-320-dark.png",
+      "bytes": 37958,
+      "sha256": "e47543420435d6af2b09d75ceff04afeb0f6ebcb46f0ad4b66c034af55ba1825"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-team-edit-5893d-phone-light-and-dark-themes/team-mode-select-320-light.png",
+      "bytes": 37643,
+      "sha256": "8c78825c86889b3ff58387b095624644cc9bcba96d365b8c65d8dd3b9287067a"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-team-edit-5893d-phone-light-and-dark-themes/team-mode-select-390-dark.png",
+      "bytes": 36489,
+      "sha256": "057b2512c4dad060a89e782b54023970baf448758ba8010f7b77b80defec9a36"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-team-edit-5893d-phone-light-and-dark-themes/team-mode-select-390-light.png",
+      "bytes": 37057,
+      "sha256": "bb61ca4fe0ddd46e2669e7d96d1f164f17b1c842afb148f015ffc3149251e42c"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-two-cycle-b32f9-etain-fixed-representatives/position-team-summary.json",
+      "bytes": 347,
+      "sha256": "1cc6fca22bdade1161cee19a5554372c1e0b8cb1d0496d55315a53c4e546b51f"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-two-cycle-b32f9-etain-fixed-representatives/team-positions-completed.png",
+      "bytes": 627804,
+      "sha256": "6dc885654d3f4605c67ca94196d5f26ca1e8d9cf1dc1b2fc2c49269566becc22"
+    },
+    {
+      "path": "screenshots/browser-candidate/team-tournaments-two-cycle-b32f9-etain-fixed-representatives/team-representative-select.png",
+      "bytes": 116028,
+      "sha256": "1a00c1cdcbe412ef82c1dbb1dc9efa9b9011398cb8344c1f3b4c7f20a62de478"
+    },
+    {
+      "path": "source-manifest.json",
+      "bytes": 9848,
+      "sha256": "45e7716dc7ba29ebb2c7d0930e643867e7d36a94ef25364d0122c6f9ea32f137"
+    },
+    {
+      "path": "summaries/http-security-final.json",
+      "bytes": 767,
+      "sha256": "091bfffab5b8d1c04abb1156fba4fb54f3d4ac02852444e408696f09e12a1b60"
+    },
+    {
+      "path": "summaries/migration-summary.json",
+      "bytes": 1080,
+      "sha256": "a418b6c66484710c4e5e9f580fcbc58806b0cbfca0d112bf175b4427e747cd2d"
+    },
+    {
+      "path": "summaries/npm-audit-final.json",
+      "bytes": 387,
+      "sha256": "e2408d4d5541dd7d590ee3a83db26fbfd310daef6b1fe5db193847c90e0b75bf"
+    }
+  ]
+}

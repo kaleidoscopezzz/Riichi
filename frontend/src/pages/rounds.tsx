@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 import { ArrowLeft, RefreshCw, Trophy, Flag, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
@@ -89,6 +89,7 @@ export function RoundsPage() {
   // Background re-reads (e.g. right after a lottery write) keep the loaded page
   // mounted, so an open panel and its focus-return target survive the refresh.
   const loaded = !!t && !!ws && t.id === Number(id)
+  if (t?.competition_type === 'team') return <Navigate to={`/tournaments/${t.id}/team`} replace />
   return (
     <div className="competition-workspace">
       <Link className="back-link" to="/tournaments">
@@ -310,7 +311,7 @@ export function RoundsPage() {
                         </article>
                       ))}
                     </div>
-                    {!completed && latest.round_number < t.round_count && (
+                    {!completed && latest.round_number < (t.round_count ?? 0) && (
                       <>
                         {ws.elimination && (
                           <section className="elimination-choice" aria-label="本轮淘汰选择">

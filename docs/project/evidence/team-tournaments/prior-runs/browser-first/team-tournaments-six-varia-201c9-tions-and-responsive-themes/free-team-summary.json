@@ -1,0 +1,58 @@
+{
+  "id": 3,
+  "teams": 6,
+  "members": 24,
+  "matches": 6,
+  "champion_team_id": 1,
+  "per_team": [
+    {
+      "team_id": 1,
+      "total": {
+        "numerator": "160",
+        "denominator": "1"
+      },
+      "games": 4
+    },
+    {
+      "team_id": 2,
+      "total": {
+        "numerator": "100",
+        "denominator": "1"
+      },
+      "games": 4
+    },
+    {
+      "team_id": 3,
+      "total": {
+        "numerator": "-20",
+        "denominator": "1"
+      },
+      "games": 4
+    },
+    {
+      "team_id": 4,
+      "total": {
+        "numerator": "-80",
+        "denominator": "1"
+      },
+      "games": 4
+    },
+    {
+      "team_id": 5,
+      "total": {
+        "numerator": "-80",
+        "denominator": "1"
+      },
+      "games": 4
+    },
+    {
+      "team_id": 6,
+      "total": {
+        "numerator": "-200",
+        "denominator": "1"
+      },
+      "games": 4
+    }
+  ],
+  "page_errors": []
+}

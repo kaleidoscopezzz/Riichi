@@ -1,0 +1,38 @@
+{
+  "result": "PASS",
+  "vendor": "sqlite",
+  "original_columns_types_rows_and_keys_unchanged": true,
+  "legacy_individual_defaults": true,
+  "no_team_records_invented": true,
+  "legacy_lotteries_participant": true,
+  "idempotent_rerun": true,
+  "additions": {
+    "tables": [
+      "tournaments_teamauditrecord",
+      "tournaments_teamcompetitionsettings",
+      "tournaments_teammatchplan",
+      "tournaments_teammember",
+      "tournaments_teamstage",
+      "tournaments_teamstagerepresentative",
+      "tournaments_tournamentteam"
+    ],
+    "columns": {
+      "tournaments_lotteryrecord": [
+        "entity_type",
+        "plan_sources",
+        "roster_snapshot"
+      ],
+      "tournaments_tournament": [
+        "champion_team_id",
+        "competition_type"
+      ],
+      "tournaments_tournamentround": [
+        "competition_type"
+      ]
+    }
+  },
+  "independent_restore": "PASS",
+  "restored_upgrade": "PASS",
+  "backup_integrity": "ok",
+  "backup_sha256": "6acea5d9b51b065f34dbb205d61ae47b8f7d3d80e5326a62620a8c66fefc81a0"
+}

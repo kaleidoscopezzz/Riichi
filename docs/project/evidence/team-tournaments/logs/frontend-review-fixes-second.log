@@ -1,0 +1,13 @@
+
+> riichi-frontend@0.1.0 test
+> vitest run src/components/team-actions.test.tsx src/pages/team-tournament.test.tsx
+
+
+ RUN  v4.1.12 <workspace>/frontend
+
+
+ Test Files  2 passed (2)
+      Tests  13 passed (13)
+   Start at  19:40:33
+   Duration  7.04s (transform 573ms, setup 57ms, import 2.56s, tests 5.87s, environment 3.54s)
+

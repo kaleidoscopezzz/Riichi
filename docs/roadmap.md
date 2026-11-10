@@ -15,7 +15,10 @@ D0-01已CLOSED / PASS；F0-06候选已通过Planner源码/证据审查，此后U
 | 审查问题修复 | 代码审查发现的抽签、审计、兼容边界、认证/错误码、输入校验、前端交互、启动器与部署问题 | **PR #2已合并**，main `34d4cbd`；历史[修复报告](project/review-findings-fix-verification.md)保留当时测试快照；新增迁移tournaments/0005、0006 |
 | Linux生产上线第一阶段 | Caddy 自动 HTTPS 工程、代理信任、迁移/恢复保护和浏览器 QA | 隔离验证通过。合并与 CI 状态见 [PR #3](https://github.com/kaleidoscopezzz/Riichi/pull/3) 和[验证报告](project/production-launch-verification.md) |
 | Linux生产上线第二阶段 | 新服务器盘点、正式main部署、真实CA/续期、线上管理员登录及运维验收 | **未授权执行**，等待Owner新服务器；不得连接旧或任何正式服务器，未实测项保持UNVERIFIED |
-| 未来版本候选 | 微信、团体赛等 | 不纳入V1.0，须另行立项 |
+| 团队赛 T0～T4 | 可配置队伍/成员、每桌每队一人，自由场次与固定位置循环，精确团队积分汇总及团队冠军 | Owner已授权实现且确认TEAM-01～13；独立实现候选及隔离QA，规则见[团队赛规划](team-tournament-plan.md)，实际结果见[团队赛验证](project/team-tournaments-verification.md)，未正式验收/未上线 |
+| 未来版本候选 | 微信及其他赛制扩展 | 不纳入V1.0，须另行立项 |
+
+团队赛T0～T4属于Owner本轮独立功能授权，工作分支`codex/team-tournaments`，基线main `8f94f2e`；不属于生产上线第二阶段授权。未验证的PostgreSQL、Owner库及生产环境保持UNVERIFIED，不用功能自检改判历史F0-06验收。
 
 ## F0-06启动门禁与停止点（历史阶段记录）
 

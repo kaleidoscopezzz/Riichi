@@ -86,6 +86,9 @@ export function ResultScorePreview({
       <div className="result-preview-grid">
         {table.seats.map((seat) => {
           const row = data?.scores.find((score) => score.participant_id === seat.participant_id)
+          const team = data?.team_changes?.find(
+            (change) => change.participant_id === seat.participant_id,
+          )
           return (
             <article key={seat.id} aria-label={`${seat.display_name} 积分试算`}>
               <header>
@@ -111,6 +114,30 @@ export function ResultScorePreview({
                   </div>
                 ))}
               </dl>
+              {team && (
+                <div
+                  className="team-preview-contribution"
+                  aria-label={`${team.team_name} 累计积分试算`}
+                >
+                  <p>{team.team_name}</p>
+                  <dl>
+                    {(
+                      [
+                        ['团队当前积分', team.confirmed_total],
+                        ['本次积分变化', team.score_change],
+                        ['试算后团队积分', team.projected_total],
+                      ] as const
+                    ).map(([label, value]) => (
+                      <div key={label}>
+                        <dt>{label}</dt>
+                        <dd title={value ? exactScore(value) : undefined}>
+                          {value ? displayScore(value) : '—'}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              )}
             </article>
           )
         })}

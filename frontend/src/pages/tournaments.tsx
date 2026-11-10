@@ -5,6 +5,9 @@ import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { FormFeedback } from '@/components/form-feedback'
 import { TournamentDetail, TournamentEditor } from '@/components/tournament-editor'
+import { TeamTournamentEditor } from '@/components/team-tournament-editor'
+import { TeamTournamentDetail } from '@/components/team-tournament-detail'
+import type { TeamTournament } from '@/services/teams'
 import {
   fetchTournament,
   fetchTournaments,
@@ -22,9 +25,10 @@ export function TournamentsPage() {
   const [error, setError] = useState<Error | null>(null)
   const [success, setSuccess] = useState('')
   const [revision, setRevision] = useState(0)
-  const [modal, setModal] = useState<{ mode: 'edit' | 'view' | 'start'; row?: Tournament } | null>(
-    null,
-  )
+  const [modal, setModal] = useState<{
+    mode: 'edit' | 'team-edit' | 'view' | 'start'
+    row?: Tournament
+  } | null>(null)
   const [opening, setOpening] = useState(false)
   const trigger = useRef<HTMLButtonElement | null>(null)
   const list = useRef<HTMLElement>(null)
@@ -87,9 +91,9 @@ export function TournamentsPage() {
     <div className="tournament-workspace">
       <section className="tournament-hero">
         <div>
-          <span className="eyebrow">INDIVIDUAL TOURNAMENTS</span>
+          <span className="eyebrow">TOURNAMENTS</span>
           <h2>从一份规则，开启一场赛事。</h2>
-          <p>独立配置每场个人赛，确认选手与规则后启动。</p>
+          <p>组织个人赛或团队赛，配置规则与名单后逐场记录成绩。</p>
         </div>
         <Button
           onClick={(e) => {
@@ -100,6 +104,17 @@ export function TournamentsPage() {
         >
           <Plus size={17} />
           创建赛事
+        </Button>
+        <Button
+          variant="outline"
+          onClick={(e) => {
+            trigger.current = e.currentTarget
+            setModal({ mode: 'team-edit' })
+            setSuccess('')
+          }}
+        >
+          <Plus size={16} />
+          创建团队赛
         </Button>
       </section>
       <div className="tournament-boundary">
@@ -183,7 +198,9 @@ export function TournamentsPage() {
               <div className="tournament-row" role="row" key={row.id}>
                 <div role="cell">
                   <strong>{row.name}</strong>
-                  <small>个人赛 · ID {row.id}</small>
+                  <small>
+                    {row.competition_type === 'team' ? '团队赛' : '个人赛'} · ID {row.id}
+                  </small>
                 </div>
                 <span role="cell">
                   <Badge variant="outline" className={`tournament-status ${row.status}`}>
@@ -195,7 +212,9 @@ export function TournamentsPage() {
                   </Badge>
                 </span>
                 <span role="cell">{row.participant_count} 人</span>
-                <span role="cell">{row.round_count} 轮</span>
+                <span role="cell">
+                  {row.competition_type === 'team' ? '按团队赛程' : `${row.round_count} 轮`}
+                </span>
                 <time role="cell">{new Date(row.created_at).toLocaleDateString('zh-CN')}</time>
                 <div role="cell">
                   <Button
@@ -241,17 +260,39 @@ export function TournamentsPage() {
           saved={saved}
         />
       )}{' '}
-      {modal && modal.mode !== 'edit' && modal.row && (
-        <TournamentDetail
-          key={`${modal.row.id}-${modal.mode}`}
-          row={modal.row}
-          confirm={modal.mode === 'start'}
+      {modal?.mode === 'team-edit' && (
+        <TeamTournamentEditor
+          key={modal.row?.id ?? 'new-team'}
+          tournament={modal.row as TeamTournament | undefined}
           close={close}
           saved={saved}
-          edit={() => setModal({ mode: 'edit', row: modal.row })}
-          prepareStart={() => void open(modal.row!.id, 'start')}
         />
       )}
+      {modal &&
+        modal.mode !== 'edit' &&
+        modal.mode !== 'team-edit' &&
+        modal.row?.competition_type === 'team' && (
+          <TeamTournamentDetail
+            row={modal.row as TeamTournament}
+            close={close}
+            edit={() => setModal({ mode: 'team-edit', row: modal.row })}
+          />
+        )}
+      {modal &&
+        modal.mode !== 'edit' &&
+        modal.mode !== 'team-edit' &&
+        modal.row &&
+        modal.row.competition_type !== 'team' && (
+          <TournamentDetail
+            key={`${modal.row.id}-${modal.mode}`}
+            row={modal.row}
+            confirm={modal.mode === 'start'}
+            close={close}
+            saved={saved}
+            edit={() => setModal({ mode: 'edit', row: modal.row })}
+            prepareStart={() => void open(modal.row!.id, 'start')}
+          />
+        )}
     </div>
   )
 }

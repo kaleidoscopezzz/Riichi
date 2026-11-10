@@ -157,4 +157,29 @@ describe('服务端实时积分试算', () => {
     await screen.findAllByText('16.67')
     expect(previewResult).toHaveBeenCalledTimes(2)
   })
+  it('团队累计变化使用服务端精确试算，修改数字后立即隐藏旧累计', async () => {
+    vi.mocked(previewResult).mockResolvedValue({
+      ...response,
+      team_changes: [
+        {
+          participant_id: 1,
+          team_id: 9,
+          team_name: '测试队',
+          confirmed_total: rational('50'),
+          previous_score: rational('50', '3'),
+          score_change: rational('130', '3'),
+          projected_total: rational('280', '3'),
+        },
+      ],
+    })
+    const { rerender } = render(<ResultScorePreview {...props} />)
+    const panel = within(await screen.findByLabelText('测试队 累计积分试算'))
+    expect(panel.getByTitle('50/1').textContent).toBe('50.00')
+    expect(panel.getByTitle('130/3').textContent).toBe('43.33')
+    expect(panel.getByTitle('280/3').textContent).toBe('93.33')
+    rerender(
+      <ResultScorePreview {...props} points={points.map((p) => ({ ...p, raw_points: 25000 }))} />,
+    )
+    expect(screen.queryByLabelText('测试队 累计积分试算')).toBeNull()
+  })
 })

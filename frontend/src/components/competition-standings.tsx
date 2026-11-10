@@ -85,7 +85,7 @@ export function Standings({
             <tbody>
               {rows.map((r) => (
                 <tr key={r.participant_id}>
-                  <td data-label="名次">{r.rank}</td>
+                  <td data-label="名次">{r.rank ?? '—'}</td>
                   <th scope="row" data-label="选手">
                     {r.display_name}
                     <small>

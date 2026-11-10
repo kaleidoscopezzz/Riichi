@@ -1,0 +1,263 @@
+{
+  "base_sha": "8f94f2e70a83c329a392f568c10702aea5206ab6",
+  "branch": "codex/team-tournaments",
+  "candidate": "uncommitted working tree",
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "4fe247d5eafd9a07791f8ae3d9202ad55b552bfc0bdc9db09c73d66d073ff566"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "abdd3a3354cfd6659631ec902b492ec955f36eea09a82159be046c6b774435d5"
+    },
+    {
+      "path": "backend/requirements.txt",
+      "sha256": "a23b1ab125384d4dfa704a7d4a4077245caac35f6c49153e1e7ea19bb6f4afc3"
+    },
+    {
+      "path": "backend/tournaments/competition_services.py",
+      "sha256": "1a15ffdd9383682e578a1216c9aa12616e73e168693b1135ba18d5d87013d34f"
+    },
+    {
+      "path": "backend/tournaments/competition_views.py",
+      "sha256": "83f9724f8dabc462e072c5805136debb055355ced6077c420cdca3c7b76d1eee"
+    },
+    {
+      "path": "backend/tournaments/migrations/0011_team_competitions.py",
+      "sha256": "dc3c7416594cf7467bbf145e20485ec290ff2b201cfb4973fbe6d7386e6be697"
+    },
+    {
+      "path": "backend/tournaments/migrations/0012_team_plan_sources.py",
+      "sha256": "1e9aad4a0fa1f2b584d249bde441a36ca9b16cd322a0bdae33442ef42835ad6d"
+    },
+    {
+      "path": "backend/tournaments/migrations/0013_preserve_personal_column_types.py",
+      "sha256": "0631f66d0927a8f5a42084702a3ec67831be1d45e8377f7c0634b9bc87038d28"
+    },
+    {
+      "path": "backend/tournaments/migrations/0014_stage_captain_sources.py",
+      "sha256": "f7a89ef74c4c677cd2a73f114e108c989895634e31f20bf1f6f18f938ae7c72a"
+    },
+    {
+      "path": "backend/tournaments/models.py",
+      "sha256": "53bc219f2c3b75ef933c99acd9cb13015e42f619aaa92e81c6e375c2192aaa08"
+    },
+    {
+      "path": "backend/tournaments/pairing.py",
+      "sha256": "a16f1af4c46da02577fd4aa1ff0570c17cfa05b431eb4e052c245655ee384784"
+    },
+    {
+      "path": "backend/tournaments/pairing_plan.py",
+      "sha256": "27c76c96e56f5b4db1e9e9478c0c471a0e1e5c64836b134f0b19897819231b31"
+    },
+    {
+      "path": "backend/tournaments/round_services.py",
+      "sha256": "b9b26cefec9a76dc512e3b6ee38df336aaeb88269ab9430ea4f06b47253d6d90"
+    },
+    {
+      "path": "backend/tournaments/scoring.py",
+      "sha256": "6f09393f6fdf87e1aa2ffb3425423f346c7a963b8809afeea0847af3589f78b5"
+    },
+    {
+      "path": "backend/tournaments/serializers.py",
+      "sha256": "664bf1bf79b1a8b4949332489d39b15aecdef8d6392b344aeacf334ecdf40dd0"
+    },
+    {
+      "path": "backend/tournaments/services.py",
+      "sha256": "31122309a816e5a27c089e27ee95bf0ebe59063a173423b36be9ab76a3332d06"
+    },
+    {
+      "path": "backend/tournaments/team_scheduling.py",
+      "sha256": "331e1c65776630b34c4660d8f35018062f35336a6a03ba4de8c8c483d7ec599c"
+    },
+    {
+      "path": "backend/tournaments/team_serializers.py",
+      "sha256": "262f21b2d020131734c84d89262c0259e5ff684d3106dbaa7cf506d1237ab0ca"
+    },
+    {
+      "path": "backend/tournaments/team_services.py",
+      "sha256": "b942172cdeeb692ce4d371b0baa0e841d14871eb3fd44edd1ab14f15fbdb8c0c"
+    },
+    {
+      "path": "backend/tournaments/team_views.py",
+      "sha256": "fb8f113a2e2862498a4cf0111608e9888d9c7aec57740c0196c5796ed8e85deb"
+    },
+    {
+      "path": "backend/tournaments/tests_migrations.py",
+      "sha256": "cd7e3a81b9caf61901c49d44edd2b3f6a3113b1c997afb3a7e232b35e4f23483"
+    },
+    {
+      "path": "backend/tournaments/tests_team_concurrency.py",
+      "sha256": "ae9b743c1dd9dbb6c0dbd2c5467b7af69cc7b511f7ff153b4c4920fcbb3e86d1"
+    },
+    {
+      "path": "backend/tournaments/tests_team_scheduling.py",
+      "sha256": "9bc7b4ce845f428d6749184d8eecf4b7d4a1e135bb5d259530fabde406f8dc18"
+    },
+    {
+      "path": "backend/tournaments/tests_teams.py",
+      "sha256": "93204c358b6d59ce45c47d98513e04c0e0232236b8086c2d117b19c588588736"
+    },
+    {
+      "path": "backend/tournaments/urls.py",
+      "sha256": "12ac3d5798ed0ba54240dabf863e0546d35f553881f73e7d45db02e4ebeef1ac"
+    },
+    {
+      "path": "backend/tournaments/views.py",
+      "sha256": "539ad7b5019cd6617c169d4243c90e44ecadcb94adff0f2e9c3ce9c711447d79"
+    },
+    {
+      "path": "backend/verification/event_flow_migration_check.py",
+      "sha256": "2976ca3ce64c8fbc4c7a126fe31cc37689fbd22ed43c992ce78544bcb0e5aa5b"
+    },
+    {
+      "path": "backend/verification/oka_migration_check.py",
+      "sha256": "0dbc1bf0df58e23d88fda04c3bad188e5e4524baec6c880ac76e5fad52afe9a4"
+    },
+    {
+      "path": "backend/verification/pairing_migration_check.py",
+      "sha256": "0d19ef6790a59aad5bd8226b847ed93390fa55f3f377ea5946c8f91578ab3719"
+    },
+    {
+      "path": "backend/verification/postgres_migration_check.py",
+      "sha256": "85bec263b6d29f8be39abdc928faf1bca619971fe2cd4f206f1514afa52db0c7"
+    },
+    {
+      "path": "backend/verification/review_migration_check.py",
+      "sha256": "c3aba401ccc35d0bc5d0fc841c21533457ff654ad8a778447d2f9283a2b47066"
+    },
+    {
+      "path": "backend/verification/team_migration_check.py",
+      "sha256": "2ba184de65f8c484d0c4594edc24d9ad7a860cd439417d680c94e1f98664d50d"
+    },
+    {
+      "path": "deploy/tests/browser_seed.py",
+      "sha256": "5f2f64438794e1f350cc905de09f3964ab22d053e6d8632191c65eba385af70f"
+    },
+    {
+      "path": "docs/F0-06-functional-spec.md",
+      "sha256": "aab069fa3344dacdd28d83dc8b15143663b026dab089cdfdbec1c17ec4c63222"
+    },
+    {
+      "path": "docs/architecture.md",
+      "sha256": "bf9cb56a72b2cf0f6a2654d04abdac09714163ec8520ac808768f674c4147291"
+    },
+    {
+      "path": "docs/requirements.md",
+      "sha256": "b105056ea15b11000b8a1801a3e4cb78d8c40069d5b58987ed71998ff7c14fd3"
+    },
+    {
+      "path": "docs/roadmap.md",
+      "sha256": "9172157061409144337d923f130a40e6fb23bb5ad3bad19c44ae7549f340fece"
+    },
+    {
+      "path": "docs/team-tournament-plan.md",
+      "sha256": "36c1b2de28ac1725aa82b49e84fefd51003ea35434f719a4402d7e4fbb2666cf"
+    },
+    {
+      "path": "frontend/e2e/team-tournaments.spec.ts",
+      "sha256": "f48007022fbe5eb8b11d26968c02fc3d3c4f6201196d05d85fc5f3d552c3689f"
+    },
+    {
+      "path": "frontend/package-lock.json",
+      "sha256": "a268002473d1c5ec8ce73991ced011564962d63849a0541ffbb7deafa2f7ebac"
+    },
+    {
+      "path": "frontend/package.json",
+      "sha256": "c3f544e195e1258468f0cf05a647348d17be36eebbc16e64b941a5c143773dc3"
+    },
+    {
+      "path": "frontend/src/app.tsx",
+      "sha256": "a62fb9e762646dd2b4d540bdadca21aedbb5be85363c5df22c1262e703ce8b35"
+    },
+    {
+      "path": "frontend/src/components/competition-standings.tsx",
+      "sha256": "48257ed21a5bafb20607a771c83783977d1e1f896d9fd88554f2478ae1b2c9de"
+    },
+    {
+      "path": "frontend/src/components/player-picker.tsx",
+      "sha256": "a776260ca5c04ea957f361170d5c769fd275b7ae06654c66544c95991bcecea3"
+    },
+    {
+      "path": "frontend/src/components/result-score-preview.test.tsx",
+      "sha256": "66dfc31007a02bb318c4dc4b6ee00666a6dd20868faa49b8789ea47897219629"
+    },
+    {
+      "path": "frontend/src/components/result-score-preview.tsx",
+      "sha256": "1322eea297bbac0f59fdf781c59222883a20c7992c3c1cb3e98ab2e8fec4eb85"
+    },
+    {
+      "path": "frontend/src/components/table-result-editor.tsx",
+      "sha256": "d48e616308708a7bd29c79cfe515a007a94dc60461a76e964a232b268f0f6f77"
+    },
+    {
+      "path": "frontend/src/components/team-actions.test.tsx",
+      "sha256": "f92fad633f48164e2a58af23b6af192f123cbb02df9bbb1e3abbfc7b303c8d3a"
+    },
+    {
+      "path": "frontend/src/components/team-actions.tsx",
+      "sha256": "44872b4fb48c5c3677643df7e18a5ca8936fb2efad2bb36813ada97fba7c02b8"
+    },
+    {
+      "path": "frontend/src/components/team-standings.tsx",
+      "sha256": "234f4423f97129aa6f53b7f1a3fb3ca3939a335f0afdfd3a246595595dcbed03"
+    },
+    {
+      "path": "frontend/src/components/team-tournament-detail.tsx",
+      "sha256": "352ddf1d0fecd922bc40fdb5fdc5f419cd22a186c145b3d3064c52f9d46b7cc3"
+    },
+    {
+      "path": "frontend/src/components/team-tournament-editor.test.tsx",
+      "sha256": "aa8a765919760875346f13afa710cc27ab527fe493e373e19a0085285173be0d"
+    },
+    {
+      "path": "frontend/src/components/team-tournament-editor.tsx",
+      "sha256": "f7cf6c171a2690670c1312a7ead6669a11543b610dec494c296ab036d8c2b245"
+    },
+    {
+      "path": "frontend/src/layouts/app-layout.tsx",
+      "sha256": "52c337727ca8cd39ebb393fd82ebeb836d2a3a3ff80db98a66b061463904bfa0"
+    },
+    {
+      "path": "frontend/src/pages/rounds.tsx",
+      "sha256": "aa82906583028703fc9ffc48df14b7f7d9c78135616192333a020dcefd779297"
+    },
+    {
+      "path": "frontend/src/pages/team-tournament.test.tsx",
+      "sha256": "bd987e44ca538e87c7a8a9efe7d1832f7c704e7e338d795c2406448d586b3562"
+    },
+    {
+      "path": "frontend/src/pages/team-tournament.tsx",
+      "sha256": "9cb6263fc758dcd80e04021f44ecf020401eb5131973edfaf9bb3ff66c392ee3"
+    },
+    {
+      "path": "frontend/src/pages/tournaments.tsx",
+      "sha256": "a22a0917a4413f13bd20b3a0c34c9e9afd809b4923e0f56a6316a0f0c35c6e10"
+    },
+    {
+      "path": "frontend/src/services/competition.ts",
+      "sha256": "dbce202e4ef80dfbe91fa0e097bb7eecd205abf19336eda370c0613a14381032"
+    },
+    {
+      "path": "frontend/src/services/teams.test.ts",
+      "sha256": "6ff217d9b181d9a0f876b1572bd50a30ea457a1e31765bf1c669a67c11a9fa26"
+    },
+    {
+      "path": "frontend/src/services/teams.ts",
+      "sha256": "05fa208a547b675bb8a45072c566fb2ff1ba0833596557509100b3ecf00dbdf9"
+    },
+    {
+      "path": "frontend/src/services/tournaments.ts",
+      "sha256": "f3f3517f7ef5b50a02b0e7a34390702210dc5b6fbe4c45c51c5ee0dc889a2128"
+    },
+    {
+      "path": "frontend/src/styles/globals.css",
+      "sha256": "f2544a7750ae4e72167668b1c3a8aee69350c06c780db666cd1ff0ddf69c106e"
+    },
+    {
+      "path": "frontend/src/test/team-fixtures.ts",
+      "sha256": "1fabc6ca01d5eedd0537675d0c9d9136ce0e1c09eb1fad1ba12eb77581de239b"
+    }
+  ]
+}

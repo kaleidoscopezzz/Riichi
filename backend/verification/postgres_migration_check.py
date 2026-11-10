@@ -57,6 +57,9 @@ def main():
             before[table]=c.fetchall()
     executor=MigrationExecutor(connection);executor.migrate(BEFORE_REVIEW)
     review=rehearse_review_migrations(connection,tournament_id=review_tournament.pk,admin_id=admin.pk,machine_id=machines[3].pk,members=review_members[:2])
+    # Each historical helper stops at its own graph. Advance normally before
+    # loading the current runtime models, including later personal/team fields.
+    executor=MigrationExecutor(connection);executor.migrate(executor.loader.graph.leaf_nodes())
     with connection.cursor() as c:
         for table in tables:
             c.execute(f'SELECT {",".join(columns[table])} FROM {table} ORDER BY id')

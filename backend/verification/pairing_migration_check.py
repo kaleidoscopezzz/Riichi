@@ -60,7 +60,9 @@ def rehearse_pairing_migration(connection, *, before_upgrade=None):
     executor.migrate(targets)
     projection = build_manifest(connection, baseline)
     if projection['result'] != 'PASS': raise AssertionError('0009 changed original fields or identities')
+    Tournament = executor.loader.project_state(targets).apps.get_model('tournaments', 'Tournament')
     for t in Tournament.objects.using(connection.alias).filter(pk__in=expected):
+        t.oka = derive_oka(t.starting_points, t.return_points) if t.oka_override is None else t.oka_override
         if (t.pairing_strategy, t.table_bonus_policy, t.ranked_table_bonuses) != ('legacy_v1', 'none', ['0'] * 4): raise AssertionError('Legacy rules falsely opted into new pairing')
         for r in t.rounds.all():
             for table in r.tables.all():

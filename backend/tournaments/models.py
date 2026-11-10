@@ -4,16 +4,22 @@ from django.db import models
 from django.db.models import Q
 
 from .rules import default_uma, derive_oka, validate_oka, validate_uma
-from .pairing import BONUS_POLICY, CHOICES as PAIRING_CHOICES, RANKED, default_table_bonuses, validate_table_bonuses
+from .pairing import BONUS_POLICY, CHOICES as PAIRING_CHOICES, RANKED, TEAM_CHOICES, default_table_bonuses, validate_table_bonuses
+from .team_scheduling import default_positions
 
 
 class Tournament(models.Model):
+    class CompetitionType(models.TextChoices):
+        INDIVIDUAL = 'individual', '个人赛'
+        TEAM = 'team', '团队赛'
+
     class Status(models.TextChoices):
         DRAFT = "draft", "草稿"
         STARTED = "started", "已启动"
         COMPLETED = "completed", "已完赛"
 
     name = models.CharField(max_length=120)
+    competition_type = models.CharField(max_length=12, choices=CompetitionType, default=CompetitionType.INDIVIDUAL)
     description = models.TextField(max_length=3000, blank=True)
     round_count = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(6)])
     starting_points = models.PositiveIntegerField(default=25000, validators=[MinValueValidator(1), MaxValueValidator(2147483647)])
@@ -41,18 +47,20 @@ class Tournament(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
     completed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="completed_tournaments")
     champion = models.ForeignKey("TournamentParticipant", null=True, blank=True, on_delete=models.PROTECT, related_name="championships")
+    champion_team = models.ForeignKey('TournamentTeam', null=True, blank=True, on_delete=models.PROTECT, related_name='championships')
     final_snapshot = models.JSONField(blank=True, default=dict)
 
     class Meta:
         ordering = ["-created_at", "-id"]
         constraints = [
-            models.CheckConstraint(condition=Q(round_count__gte=1, round_count__lte=6), name="tournament_round_range"),
+            models.CheckConstraint(condition=Q(competition_type='individual', round_count__gte=1, round_count__lte=6) | Q(competition_type='team', round_count=1), name="tournament_round_range"),
             models.CheckConstraint(condition=Q(starting_points__gte=1, starting_points__lte=2147483647, return_points__gte=1, return_points__lte=2147483647), name="tournament_positive_points"),
-            models.CheckConstraint(condition=Q(status="draft", started_at__isnull=True, completed_at__isnull=True, champion__isnull=True) | Q(status="started", started_at__isnull=False, completed_at__isnull=True, champion__isnull=True) | Q(status="completed", started_at__isnull=False, completed_at__isnull=False, completed_by__isnull=False, champion__isnull=False), name="tournament_lifecycle"),
+            models.CheckConstraint(condition=Q(status="draft", started_at__isnull=True, completed_at__isnull=True, champion__isnull=True, champion_team__isnull=True) | Q(status="started", started_at__isnull=False, completed_at__isnull=True, champion__isnull=True, champion_team__isnull=True) | (Q(status="completed", started_at__isnull=False, completed_at__isnull=False, completed_by__isnull=False) & (Q(competition_type='individual', champion__isnull=False, champion_team__isnull=True) | Q(competition_type='team', champion__isnull=True, champion_team__isnull=False))), name="tournament_lifecycle"),
             models.CheckConstraint(condition=Q(name__regex=r"\S"), name="tournament_name_nonblank"),
             models.CheckConstraint(condition=Q(oka_override__isnull=True) | Q(rules_version=2, oka_override__regex=r"\A[+]?[0-9]+([.][0-9]+)?\Z"), name="tournament_oka_override_valid"),
             models.CheckConstraint(condition=Q(pairing_strategy__in=[value for value, _ in PAIRING_CHOICES]), name='tournament_pairing_strategy_valid'),
-            models.CheckConstraint(condition=Q(pairing_strategy='legacy_v1', table_bonus_policy='none') | (~Q(pairing_strategy='legacy_v1') & Q(table_bonus_policy=BONUS_POLICY)), name='tournament_table_bonus_policy_valid'),
+            models.CheckConstraint(condition=Q(competition_type='individual') & (Q(pairing_strategy='legacy_v1', table_bonus_policy='none') | (~Q(pairing_strategy='legacy_v1') & Q(table_bonus_policy=BONUS_POLICY))) | Q(competition_type='team', pairing_strategy__in=[value for value, _ in TEAM_CHOICES], table_bonus_policy='none'), name='tournament_table_bonus_policy_valid'),
+            models.CheckConstraint(condition=Q(competition_type='individual', champion_tiebreak_policy='performance_v1') | Q(competition_type='team', champion_tiebreak_policy='team_performance_v1'), name='tournament_mode_champion_policy'),
         ]
 
     @property
@@ -78,6 +86,7 @@ class TournamentParticipant(models.Model):
 
 class TournamentRound(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.PROTECT, related_name="rounds")
+    competition_type = models.CharField(max_length=12, choices=Tournament.CompetitionType, default='individual')
     round_number = models.PositiveSmallIntegerField()
     generated_at = models.DateTimeField(auto_now_add=True)
     generated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="generated_rounds")
@@ -88,7 +97,7 @@ class TournamentRound(models.Model):
         ordering = ["round_number"]
         constraints = [
             models.UniqueConstraint(fields=["tournament", "round_number"], name="unique_tournament_round"),
-            models.CheckConstraint(condition=Q(round_number__gte=1, round_number__lte=6), name="round_number_range"),
+            models.CheckConstraint(condition=Q(competition_type='individual', round_number__gte=1, round_number__lte=6) | Q(competition_type='team', round_number__gte=1, round_number__lte=10000), name="round_number_range"),
         ]
 
 
@@ -245,6 +254,9 @@ class TableResultCorrection(models.Model):
 
 class LotteryRecord(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.PROTECT, related_name='lotteries')
+    entity_type = models.CharField(max_length=12, choices=[('participant', '个人'), ('team', '团队')], default='participant')
+    roster_snapshot = models.JSONField(default=list, blank=True)
+    plan_sources = models.JSONField(default=list, blank=True)
     source_versions = models.JSONField()
     members = models.JSONField()
     order = models.JSONField()
@@ -269,4 +281,101 @@ class LotteryRecord(models.Model):
         constraints = [
             models.CheckConstraint(condition=Q(voided_at__isnull=True, voided_by__isnull=True, void_reason='') | (Q(voided_at__isnull=False, voided_by__isnull=False, confirmed_at__isnull=True) & ~Q(void_reason='')), name='lottery_void_state'),
             models.CheckConstraint(condition=Q(purpose='final', elimination_round__isnull=True) | Q(purpose='elimination', elimination_round__isnull=False), name='lottery_purpose_round_valid'),
+            models.CheckConstraint(condition=Q(entity_type='participant') | Q(entity_type='team', purpose='final', elimination_round__isnull=True), name='lottery_entity_scope_valid'),
         ]
+
+
+class TournamentTeam(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.PROTECT, related_name='teams')
+    name = models.CharField(max_length=80)
+    name_snapshot = models.CharField(max_length=80, blank=True)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['id']
+        constraints = [models.UniqueConstraint(fields=['tournament', 'name'], condition=Q(active=True), name='unique_active_team_name')]
+
+
+class TeamMember(models.Model):
+    team = models.ForeignKey(TournamentTeam, on_delete=models.PROTECT, related_name='members')
+    participant = models.OneToOneField(TournamentParticipant, on_delete=models.PROTECT, related_name='team_membership')
+    active = models.BooleanField(default=True)
+    is_captain = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['id']
+
+
+class TeamCompetitionSettings(models.Model):
+    tournament = models.OneToOneField(Tournament, on_delete=models.PROTECT, related_name='team_settings')
+    schedule_mode = models.CharField(max_length=12, choices=[('free', '自由场次'), ('positions', '固定位置循环')], default='free')
+    total_matches = models.PositiveIntegerField(null=True, blank=True)
+    positions = models.JSONField(default=default_positions)
+    games_per_position = models.PositiveSmallIntegerField(default=2)
+    cycles = models.PositiveSmallIntegerField(default=1)
+    schedule_revision = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        constraints = [models.CheckConstraint(condition=Q(schedule_mode='free', total_matches__isnull=False, total_matches__gte=1, total_matches__lte=10000) | Q(schedule_mode='positions', total_matches__isnull=True, games_per_position__gte=1, games_per_position__lte=100, cycles__gte=1, cycles__lte=100), name='team_schedule_config_valid')]
+
+
+class TeamStage(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.PROTECT, related_name='team_stages')
+    schedule_revision = models.PositiveIntegerField()
+    stage_number = models.PositiveIntegerField()
+    cycle = models.PositiveSmallIntegerField()
+    position_index = models.PositiveSmallIntegerField()
+    position_label = models.CharField(max_length=80)
+    games_per_team = models.PositiveSmallIntegerField()
+
+    class Meta:
+        ordering = ['stage_number']
+        constraints = [models.UniqueConstraint(fields=['tournament', 'schedule_revision', 'stage_number'], name='unique_team_stage')]
+
+
+class TeamStageRepresentative(models.Model):
+    stage = models.ForeignKey(TeamStage, on_delete=models.PROTECT, related_name='representatives')
+    team = models.ForeignKey(TournamentTeam, on_delete=models.PROTECT, related_name='stage_representatives')
+    member = models.ForeignKey(TeamMember, null=True, blank=True, on_delete=models.PROTECT, related_name='stage_appearances')
+    locked = models.BooleanField(default=False)
+    captain_supplied = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['stage', 'team'], name='unique_stage_representative')]
+
+
+class TeamMatchPlan(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.PROTECT, related_name='team_matches')
+    schedule_revision = models.PositiveIntegerField()
+    match_number = models.PositiveIntegerField()
+    stage = models.ForeignKey(TeamStage, null=True, blank=True, on_delete=models.PROTECT, related_name='matches')
+    team_ids = models.JSONField(default=list)
+    lineup = models.JSONField(default=dict)
+    version = models.PositiveIntegerField(default=1)
+    captain_supplied = models.BooleanField(default=False)
+    status = models.CharField(max_length=12, choices=[('draft', '计划草稿'), ('confirmed', '计划已确认'), ('started', '已开场'), ('voided', '计划已撤销')], default='draft')
+    confirmed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name='confirmed_team_plans')
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    table = models.OneToOneField(RoundTable, null=True, blank=True, on_delete=models.PROTECT, related_name='team_match')
+
+    class Meta:
+        ordering = ['match_number', 'id']
+        constraints = [
+            models.UniqueConstraint(fields=['tournament', 'schedule_revision', 'match_number'], name='unique_team_match_number'),
+            models.CheckConstraint(condition=Q(status='draft', confirmed_by__isnull=True, confirmed_at__isnull=True, table__isnull=True) | Q(status='confirmed', confirmed_by__isnull=False, confirmed_at__isnull=False, table__isnull=True) | Q(status='started', confirmed_by__isnull=False, confirmed_at__isnull=False, table__isnull=False) | Q(status='voided', table__isnull=True), name='team_plan_state_valid'),
+        ]
+
+
+class TeamAuditRecord(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.PROTECT, related_name='team_audits')
+    action = models.CharField(max_length=48)
+    revision = models.PositiveIntegerField()
+    before_snapshot = models.JSONField(default=dict)
+    after_snapshot = models.JSONField(default=dict)
+    reason = models.CharField(max_length=500, blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='team_audits')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-id']

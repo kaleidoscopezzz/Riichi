@@ -1,0 +1,53 @@
+
+Running 4 tests using 1 worker
+
+(node:83656) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 e2e\team-tournaments.spec.ts:193:1 › six variable teams and twenty-four members complete free matches with real team contributions and responsive themes (56.1s)
+  x  2 e2e\team-tournaments.spec.ts:250:1 › two cycles of five positions finish twenty matches, allow next-cycle substitutes and retain fixed representatives (10.1m)
+(node:79896) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Timed out waiting 900s for the test suite to run
+Timed out waiting 900s for the teardown for test suite to run
+
+
+  1) e2e\team-tournaments.spec.ts:250:1 › two cycles of five positions finish twenty matches, allow next-cycle substitutes and retain fixed representatives 
+
+    Test timeout of 600000ms exceeded.
+
+    Error: locator.click: Test timeout of 600000ms exceeded.
+    Call log:
+      - waiting for getByRole('combobox', { name: 'TeamQA-8abf1b 队1 大将代表', exact: true })
+
+
+      14 | }
+      15 | async function select(page: Page, label: string, value: string) {
+    > 16 |   await page.getByRole('combobox', { name: label, exact: true }).click()
+         |                                                                  ^
+      17 |   await page.getByRole('option', { name: value, exact: true }).click()
+      18 | }
+      19 | async function login(page: Page) {
+        at select (<workspace>\frontend\e2e\team-tournaments.spec.ts:16:66)
+        at <workspace>\frontend\e2e\team-tournaments.spec.ts:262:13
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\.verification\team-tournaments\browser-first\team-tournaments-two-cycle-b32f9-etain-fixed-representatives\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.verification\team-tournaments\browser-first\team-tournaments-two-cycle-b32f9-etain-fixed-representatives\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\.verification\team-tournaments\browser-first\team-tournaments-two-cycle-b32f9-etain-fixed-representatives\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\.verification\team-tournaments\browser-first\team-tournaments-two-cycle-b32f9-etain-fixed-representatives\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Slow test file: e2e\team-tournaments.spec.ts (11.0m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 failed
+    e2e\team-tournaments.spec.ts:250:1 › two cycles of five positions finish twenty matches, allow next-cycle substitutes and retain fixed representatives 
+  2 did not run
+  1 passed (15.0m)
+  2 errors were not a part of any test, see above for details

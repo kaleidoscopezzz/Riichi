@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError as ModelValidationError
 from rest_framework.exceptions import ValidationError
 
 from .rules import canonical_oka
-from .pairing import BONUS_POLICY, LEGACY, RANKED, SUPPORTED_CHOICES, canonical_table_bonuses
+from .pairing import BONUS_POLICY, LEGACY, RANKED, SUPPORTED_CHOICES, TEAM_CHOICES, canonical_table_bonuses
 
 
 def pack(value):
@@ -17,7 +17,9 @@ def unpack(value):
 
 
 def rules(tournament, *, table=None):
-    if (tournament.score_tie_policy, tournament.champion_tiebreak_policy) != ('split_rank_bonus_v1', 'performance_v1') or tournament.rules_version not in (1, 2):
+    is_team = getattr(tournament, 'competition_type', 'individual') == 'team'
+    champion_policy = 'team_performance_v1' if is_team else 'performance_v1'
+    if (tournament.score_tie_policy, tournament.champion_tiebreak_policy) != ('split_rank_bonus_v1', champion_policy) or tournament.rules_version not in (1, 2):
         raise ValidationError({'rules_version': ['不支持此冻结策略或版本。']})
     if tournament.rules_version == 1 and tournament.oka_override is not None:
         raise ValidationError({'rules_version': ['自定义头名赏 Oka 需要规则版本 2。']})
@@ -29,7 +31,13 @@ def rules(tournament, *, table=None):
             raise ValidationError({'oka_override': exc.messages}) from None
         snapshot.update(oka_override=override, oka=tournament.oka if override is None else override)
     strategy = getattr(tournament, 'pairing_strategy', LEGACY)
-    if strategy != LEGACY:
+    if is_team:
+        if strategy not in dict(TEAM_CHOICES) or tournament.table_bonus_policy != 'none' or tournament.ranked_table_bonuses != ['0'] * 4:
+            raise ValidationError({'pairing_strategy': ['团队赛使用团队编排规则，首版不支持桌附加分。']})
+        if table is not None and table.base_bonus != '0':
+            raise ValidationError({'ranked_table_bonuses': ['团队赛首版不支持桌附加分。']})
+        snapshot.update(competition_type='team', pairing_strategy=strategy, table_bonus_policy='none')
+    elif strategy != LEGACY:
         if strategy not in dict(SUPPORTED_CHOICES) or tournament.table_bonus_policy != BONUS_POLICY:
             raise ValidationError({'pairing_strategy': ['不支持此冻结分桌或附加积分策略。']})
         try:

@@ -1,0 +1,32 @@
+Creating test database for alias 'default'...
+
+...................E.F
+======================================================================
+ERROR: test_team_and_individual_share_real_machine_maintenance_and_releases_are_scoped (tournaments.tests_teams.TeamApiTests.test_team_and_individual_share_real_machine_maintenance_and_releases_are_scoped)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<workspace>\backend\tournaments\tests_teams.py", line 488, in test_team_and_individual_share_real_machine_maintenance_and_releases_are_scoped
+    individual.generate(personal.pk, self.admin, 1, [self.machines[0].pk])
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: generate() takes 3 positional arguments but 4 were given
+
+======================================================================
+FAIL: test_team_lottery_void_history_and_final_source_after_correction (tournaments.tests_teams.TeamApiTests.test_team_lottery_void_history_and_final_source_after_correction)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<workspace>\backend\tournaments\tests_teams.py", line 444, in test_team_lottery_void_history_and_final_source_after_correction
+    voided = self.expect_data(self.write(path, {'confirmed': True, 'reason': '˳��¼������'}))
+             ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<workspace>\backend\tournaments\tests_teams.py", line 40, in expect_data
+    self.assertEqual(response.status_code, code, response.content)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 400 != 200 : b'{"error":{"code":"invalid","message":"\xe8\xbe\x93\xe5\x85\xa5\xe4\xbf\xa1\xe6\x81\xaf\xe6\x9c\x89\xe8\xaf\xaf\xef\xbc\x8c\xe8\xaf\xb7\xe6\xa3\x80\xe6\x9f\xa5\xe8\xa1\xa8\xe5\x8d\x95\xe3\x80\x82","fields":{"confirmed":["\xe4\xb8\x8d\xe5\x85\x81\xe8\xae\xb8\xe6\x8f\x90\xe4\xbe\x9b\xe6\xad\xa4\xe5\xad\x97\xe6\xae\xb5\xe3\x80\x82"]}}}'
+
+----------------------------------------------------------------------
+Ran 22 tests in 13.149s
+
+FAILED (failures=1, errors=1)
+Destroying test database for alias 'default'...
+
+Found 22 test(s).
+System check identified no issues (0 silenced).

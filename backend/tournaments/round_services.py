@@ -18,6 +18,11 @@ def conflict(message, code):
 
 def validate_round_structure(round):
     """Cross-table and exact-count checks, intentionally not claimed as SQL CHECKs."""
+    if round.competition_type != round.tournament.competition_type:
+        raise ValidationError({'round_number': ['开赛批次与赛事类型不一致。']})
+    if round.competition_type == 'team':
+        from .team_services import validate_batch
+        return validate_batch(round)
     participants = set(round.tournament.participants.filter(
         Q(eliminated_after_round__isnull=True) | Q(eliminated_after_round__gte=round.round_number)
     ).values_list("pk", flat=True))
