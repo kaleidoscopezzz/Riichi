@@ -172,6 +172,21 @@ async function score(page: Page, row: any, b: any, info?: TestInfo) {
     await expect(dialog(page)).toHaveCount(0)
   }
 }
+async function confirmTeamLottery(page: Page) {
+  // Saving the draw refreshes the dialog; retry against the replacement button
+  // instead of letting a single detached node exhaust the test budget.
+  for (let attempt = 0; attempt < 30; attempt++) {
+    if ((await dialog(page).count()) === 0) return
+    try {
+      await dialog(page)
+        .getByRole('button', { name: '二次确认团队抽签' })
+        .click({ timeout: 3000 })
+    } catch {
+      await page.waitForTimeout(200)
+    }
+  }
+  await expect(dialog(page)).toHaveCount(0)
+}
 async function finish(page: Page, id: number) {
   let ws = await read(page, `/tournaments/${id}/workspace/`)
   while ((ws.unresolved_groups ?? []).length) {
@@ -187,7 +202,7 @@ async function finish(page: Page, id: number) {
       .getByLabel('团队公开过程说明', { exact: true })
       .fill('隔离QA真实接口完整记录')
     await dialog(page).getByRole('button', { name: '保存公开团队抽签' }).click()
-    await dialog(page).getByRole('button', { name: '二次确认团队抽签' }).click()
+    await confirmTeamLottery(page)
     await expect(dialog(page)).toHaveCount(0)
     ws = await read(page, `/tournaments/${id}/workspace/`)
   }
