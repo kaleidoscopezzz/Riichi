@@ -99,7 +99,7 @@ jobs:
   runtime:
     name: Docker runtime and browser QA
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v5
         with:

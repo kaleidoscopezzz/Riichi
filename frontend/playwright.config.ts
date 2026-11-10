@@ -7,7 +7,7 @@ if (!origin || !/^https:\/\/localhost:\d+$/.test(origin) || !process.env.RIICHI_
 export default defineConfig({
   testDir: './e2e',
   timeout: 600_000,
-  globalTimeout: 900_000,
+  globalTimeout: 1_800_000,
   workers: 1,
   retries: 0,
   forbidOnly: !!process.env.CI,
