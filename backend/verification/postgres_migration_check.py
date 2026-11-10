@@ -73,7 +73,9 @@ def main():
     generate(cases['F0-04_started'],admin,1,machine_ids=[extra[0].pk])
     review_legacy(cases['F0-05_released'],admin,historical_only=True,machine_ids=[],reason='无需后续实体对局')
     review_legacy(cases['F0-05_partial'],admin,historical_only=False,machine_ids=[machines[2].pk,extra[1].pk],reason='保留有效占用，明确补选空闲桌')
-    assert len(occupied_ids())==6
+    # Event associations may share a machine; occupied_ids() now reports only
+    # legacy active allocations, i.e. the three inherited active rows here.
+    assert occupied_ids()=={machines[0].pk,machines[1].pk,machines[2].pk}, occupied_ids()
     print(json.dumps({'result':'PASS','states_after_migration':states,'historical_rows':{k:len(v) for k,v in before.items()},'all_original_columns_unchanged':True,'snapshot_sha256':hashlib.sha256(repr(before).encode()).hexdigest(),'new_machines_created':len(extra),'valid_inherited_reservations':3,'legacy_partial_and_released_review':'PASS','review_0005_0006':review},ensure_ascii=False,indent=2))
 
 
