@@ -19,6 +19,9 @@ from uuid import UUID
 
 
 FORMAT_VERSION = 1
+# Django's post_migrate adds rows here when a migration introduces a model;
+# these tables are compared by original-row inclusion rather than exact hash.
+ADDITIVE_TABLES = {"auth_permission", "django_content_type"}
 
 
 def canonical_value(value):
@@ -63,7 +66,7 @@ def migration_state(connection, tables):
     return result
 
 
-def table_manifest(connection, table, columns, constraints):
+def table_manifest(connection, table, columns, constraints, include_rows=False):
     quote = connection.ops.quote_name
     primary = [column for constraint in constraints.values() if constraint.get("primary_key") for column in constraint["columns"]]
     with connection.cursor() as cursor:
@@ -72,11 +75,14 @@ def table_manifest(connection, table, columns, constraints):
             query += " ORDER BY " + ", ".join(map(quote, primary))
         cursor.execute(query)
         digest = hashlib.sha256()
+        row_hashes = []
         count = 0
         if primary:
             while rows := cursor.fetchmany(1000):
                 for row in rows:
                     digest.update(canonical_json(row).encode("utf-8") + b"\n")
+                    if include_rows:
+                        row_hashes.append(row_digest(row))
                     count += 1
         else:
             # Django tables have a PK. Sorting hashes also makes the rare
@@ -106,7 +112,13 @@ def table_manifest(connection, table, columns, constraints):
     # SQLite renumbers anonymous FK names when AddField rebuilds a table.
     # Compare relationships rather than backend-generated constraint names.
     foreign_keys = sorted([{"columns": constraint["columns"], "target": list(constraint["foreign_key"])} for constraint in constraints.values() if constraint.get("foreign_key")], key=canonical_json)
-    return {"columns": columns, "primary_columns": primary, "count": count, "sha256": digest.hexdigest(), "foreign_keys": foreign_keys, "foreign_key_orphans": orphans}
+    result = {"columns": columns, "primary_columns": primary, "count": count, "sha256": digest.hexdigest(), "foreign_keys": foreign_keys, "foreign_key_orphans": orphans}
+    # auth_permission/content type rows may be legitimately added by
+    # post_migrate when a migration introduces a model. Keep per-row hashes so
+    # a reference can require its original rows without rejecting additions.
+    if include_rows:
+        result["row_hashes"] = sorted(row_hashes)
+    return result
 
 
 def build_manifest(connection, reference=None):
@@ -137,7 +149,7 @@ def build_manifest(connection, reference=None):
         if missing:
             differences.append(f"Missing original columns: {table}")
             continue
-        current = table_manifest(connection, table, columns, constraints)
+        current = table_manifest(connection, table, columns, constraints, include_rows=table in ADDITIVE_TABLES)
         current["column_types"] = {column: column_types[column] for column in columns}
         result["tables"][table] = current
         if any(current["foreign_key_orphans"].values()):
@@ -147,7 +159,12 @@ def build_manifest(connection, reference=None):
                 differences.append(f"Original column types, nullability or primary key changed: {table}")
             if any(value not in current["foreign_keys"] for value in expected["foreign_keys"]):
                 differences.append(f"Original foreign key changed: {table}")
-            if current["count"] != expected["count"] or current["sha256"] != expected["sha256"]:
+            if table in ADDITIVE_TABLES and "row_hashes" in expected and "row_hashes" in current:
+                # post_migrate may add permissions/content types for a new
+                # model. Original rows must remain; additions are expected.
+                if not set(expected["row_hashes"]).issubset(set(current["row_hashes"])):
+                    differences.append(f"Original data changed: {table}")
+            elif current["count"] != expected["count"] or current["sha256"] != expected["sha256"]:
                 differences.append(f"Original data changed: {table}")
             added = sorted(set(actual_columns) - set(columns))
             if added:
