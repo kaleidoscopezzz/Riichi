@@ -99,7 +99,9 @@ export function AppLayout() {
     navigation.find((item) => item.path === pathname) ||
     (/^\/tournaments\/\d+\/rounds$/.test(pathname)
       ? { ...navigation[1], title: '分桌工作台', caption: '固定选桌、逐轮计分与冠军结果' }
-      : undefined)
+      : /^\/tournaments\/\d+\/team$/.test(pathname)
+        ? { ...navigation[1], title: '团队赛工作台', caption: '队长出场名单、位置循环与团队成绩' }
+        : undefined)
   const { theme, setTheme } = useTheme()
   const [open, setOpen] = useState(false)
   useEffect(() => {

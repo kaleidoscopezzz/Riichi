@@ -15,6 +15,8 @@ export type PairingStrategy =
   | 'manual_v1'
   | 'swiss_repeats_first_v1'
   | 'swiss_scores_first_v1'
+  | 'team_balanced_v1'
+  | 'team_manual_v1'
 export const pairingOptions = [
   { value: 'ranked_v1', label: '高高碰' },
   { value: 'random_v1', label: '完全随机' },
@@ -31,7 +33,8 @@ export type Tournament = {
   id: number
   name: string
   description: string
-  round_count: number
+  competition_type?: 'individual' | 'team'
+  round_count: number | null
   starting_points: number
   return_points: number
   uma: string[]
@@ -50,6 +53,7 @@ export type Tournament = {
   participants: Participant[]
   /** Read-only optimistic lock; a draft PATCH echoes it back (409 stale_tournament). */
   revision: number
+  champion_team_id?: number | null
 }
 export type TournamentInput = Pick<
   Tournament,

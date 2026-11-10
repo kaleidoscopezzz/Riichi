@@ -107,11 +107,14 @@ export function TableResultEditor({
   return (
     <>
       <p>
-        第 {table.round_number} 轮 · 逻辑桌 {'ABCD'[table.table_number - 1]}。允许负数与零。
+        第 {table.round_number} {tournament.competition_type === 'team' ? '时段' : '轮'} · 逻辑桌{' '}
+        {'ABCD'[table.table_number - 1]}。允许负数与零。
       </p>
       {correction && (
         <p>
-          更正会更新累计积分和后续尚未生成轮次的排序。已经生成的轮次保留现有座次，旧成绩自动留档。
+          {tournament.competition_type === 'team'
+            ? '更正会更新团队累计积分，已经开场的比赛保留出场人员和座次，旧成绩自动留档。'
+            : '更正会更新累计积分和后续尚未生成轮次的排序。已经生成的轮次保留现有座次，旧成绩自动留档。'}
         </p>
       )}
       {table.base_bonus && table.base_bonus !== '0' && (

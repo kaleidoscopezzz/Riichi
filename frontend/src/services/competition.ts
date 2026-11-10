@@ -32,6 +32,16 @@ export type ResultPreview = {
   total: string
   expected_total: string
   difference: string
+  team_changes?: {
+    participant_id: number
+    team_id: number
+    team_name: string
+    confirmed_total: Rational
+    previous_score: Rational
+    score_change: Rational | null
+    projected_total: Rational | null
+  }[]
+  team_source_versions?: Version[]
   scores: (Omit<Score, 'raw_points' | 'rank' | 'base' | 'bonus' | 'score'> & {
     raw_points: number | null
     rank: number | null
@@ -54,7 +64,7 @@ export type ResultCorrection = {
 export type Standing = {
   participant_id: number
   display_name: string
-  rank: number
+  rank: number | null
   total: Rational
   confirmed_rounds: number
   first_count: number

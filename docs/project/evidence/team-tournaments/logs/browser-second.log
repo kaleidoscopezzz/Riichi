@@ -1,0 +1,15 @@
+
+> riichi-frontend@0.1.0 test:e2e
+> tsc --noEmit -p tsconfig.e2e.json && playwright test --config ../.verification/team-tournaments/playwright.second.config.ts e2e/team-tournaments.spec.ts
+
+
+Running 4 tests using 1 worker
+
+(node:75160) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 e2e\team-tournaments.spec.ts:196:1 › six variable teams and twenty-four members complete free matches with real team contributions and responsive themes (60.0s)
+  ok 2 e2e\team-tournaments.spec.ts:253:1 › two cycles of five positions finish twenty matches, allow next-cycle substitutes and retain fixed representatives (1.7m)
+  ok 3 e2e\team-tournaments.spec.ts:313:1 › odd team stage validation explains the seats, preserves configuration and accepts four matches (10.7s)
+  ok 4 e2e\team-tournaments.spec.ts:335:1 › team editor strategy and schedule selects expand without viewport overflow in phone light and dark themes (7.8s)
+
+  4 passed (3.1m)

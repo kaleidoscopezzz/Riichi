@@ -12,9 +12,13 @@ RANKED = 'ranked_v1'
 MANUAL = 'manual_v1'
 SWISS_REPEATS = 'swiss_repeats_first_v1'
 SWISS_SCORES = 'swiss_scores_first_v1'
-CHOICES = [(LEGACY, '历史自动分桌'), (RANDOM, '完全随机'), (RANKED, '高高碰'), (MANUAL, '手动分桌'), (SWISS_REPEATS, '瑞士轮 · 避重优先'), (SWISS_SCORES, '瑞士轮 · 积分接近优先')]
-SUPPORTED_CHOICES = CHOICES[1:]
-NEW_CHOICES = CHOICES[1:4]
+INDIVIDUAL_CHOICES = [(LEGACY, '历史自动分桌'), (RANDOM, '完全随机'), (RANKED, '高高碰'), (MANUAL, '手动分桌'), (SWISS_REPEATS, '瑞士轮 · 避重优先'), (SWISS_SCORES, '瑞士轮 · 积分接近优先')]
+TEAM_BALANCED = 'team_balanced_v1'
+TEAM_MANUAL = 'team_manual_v1'
+TEAM_CHOICES = [(TEAM_BALANCED, '均衡随机编排'), (TEAM_MANUAL, '手动安排四队')]
+CHOICES = [*INDIVIDUAL_CHOICES, *TEAM_CHOICES]
+SUPPORTED_CHOICES = INDIVIDUAL_CHOICES[1:]
+NEW_CHOICES = INDIVIDUAL_CHOICES[1:4]
 BONUS_POLICY = 'add_table_base_bonus_v1'
 
 

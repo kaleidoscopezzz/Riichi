@@ -39,6 +39,7 @@ class TableBonusesField(serializers.Field):
 
 
 class TournamentWriteSerializer(StrictFieldsMixin, serializers.Serializer):
+    competition_type = serializers.ChoiceField(choices=['individual'], required=False)
     name = serializers.CharField(max_length=120)
     description = serializers.CharField(max_length=3000, allow_blank=True, required=False)
     round_count = ExactInteger(min_value=1, max_value=6)
@@ -87,9 +88,15 @@ class TournamentSerializer(serializers.ModelSerializer):
     expected_table_count = serializers.SerializerMethodField()
     participants = serializers.SerializerMethodField()
 
+    def to_representation(self, instance):
+        if instance.competition_type == 'team':
+            from .team_services import team_data
+            return team_data(instance)
+        return super().to_representation(instance)
+
     class Meta:
         model = Tournament
-        fields = ["id", "name", "description", "round_count", "starting_points", "return_points", "uma", "oka", "oka_override", "pairing_strategy", "table_bonus_policy", "ranked_table_bonuses", "status", "created_by", "created_at", "updated_at", "started_at", "revision", "participant_count", "expected_table_count", "participants", "score_tie_policy", "champion_tiebreak_policy", "rules_version", "rules_source", "resource_state", "completed_at", "champion_id"]
+        fields = ["id", "name", "description", "competition_type", "round_count", "starting_points", "return_points", "uma", "oka", "oka_override", "pairing_strategy", "table_bonus_policy", "ranked_table_bonuses", "status", "created_by", "created_at", "updated_at", "started_at", "revision", "participant_count", "expected_table_count", "participants", "score_tie_policy", "champion_tiebreak_policy", "rules_version", "rules_source", "resource_state", "completed_at", "champion_id", "champion_team_id"]
 
     def get_participant_count(self, obj):
         return len(obj.participants.all())

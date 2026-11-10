@@ -3,8 +3,23 @@ from .views import TournamentListView, TournamentDetailView, TournamentParticipa
 from .round_views import RoundListView, RoundDetailView, PairingPreviewView
 
 from .competition_views import WorkspaceView, ReplaceView, ReviewView, LotteryView, ConfirmLotteryView, VoidLotteryView, FinishView, EliminationView
+from .team_views import (SchedulePreviewView, ScheduleGenerateView, ScheduleResetView, PlansView, PlanView,
+                        PlansConfirmView, PlanWithdrawView, RepresentativeView, RepresentativesView, BatchPreviewView, BatchStartView, BatchesView, AuditView)
 
 urlpatterns = [
+    path('<int:pk>/team/schedule/preview/', SchedulePreviewView.as_view()),
+    path('<int:pk>/team/schedule/generate/', ScheduleGenerateView.as_view()),
+    path('<int:pk>/team/schedule/reset/', ScheduleResetView.as_view()),
+    path('<int:pk>/team/plans/', PlansView.as_view()),
+    path('<int:pk>/team/plans/confirm/', PlansConfirmView.as_view()),
+    path('<int:pk>/team/plans/<int:match_id>/', PlanView.as_view()),
+    path('<int:pk>/team/plans/<int:match_id>/withdraw/', PlanWithdrawView.as_view()),
+    path('<int:pk>/team/stages/<int:stage_id>/representative/', RepresentativeView.as_view()),
+    path('<int:pk>/team/stages/<int:stage_id>/representatives/', RepresentativesView.as_view()),
+    path('<int:pk>/team/batches/preview/', BatchPreviewView.as_view()),
+    path('<int:pk>/team/batches/start/', BatchStartView.as_view()),
+    path('<int:pk>/team/batches/', BatchesView.as_view()),
+    path('<int:pk>/team/audit/', AuditView.as_view()),
     path('<int:pk>/rounds/preview/', PairingPreviewView.as_view()),
     path("<int:pk>/workspace/", WorkspaceView.as_view()),
     path("<int:pk>/eliminations/", EliminationView.as_view()),

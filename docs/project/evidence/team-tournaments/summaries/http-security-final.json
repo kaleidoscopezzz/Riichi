@@ -1,0 +1,32 @@
+{
+  "result": "PASS",
+  "origin": "https://localhost:18455",
+  "isolated_only": true,
+  "cases": {
+    "health": 200,
+    "anonymous_team_read": 403,
+    "login_missing_csrf": 403,
+    "admin_login": 200,
+    "admin_session_read": 200,
+    "authenticated_write_missing_csrf": 403,
+    "foreign_origin_rejected": 403,
+    "invalid_host_rejected": 400,
+    "eligible_roster": 200,
+    "team_create_with_session_csrf": 201,
+    "team_workspace_read": 200,
+    "strict_fields": 400,
+    "closed_registration": 403,
+    "logout": 200,
+    "logged_out_team_read": 403
+  },
+  "cookie_flags": {
+    "csrftoken": {
+      "secure": true,
+      "httponly": false
+    },
+    "sessionid": {
+      "secure": true,
+      "httponly": true
+    }
+  }
+}

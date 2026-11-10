@@ -110,6 +110,7 @@ def response(data, status=200):
 
 def lottery_data(row):
     return {**{key: getattr(row, key) for key in ['id', 'members', 'order', 'method', 'description', 'drawn_at', 'created_by_id', 'created_at', 'confirmed_by_id', 'confirmed_at', 'source_versions', 'participant_statuses', 'purpose', 'rules_version', 'voided_by_id', 'voided_at', 'void_reason']},
+            'entity_type': row.entity_type, 'roster_snapshot': row.roster_snapshot, 'plan_sources': row.plan_sources,
             'round_number': row.elimination_round.round_number if row.elimination_round_id else None}
 
 
@@ -168,12 +169,22 @@ class ReviewView(AdminView):
 
 class LotteryView(AdminView):
     def post(self, request, pk):
-        return response(lottery_data(svc.record_lottery(pk, request.user, validated(LotteryWrite, request))), 201)
+        t = get_object_or_404(Tournament, pk=pk)
+        if t.competition_type == 'team':
+            from .team_serializers import TeamLotteryWrite
+            from .team_services import record_team_lottery
+            return response(lottery_data(record_team_lottery(pk, request.user, validated(TeamLotteryWrite, request))), 201)
+        else:
+            cls = LotteryWrite
+        return response(lottery_data(svc.record_lottery(pk, request.user, validated(cls, request))), 201)
 
 
 class ConfirmLotteryView(AdminView):
     def post(self, request, pk, lottery_id):
         validated(ConfirmWrite, request)
+        if get_object_or_404(Tournament, pk=pk).competition_type == 'team':
+            from .team_services import confirm_team_lottery
+            return response(lottery_data(confirm_team_lottery(pk, lottery_id, request.user)))
         return response(lottery_data(svc.confirm_lottery(pk, lottery_id, request.user)))
 
 
@@ -184,6 +195,11 @@ class VoidLotteryView(AdminView):
 
 class FinishView(AdminView):
     def post(self, request, pk):
+        t = get_object_or_404(Tournament, pk=pk)
+        if t.competition_type == 'team':
+            from .team_serializers import TeamFinishWrite
+            from .team_services import finish_team
+            return response(finish_team(pk, request.user, validated(TeamFinishWrite, request)))
         values = validated(FinishWrite, request)
         return response(svc.finish(pk, request.user, values['source_versions'], values.get('participant_statuses')))
 

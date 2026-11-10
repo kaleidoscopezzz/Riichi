@@ -59,14 +59,16 @@ def rehearse_oka_migration(connection, *, before_upgrade=None):
     if before_upgrade is not None:
         before_upgrade(baseline)
     executor = MigrationExecutor(connection)
-    targets = executor.loader.graph.leaf_nodes()
+    targets = [node for node in executor.loader.graph.leaf_nodes() if node[0] != 'tournaments'] + [('tournaments', '0007_configurable_oka')]
     executor.migrate(targets)
     projection = build_manifest(connection, baseline)
     if projection["result"] != "PASS":
         raise AssertionError("0007 changed historical columns, rows, keys or snapshots")
 
-    from tournaments.models import Tournament
+    from tournaments.rules import derive_oka
+    Tournament = executor.loader.project_state(targets).apps.get_model('tournaments', 'Tournament')
     for tournament in Tournament.objects.using(alias).filter(pk__in=expected):
+        tournament.oka = derive_oka(tournament.starting_points, tournament.return_points)
         if (tournament.oka_override, tournament.rules_version, tournament.rules_source, tournament.oka) != (None, 1, "legacy_default_backfill:0004", expected[tournament.pk]):
             raise AssertionError("0007 changed a historical tournament's scoring configuration")
         for round_ in tournament.rounds.all():

@@ -1,0 +1,69 @@
+
+> riichi-frontend@0.1.0 test:e2e
+> tsc --noEmit -p tsconfig.e2e.json && playwright test --config ../.verification/team-tournaments/playwright.final.config.ts
+
+
+Running 13 tests using 1 worker
+
+(node:64080) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 e2e\configurable-oka.spec.ts:23:1 › configurable Oka: zero, exact decimals, automatic reset, frozen scoring and accessible themes (32.9s)
+  ok  2 e2e\event-flow.spec.ts:180:1 › monthly and daily events share a machine; maintenance blocks next round until explicit replacement (29.2s)
+  ok  3 e2e\event-flow.spec.ts:252:1 › sixteen players finish six configured rounds with optional elimination and readable statistics in both themes (49.1s)
+  ok  4 e2e\event-flow.spec.ts:390:1 › a tied elimination boundary requires a public draw; later correction preserves eligibility and generated seats (25.4s)
+  ok  5 e2e\event-flow.spec.ts:482:1 › three new strategies and existing Swiss labels use the shared Select in desktop and phone themes (11.2s)
+  ok  6 e2e\pairing-strategies.spec.ts:160:1 › new presets and existing Swiss history, exact high-table bonuses and manual mouse/keyboard swaps (59.6s)
+  ok  7 e2e\pairing-strategies.spec.ts:251:1 › sixteen-player manual touch drag scrolls from table A to offscreen D on phones (36.4s)
+  ok  8 e2e\production-launch.spec.ts:24:1 › real browser: roster, tournaments, scores, lotteries, completion, responsive themes (2.9m)
+  ok  9 e2e\score-corrections.spec.ts:23:1 › correct earlier results while a later round is underway, preview exact scores and preserve play history (30.3s)
+  x  10 e2e\team-tournaments.spec.ts:209:1 › six variable teams and twenty-four members complete free matches with real team contributions and responsive themes (39.3s)
+(node:80288) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 11 e2e\team-tournaments.spec.ts:266:1 › two cycles of five positions finish twenty matches, allow next-cycle substitutes and retain fixed representatives (1.7m)
+  ok 12 e2e\team-tournaments.spec.ts:326:1 › odd team stage validation explains the seats, preserves configuration and accepts four matches (10.5s)
+  ok 13 e2e\team-tournaments.spec.ts:348:1 › team editor strategy and schedule selects expand without viewport overflow in phone light and dark themes (8.0s)
+
+
+  1) e2e\team-tournaments.spec.ts:209:1 › six variable teams and twenty-four members complete free matches with real team contributions and responsive themes 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: getByRole('dialog').getByLabel('TeamQA-6596e1 队2 累计积分试算', { exact: true }).getByTitle('0/1')
+    Expected: "0.00"
+    Error: strict mode violation: getByRole('dialog').getByLabel('TeamQA-6596e1 队2 累计积分试算', { exact: true }).getByTitle('0/1') resolved to 3 elements:
+        1) <dd title="0/1">0.00</dd> aka getByRole('article', { name: 'TeamQA-6596e1 02 积分试算' }).getByText('0.00', { exact: true })
+        2) <dd title="40/1">40.00</dd> aka getByText('40.00').nth(2)
+        3) <dd title="40/1">40.00</dd> aka getByText('40.00').nth(3)
+
+    Call log:
+      - Expect "toHaveText" getByRole('dialog').getByLabel('TeamQA-6596e1 队2 累计积分试算', { exact: true }).getByTitle('0/1') with timeout 5000ms
+      - waiting for getByRole('dialog').getByLabel('TeamQA-6596e1 队2 累计积分试算', { exact: true }).getByTitle('0/1')
+
+
+      159 |       })
+      160 |       await expect(contribution).toBeVisible()
+    > 161 |       await expect(contribution.getByTitle('0/1')).toHaveText('0.00')
+          |                                                    ^
+      162 |       await expect(contribution.getByTitle('40/1')).toHaveCount(2)
+      163 |       await page.screenshot({
+      164 |         path: info.outputPath('team-live-score-contribution.png'),
+        at score (<workspace>\frontend\e2e\team-tournaments.spec.ts:161:52)
+        at <workspace>\frontend\e2e\team-tournaments.spec.ts:223:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\.verification\team-tournaments\browser-final\team-tournaments-six-varia-201c9-tions-and-responsive-themes\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\.verification\team-tournaments\browser-final\team-tournaments-six-varia-201c9-tions-and-responsive-themes\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ..\.verification\team-tournaments\browser-final\team-tournaments-six-varia-201c9-tions-and-responsive-themes\trace.zip
+    Usage:
+
+        npx playwright show-trace ..\.verification\team-tournaments\browser-final\team-tournaments-six-varia-201c9-tions-and-responsive-themes\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    e2e\team-tournaments.spec.ts:209:1 › six variable teams and twenty-four members complete free matches with real team contributions and responsive themes 
+  12 passed (10.4m)

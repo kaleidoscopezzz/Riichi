@@ -24,6 +24,8 @@ def preview(tournament_id, user, number):
     t = get_object_or_404(Tournament, pk=tournament_id)
     if t.status != 'started':
         conflict('请先启动赛事，再预览本轮分桌。', 'tournament_not_started')
+    if t.competition_type != 'individual':
+        conflict('团队赛使用出场计划与开赛批次，请进入团队工作台。', 'competition_mode_mismatch')
     if t.pairing_strategy == LEGACY:
         raise ValidationError({'pairing_strategy': ['历史赛事沿用原分桌规则。']})
     latest = t.rounds.order_by('-round_number').first()

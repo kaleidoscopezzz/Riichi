@@ -68,6 +68,9 @@ def configure_rules(tournament, values, previous_version=None, previous_pairing=
 
 
 def create_tournament(user, values):
+    if values.get('competition_type') == 'team':
+        from .team_services import create_team_tournament
+        return create_team_tournament(user, values)
     values = dict(values)
     ids = values.pop("participant_ids", [])
     try:
@@ -87,7 +90,7 @@ def database_busy(exc):
     raise exc
 
 
-def mutate_tournament(pk, *, values=None, participant_ids=None, start=False, revision=None):
+def mutate_tournament(pk, *, values=None, participant_ids=None, start=False, revision=None, actor=None):
     try:
         with transaction.atomic():
             # FIRST database statement is a conditional write, not a read. All
@@ -96,6 +99,8 @@ def mutate_tournament(pk, *, values=None, participant_ids=None, start=False, rev
             # An optional client revision is compared inside this same UPDATE.
             changed = Tournament.objects.filter(pk=pk, status="draft", **({} if revision is None else {"revision": revision})).update(revision=F("revision") + 1)
             tournament = get_object_or_404(Tournament, pk=pk)
+            if tournament.competition_type != 'individual':
+                raise TournamentConflict('请通过团队赛入口维护阵容和启动赛事。', 'competition_mode_mismatch')
             if not changed:
                 if tournament.status == "draft":
                     raise TournamentConflict("赛事草稿已被他人修改，请刷新后再保存。", "stale_tournament")

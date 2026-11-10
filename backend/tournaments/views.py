@@ -43,7 +43,11 @@ class TournamentListView(generics.GenericAPIView):
         return Response({"data": {"count": self.paginator.page.paginator.count, "next": self.paginator.get_next_link(), "previous": self.paginator.get_previous_link(), "results": TournamentSerializer(page, many=True).data}}, headers={"Cache-Control": "no-store"})
 
     def post(self, request):
-        serializer = TournamentCreateSerializer(data=request.data)
+        if request.data.get('competition_type') == 'team':
+            from .team_serializers import TeamTournamentWrite
+            serializer = TeamTournamentWrite(data=request.data)
+        else:
+            serializer = TournamentCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return response(create_tournament(request.user, serializer.validated_data).pk, 201)
 
@@ -55,14 +59,22 @@ class TournamentDetailView(APIView):
         return response(pk)
 
     def patch(self, request, pk):
-        serializer = TournamentUpdateSerializer(data=request.data, partial=True)
+        t = get_object_or_404(Tournament, pk=pk)
+        if t.competition_type == 'team':
+            from .team_serializers import TeamTournamentUpdate
+            serializer = TeamTournamentUpdate(data=request.data, partial=True)
+        else:
+            serializer = TournamentUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         values = dict(serializer.validated_data)
         revision = values.pop("revision", None)
         if not values:
             raise ValidationError({"non_field_errors": ["请提供需要修改的字段。"]})
         ids = values.pop("participant_ids", None)
-        return response(mutate_tournament(pk, values=values, participant_ids=ids, revision=revision).pk)
+        if t.competition_type == 'team':
+            from .team_services import update_team_tournament
+            return response(update_team_tournament(pk, values, user=request.user, revision=revision).pk)
+        return response(mutate_tournament(pk, values=values, participant_ids=ids, revision=revision, actor=request.user).pk)
 
 
 class TournamentParticipantsView(APIView):
@@ -80,4 +92,8 @@ class TournamentStartView(APIView):
     def post(self, request, pk):
         serializer = EmptySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return response(mutate_tournament(pk, start=True).pk)
+        t = get_object_or_404(Tournament, pk=pk)
+        if t.competition_type == 'team':
+            from .team_services import start_team_tournament
+            return response(start_team_tournament(pk, user=request.user).pk)
+        return response(mutate_tournament(pk, start=True, actor=request.user).pk)

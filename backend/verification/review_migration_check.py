@@ -67,7 +67,7 @@ def rehearse_review_migrations(connection, *, tournament_id, admin_id, machine_i
     require_unchanged(connection, baseline)
 
     executor = MigrationExecutor(connection)
-    targets = executor.loader.graph.leaf_nodes()
+    targets = [node for node in executor.loader.graph.leaf_nodes() if node[0] != 'tournaments'] + [('tournaments', '0006_reservation_release_reason')]
     executor.migrate(targets)
     apps = executor.loader.project_state(targets).apps
     Reservation = apps.get_model("tournaments", "TournamentMachineReservation").objects.using(alias)
@@ -77,8 +77,8 @@ def rehearse_review_migrations(connection, *, tournament_id, admin_id, machine_i
     projected = require_unchanged(connection, baseline)
     current = build_manifest(connection)
     executor = MigrationExecutor(connection)
-    if executor.migration_plan(executor.loader.graph.leaf_nodes()):
+    if executor.migration_plan(targets):
         raise AssertionError("Pending migrations remain after rehearsal")
-    executor.migrate(executor.loader.graph.leaf_nodes())
+    executor.migrate(targets)
     require_unchanged(connection, current)
     return {"result": "PASS", "database_vendor": connection.vendor, "old_lottery_rows": 2, "pre_0006_reservations": 2, "invalid_void_states_rejected": len(violations), "original_columns_unchanged": True, "released_only_copy": True, "migration_rerun_noop": True, "additions": projected["additions"]}

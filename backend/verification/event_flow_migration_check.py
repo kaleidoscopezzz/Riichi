@@ -75,7 +75,7 @@ def rehearse_event_flow_migration(connection, *, before_upgrade=None):
     if baseline['result'] != 'PASS': raise AssertionError('Original QA fixture invalid')
     if before_upgrade: before_upgrade(baseline)
     executor = MigrationExecutor(connection)
-    targets = executor.loader.graph.leaf_nodes()
+    targets = [node for node in executor.loader.graph.leaf_nodes() if node[0] != 'tournaments'] + [('tournaments', '0010_event_flow')]
     executor.migrate(targets)
     projection = build_manifest(connection, baseline)
     if projection['result'] != 'PASS': raise AssertionError('0010 changed original columns or identities')

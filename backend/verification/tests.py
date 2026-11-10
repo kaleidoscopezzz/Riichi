@@ -79,6 +79,16 @@ class SchemaManifestTests(TestCase):
         self.execute("UPDATE django_migrations SET applied = 'changed' WHERE id = 1")
         self.assertEqual(build_manifest(self.db, baseline)["result"], "FAIL")
 
+    def test_post_migrate_permission_additions_are_allowed_but_original_rows_are_not_removed(self):
+        self.execute('CREATE TABLE auth_permission (id INTEGER PRIMARY KEY, name TEXT NOT NULL)')
+        self.execute("INSERT INTO auth_permission VALUES (1, 'old permission')")
+        baseline = build_manifest(self.db)
+        self.assertIn('row_hashes', baseline['tables']['auth_permission'])
+        self.execute("INSERT INTO auth_permission VALUES (2, 'new model permission')")
+        self.assertEqual(build_manifest(self.db, baseline)["result"], "PASS")
+        self.execute('DELETE FROM auth_permission WHERE id = 1')
+        self.assertEqual(build_manifest(self.db, baseline)["result"], "FAIL")
+
     def test_wrong_manifest_version_or_vendor_is_rejected(self):
         for reference in [{"format_version": 0, "vendor": "sqlite", "tables": {}}, {"format_version": 1, "vendor": "postgresql", "tables": {}}]:
             with self.subTest(reference=reference), self.assertRaises(ValueError):

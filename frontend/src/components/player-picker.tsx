@@ -12,10 +12,18 @@ export function PlayerPicker({
   selected,
   change,
   disabled,
+  maxSelected = 16,
+  blockedPlayerIds = [],
+  label = '搜索参赛选手',
+  hintText,
 }: {
   selected: Participant[]
   change: (value: Participant[]) => void
   disabled: boolean
+  maxSelected?: number
+  blockedPlayerIds?: number[]
+  label?: string
+  hintText?: string
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -35,7 +43,11 @@ export function PlayerPicker({
   const hint = useId()
   const archivedHint = useId()
   const isSelected = (id: number) => selected.some((p) => p.player_id === id)
-  const unavailable = (p: Player) => !p.is_active || isSelected(p.id) || selected.length >= 16
+  const unavailable = (p: Player) =>
+    !p.is_active ||
+    isSelected(p.id) ||
+    blockedPlayerIds.includes(p.id) ||
+    selected.length >= maxSelected
   const archived = selected.filter((p) => !p.is_active)
 
   useEffect(() => {
@@ -115,10 +127,12 @@ export function PlayerPicker({
     <section className="participant-picker" aria-label="选择参赛选手">
       <div className="tournament-section-heading">
         <h3>参赛名单</h3>
-        <Badge variant="outline">已选 {selected.length} / 16 人</Badge>
+        <Badge variant="outline">
+          已选 {selected.length} / {maxSelected} 人
+        </Badge>
       </div>
       <p className="field-hint">
-        草稿可暂留空；启动需要 4、8、12 或 16 人。由雀庄管理员维护有效选手。
+        {hintText ?? '草稿可暂留空；启动需要 4、8、12 或 16 人。由雀庄管理员维护有效选手。'}
       </p>
       <div className="selected-players" aria-label="已选人员">
         {selected.length ? (
@@ -159,7 +173,7 @@ export function PlayerPicker({
             <input
               ref={input}
               role="combobox"
-              aria-label="搜索参赛选手"
+              aria-label={label}
               aria-expanded={open && !disabled}
               aria-controls={list}
               aria-autocomplete="list"
@@ -325,8 +339,8 @@ export function PlayerPicker({
         </Popover.Portal>
       </Popover.Root>
       <p id={hint} className="player-combobox-hint" role="status">
-        {selected.length >= 16
-          ? '已满 16 人，请先移除已选选手后再添加。'
+        {selected.length >= maxSelected
+          ? `已满 ${maxSelected} 人，请先移除已选选手后再添加。`
           : '按昵称搜索；使用 ↑ ↓ 和 Enter 选择，Escape 收起。已选人员可点击标签移除。'}
       </p>
     </section>

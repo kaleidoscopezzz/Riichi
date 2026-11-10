@@ -204,3 +204,15 @@ class LegacyMigrationTests(TransactionTestCase):
         self.assertTrue(result['historical_lotteries_final'])
         self.assertTrue(result['shared_reservation_constraint'])
         self.assertTrue(result['per_table_unique_preserved'])
+
+    def test_team_migrations_preserve_all_personal_columns_types_history_and_ids(self):
+        from verification.event_flow_migration_check import BEFORE_EVENT_FLOW, rehearse_event_flow_migration
+        from verification.team_migration_check import rehearse_team_migrations
+        self.migrate(BEFORE_EVENT_FLOW)
+        rehearse_event_flow_migration(self.db)
+        result = rehearse_team_migrations(self.db)
+        self.assertEqual(result['result'], 'PASS')
+        self.assertTrue(result['original_columns_types_rows_and_keys_unchanged'])
+        self.assertTrue(result['legacy_individual_defaults'])
+        self.assertTrue(result['no_team_records_invented'])
+        self.assertTrue(result['legacy_lotteries_participant'])

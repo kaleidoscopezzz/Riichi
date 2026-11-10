@@ -1,0 +1,325 @@
+Creating test database for alias 'default'...
+
+.........................................................................................................................................................................................................EEE..........FFE.F........................
+======================================================================
+ERROR: test_parallel_start_only_one_commits (tournaments.tests.ConcurrentTournamentTests.test_parallel_start_only_one_commits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: database table is locked: tournaments_tournament
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<workspace>\backend\tournaments\tests.py", line 239, in test_parallel_start_only_one_commits
+    results = self.race([lambda: mutate_tournament(row.pk, start=True)] * 4)
+  File "<workspace>\backend\tournaments\tests.py", line 235, in race
+    return list(pool.map(worker, functions))
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 625, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 318, in _result_or_cancel
+    return fut.result(timeout)
+           ~~~~~~~~~~^^^^^^^^^
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 460, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 402, in __get_result
+    raise self._exception
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "<workspace>\backend\tournaments\tests.py", line 228, in worker
+    fn()
+    ~~^^
+  File "<workspace>\backend\tournaments\tests.py", line 239, in <lambda>
+    results = self.race([lambda: mutate_tournament(row.pk, start=True)] * 4)
+                                 ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "<workspace>\backend\tournaments\services.py", line 94, in mutate_tournament
+    if Tournament.objects.filter(pk=pk, competition_type='team').exists():
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\query.py", line 1298, in exists
+    return self.query.has_results(using=self.db)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\sql\query.py", line 676, in has_results
+    return compiler.has_results()
+           ~~~~~~~~~~~~~~~~~~~~^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1591, in has_results
+    return bool(self.execute_sql(SINGLE))
+                ~~~~~~~~~~~~~~~~^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: database table is locked: tournaments_tournament
+
+======================================================================
+ERROR: test_same_revision_parallel_edits_only_one_commits (tournaments.tests.ConcurrentTournamentTests.test_same_revision_parallel_edits_only_one_commits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: database table is locked: tournaments_tournament
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<workspace>\backend\tournaments\tests.py", line 264, in test_same_revision_parallel_edits_only_one_commits
+    results = self.race([lambda: mutate_tournament(row.pk, values={"name": "甲的修改"}, revision=0), lambda: mutate_tournament(row.pk, values={"name": "乙的修改"}, revision=0), lambda: mutate_tournament(row.pk, participant_ids=self.ids[4:], revision=0)])
+              ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<workspace>\backend\tournaments\tests.py", line 235, in race
+    return list(pool.map(worker, functions))
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 625, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 318, in _result_or_cancel
+    return fut.result(timeout)
+           ~~~~~~~~~~^^^^^^^^^
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 460, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 402, in __get_result
+    raise self._exception
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "<workspace>\backend\tournaments\tests.py", line 228, in worker
+    fn()
+    ~~^^
+  File "<workspace>\backend\tournaments\tests.py", line 264, in <lambda>
+    results = self.race([lambda: mutate_tournament(row.pk, values={"name": "甲的修改"}, revision=0), lambda: mutate_tournament(row.pk, values={"name": "乙的修改"}, revision=0), lambda: mutate_tournament(row.pk, participant_ids=self.ids[4:], revision=0)])
+                                 ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<workspace>\backend\tournaments\services.py", line 94, in mutate_tournament
+    if Tournament.objects.filter(pk=pk, competition_type='team').exists():
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\query.py", line 1298, in exists
+    return self.query.has_results(using=self.db)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\sql\query.py", line 676, in has_results
+    return compiler.has_results()
+           ~~~~~~~~~~~~~~~~~~~~^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1591, in has_results
+    return bool(self.execute_sql(SINGLE))
+                ~~~~~~~~~~~~~~~~^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: database table is locked: tournaments_tournament
+
+======================================================================
+ERROR: test_start_vs_roster_and_config_edits_are_serial (tournaments.tests.ConcurrentTournamentTests.test_start_vs_roster_and_config_edits_are_serial)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: database table is locked: tournaments_tournament
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<workspace>\backend\tournaments\tests.py", line 248, in test_start_vs_roster_and_config_edits_are_serial
+    results = self.race([lambda: mutate_tournament(row.pk, start=True), lambda: mutate_tournament(row.pk, participant_ids=self.ids[4:]), lambda: mutate_tournament(row.pk, values={"round_count": 6})])
+  File "<workspace>\backend\tournaments\tests.py", line 235, in race
+    return list(pool.map(worker, functions))
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 625, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 318, in _result_or_cancel
+    return fut.result(timeout)
+           ~~~~~~~~~~^^^^^^^^^
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 460, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 402, in __get_result
+    raise self._exception
+  File "<existing-project-tools>\python\cpython-3.13-windows-x86_64-none\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "<workspace>\backend\tournaments\tests.py", line 228, in worker
+    fn()
+    ~~^^
+  File "<workspace>\backend\tournaments\tests.py", line 248, in <lambda>
+    results = self.race([lambda: mutate_tournament(row.pk, start=True), lambda: mutate_tournament(row.pk, participant_ids=self.ids[4:]), lambda: mutate_tournament(row.pk, values={"round_count": 6})])
+                                 ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "<workspace>\backend\tournaments\services.py", line 94, in mutate_tournament
+    if Tournament.objects.filter(pk=pk, competition_type='team').exists():
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\query.py", line 1298, in exists
+    return self.query.has_results(using=self.db)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\sql\query.py", line 676, in has_results
+    return compiler.has_results()
+           ~~~~~~~~~~~~~~~~~~~~^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1591, in has_results
+    return bool(self.execute_sql(SINGLE))
+                ~~~~~~~~~~~~~~~~^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: database table is locked: tournaments_tournament
+
+======================================================================
+ERROR: test_pairing_fields_preserve_old_rules_results_corrections_and_identities (tournaments.tests_migrations.LegacyMigrationTests.test_pairing_fields_preserve_old_rules_results_corrections_and_identities)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: tournaments_tournament.competition_type
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<workspace>\backend\tournaments\tests_migrations.py", line 189, in test_pairing_fields_preserve_old_rules_results_corrections_and_identities
+    result = rehearse_pairing_migration(self.db)
+  File "<workspace>\backend\verification\pairing_migration_check.py", line 63, in rehearse_pairing_migration
+    for t in Tournament.objects.using(connection.alias).filter(pk__in=expected):
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\query.py", line 386, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "<existing-project-tools>\cov-venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: tournaments_tournament.competition_type
+
+======================================================================
+FAIL: test_event_flow_upgrade_preserves_swiss_rules_results_corrections_and_snapshots (tournaments.tests_migrations.LegacyMigrationTests.test_event_flow_upgrade_preserves_swiss_rules_results_corrections_and_snapshots)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<workspace>\backend\tournaments\tests_migrations.py", line 199, in test_event_flow_upgrade_preserves_swiss_rules_results_corrections_and_snapshots
+    result = rehearse_event_flow_migration(self.db)
+  File "<workspace>\backend\verification\event_flow_migration_check.py", line 81, in rehearse_event_flow_migration
+    if projection['result'] != 'PASS': raise AssertionError('0010 changed original columns or identities')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0010 changed original columns or identities
+
+======================================================================
+FAIL: test_oka_upgrade_preserves_legacy_rules_results_and_completed_snapshots (tournaments.tests_migrations.LegacyMigrationTests.test_oka_upgrade_preserves_legacy_rules_results_and_completed_snapshots)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<workspace>\backend\tournaments\tests_migrations.py", line 168, in test_oka_upgrade_preserves_legacy_rules_results_and_completed_snapshots
+    result = rehearse_oka_migration(self.db)
+  File "<workspace>\backend\verification\oka_migration_check.py", line 66, in rehearse_oka_migration
+    raise AssertionError("0007 changed historical columns, rows, keys or snapshots")
+AssertionError: 0007 changed historical columns, rows, keys or snapshots
+
+======================================================================
+FAIL: test_shared_review_rehearsal_checks_original_schema_projection (tournaments.tests_migrations.LegacyMigrationTests.test_shared_review_rehearsal_checks_original_schema_projection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<workspace>\backend\tournaments\tests_migrations.py", line 157, in test_shared_review_rehearsal_checks_original_schema_projection
+    result = rehearse_review_migrations(self.db, tournament_id=tournament.pk, admin_id=admin.pk, machine_id=machine.pk, members=members)
+  File "<workspace>\backend\verification\review_migration_check.py", line 77, in rehearse_review_migrations
+    projected = require_unchanged(connection, baseline)
+  File "<workspace>\backend\verification\review_migration_check.py", line 27, in require_unchanged
+    raise AssertionError("Original schema projection or foreign key integrity changed: " + "; ".join(result["differences"]))
+AssertionError: Original schema projection or foreign key integrity changed: Original column types, nullability or primary key changed: tournaments_tournament; Original column types, nullability or primary key changed: tournaments_tournamentround
+
+----------------------------------------------------------------------
+Ran 243 tests in 70.712s
+
+FAILED (failures=3, errors=4)
+Destroying test database for alias 'default'...
+
+Found 243 test(s).
+System check identified no issues (0 silenced).

@@ -1,0 +1,61 @@
+{
+  "id": 6,
+  "sizes": [
+    16,
+    16,
+    12,
+    12,
+    8,
+    4
+  ],
+  "eliminationRounds": [
+    2,
+    4,
+    5
+  ],
+  "ranks": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "statistics": {
+    "fourth_avoidance": {
+      "value": {
+        "numerator": "1",
+        "denominator": "1"
+      },
+      "participant_ids": [
+        60,
+        55,
+        52,
+        59
+      ]
+    },
+    "highest_raw_points": {
+      "value": 40619,
+      "participant_ids": [
+        47
+      ]
+    },
+    "most_firsts": {
+      "value": 4,
+      "participant_ids": [
+        47
+      ]
+    }
+  },
+  "page_errors": []
+}

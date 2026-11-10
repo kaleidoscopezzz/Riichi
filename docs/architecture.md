@@ -50,16 +50,16 @@ API不发布端口，仅在该受控拓扑启用`TRUST_PROXY_HEADERS`。Django�
 | 实体 | 实现和约束 |
 | --- | --- |
 | MahjongMachine | 原ID/编号/状态/历史保留；capacity_slot为nullable只读legacy列，旧值及唯一索引保留，新设备NULL；现役三位编号唯一、状态/名称CHECK仍有效 |
-| Tournament | draft/started/completed，数字规则/Uma字符串、两个策略ID/rules_version/rules_source；revision、首轮序列/来源、资源兼容状态/审计、冠军FK、完成管理员/时间及final_snapshot |
+| Tournament | individual/team，draft/started/completed，数字规则/Uma字符串、策略ID/rules_version/rules_source；revision、首轮序列/来源、资源兼容状态/审计、participant/team冠军FK、完成管理员/时间及final_snapshot |
 | TournamentParticipant | 关联PlayerProfile；赛事内player唯一、启动时昵称快照；nullable eliminated_after_round标记参赛资格，1～5轮范围CHECK，历史关系保留 |
 | TournamentTable | 全赛事稳定逻辑桌ordinal 1～4/A～D；赛事内ordinal唯一，范围CHECK |
 | TournamentMachineReservation | active/released、稳定machineId、编号快照、操作者/时间/原因、可空OneToOne legacy_allocation；active逻辑桌条件唯一、释放审计CHECK，跨赛事机器可共享，赛事内不重复由服务校验 |
-| TournamentRound | 1～6且赛事轮号唯一；generation_snapshot保存规则、来源成绩版本、排序输入、首轮顺序引用 |
+| TournamentRound | 个人1～6轮、团队1～10000批次且赛事内编号唯一；镜像competition_type，generation_snapshot保存规则、成绩/计划/阵容来源及个人排序/首轮引用 |
 | RoundTable | 保留原ID/table_number，新增可空TournamentTable FK和生成时machine_snapshot；故障替换不改旧快照 |
 | RoundSeat | 原Round/Table/Participant FK、桌内四风唯一、轮内选手唯一；全员及跨FK归属由服务验证 |
 | MachineAllocation | 原轮次级表和全部FK/历史保留，原active条件唯一及release审计CHECK保留；新轮不复制active旧分配 |
 | TableResult | 每桌OneToOne；draft/confirmed、version、points JSON（participant ID→有符号整数/空值）、scores、规则快照、录入/确认管理员及时间；确认状态CHECK |
-| LotteryRecord | 赛事、来源成绩版本与资格、purpose/淘汰轮次、组员、完整顺序、方式/过程/实际抽签时间、记录/确认管理员与时间；用途/轮次CHECK |
+| LotteryRecord | participant/team作用域、赛事、成绩/资格及团队阵容/计划来源、purpose/淘汰轮次、组员、完整顺序、方式/过程/实际抽签时间、记录/确认/作废审计；用途/轮次及状态CHECK |
 | EliminationRecord | 每轮OneToOne、四个稳定participant ID、原来源成绩/资格、确认时排名快照、抽签引用、确认人/时间，所有FK PROTECT |
 
 成绩请求只引用本桌既有participant ID，不接受换座、权威积分或冠军字段。草稿允许缺项/空值；确认及更正必须四人整数、总和4×开局且版本匹配。原始点数范围为±(2^53−1)，保证JSON到浏览器均为精确整数；超范围明确400，不截断。赛事进行中已确认成绩通过显式更正接口更新并留档，完赛后只读。默认未存成绩version=0，首次成功写入为1，之后成功写入递增。
@@ -134,6 +134,14 @@ LotteryRecord新增`purpose`与可空`elimination_round`，CHECK约束二者组�
 create_machine也加入原有物理池锁顺序；SQLite空池先无操作DML获得写预留，PostgreSQL在池PK行锁前取得数据库内事务级advisory锁，解决空表无法由行锁串行化的自动分号竞争。所有创建/状态/分配路径保持同一锁顺序，提交或回滚释放锁，不依赖Redis或全局服务。实际验证见[自动编号报告](project/machine-auto-number-verification.md)。
 
 ## 历史边界与验证限制
+
+Owner已授权团队赛实现，规则见[团队赛文档](team-tournament-plan.md)，实际结果见[团队赛验证](project/team-tournaments-verification.md)。团队服务、排程、Serializer和View仍在tournaments模块；前端提供`/tournaments/:id/team`工作台，复用Select、player-picker、成绩编辑/更正及Session/CSRF，不新增依赖或身份体系。
+
+新增TournamentTeam、TeamMember、TeamCompetitionSettings、TeamStage、TeamStageRepresentative、TeamMatchPlan及TeamAuditRecord。TeamMember通过OneToOne关联既有TournamentParticipant；Tournament新增individual/team及champion_team，LotteryRecord新增participant/team作用域和阵容/计划来源。实际对局复用TournamentRound、RoundTable、RoundSeat、TableResult及Correction，团队Round代表开赛时段，不要求全名单每批上场。
+
+新迁移0011～0014保留0001～0010及原列类型/非空要求，旧行默认individual/participant且不创造团队记录。团队API的round_count为null，实际场次在配置/计划中；原数据库列继续非空。Round类型镜像配合分类型CHECK，个人1～6轮保持，团队支持10000批次；跨表类型/团队/阶段/人员一致仍由服务校验。具体兼容投影、备份与独立恢复演练见本轮验证，不代表生产库已升级。
+
+团队自由赛程及每个位置阶段各队等场；均衡随机按队伍重复席位构造，手动模式允许调整未开场四队分组。计划确认、首次位置出场锁代表、批次预览及开场、冠军/抽签共用赛事写序列和物理池锁，绑定计划/阵容/成绩来源版本并留档。权威团队累计和实时累计变化全程Fraction，未确认或未出场不造半庄；完赛存冻结团队榜、成员贡献、规则和来源，工作台补只读关联/抽签历史字段。
 
 F0-05当时是最多四台、轮次级自动选机、仅首轮、无成绩/冠军；原报告/失败证据与历史Tag保留。旧自动生成器仅在`legacy_test_fixture.py`供历史数据回归构造，运行时路由/服务不引用；正常入口只接受显式选桌。与新需求冲突的旧断言已逐项更新并补回归，有效旧权限/数据约束/历史测试继续执行。
 

@@ -28,7 +28,9 @@ from machines.models import MahjongMachine
 assert settings.DATABASES['default']['NAME'] == 'riichi_qa'
 v=json.load(sys.stdin)
 admin=get_user_model().objects.create_superuser(username=v['username'],password=v['password'])
-players=[create_player(nickname=f"{v['prefix']} {i+1:02}") for i in range(16)]
+# Team browser scenarios use 24 roster members; keep the full isolated fixture
+# larger than the personal 16-player limit without changing personal lineups.
+players=[create_player(nickname=f"{v['prefix']} {i+1:02}") for i in range(80)]
 for i in range(4): MahjongMachine.objects.create(machine_no=str(800+i),name=f"{v['prefix']} 桌{i+1}",status='available')
 from tournaments.models import Tournament
 from tournaments.services import create_tournament, mutate_tournament

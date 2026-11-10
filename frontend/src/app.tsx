@@ -11,6 +11,7 @@ import { RouteGuard } from '@/components/route-guard'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { MachinesPage } from '@/pages/machines'
 import { RoundsPage } from '@/pages/rounds'
+import { TeamTournamentPage } from '@/pages/team-tournament'
 
 export function App() {
   const { pathname } = useLocation()
@@ -26,6 +27,7 @@ export function App() {
             <Route element={<RouteGuard admin />}>
               <Route path="tournaments" element={<TournamentsPage />} />
               <Route path="tournaments/:id/rounds" element={<RoundsPage />} />
+              <Route path="tournaments/:id/team" element={<TeamTournamentPage />} />
               <Route path="players" element={<PlayersPage />} />
               <Route path="machines" element={<MachinesPage />} />
             </Route>
