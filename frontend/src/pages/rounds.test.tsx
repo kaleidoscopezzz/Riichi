@@ -27,6 +27,7 @@ import {
   fetchResult,
   fetchResultCorrections,
   completeTournament,
+  eliminatePlayers,
   recordLottery,
   confirmLottery,
   voidLottery,
@@ -34,6 +35,7 @@ import {
   reviewLegacy,
   type Lottery,
   type Workspace,
+  type EliminationPlan,
 } from '@/services/competition'
 vi.mock('@/services/tournaments', async (original) => ({
   ...(await original<typeof import('@/services/tournaments')>()),
@@ -54,6 +56,7 @@ vi.mock('@/services/competition', async (original) => ({
   fetchResult: vi.fn(),
   fetchResultCorrections: vi.fn(),
   completeTournament: vi.fn(),
+  eliminatePlayers: vi.fn(),
   recordLottery: vi.fn(),
   confirmLottery: vi.fn(),
   voidLottery: vi.fn(),
@@ -218,6 +221,275 @@ beforeEach(() => {
     voided_at: null,
     void_reason: '',
     source_versions: [],
+  })
+})
+
+function eliminationWorkspace(): Workspace {
+  const standings = Array.from({ length: 8 }, (_, index) => ({
+    ...ws.standings[0],
+    participant_id: index + 1,
+    display_name: `快照选手${index + 1}`,
+    rank: index + 1,
+    confirmed_rounds: 1,
+    total: { numerator: String(80 - index * 10), denominator: '1' },
+    eliminated_after_round: null,
+  }))
+  const participant_statuses = standings.map((row) => ({
+    participant_id: row.participant_id,
+    eliminated_after_round: null,
+  }))
+  const source_versions = [
+    { table_id: 20, version: 1 },
+    { table_id: 21, version: 1 },
+  ]
+  const elimination: EliminationPlan = {
+    round_number: 1,
+    active_count: 8,
+    remaining_count: 4,
+    remaining_rounds: 2,
+    ready: true,
+    candidates: standings.slice(4),
+    standings,
+    unresolved_groups: [],
+    source_versions,
+    participant_statuses,
+  }
+  return { ...ws, standings, source_versions, participant_statuses, elimination, eliminations: [] }
+}
+
+describe('逐轮可选淘汰与共享物理桌', () => {
+  function prepare(current = eliminationWorkspace()) {
+    vi.mocked(fetchTournament).mockResolvedValue({
+      ...t,
+      participant_count: 8,
+      expected_table_count: 2,
+    })
+    vi.mocked(fetchRounds).mockResolvedValue({
+      results: [
+        { ...round, tables: [{ ...table, result: { ...table.result!, status: 'confirmed' } }] },
+      ],
+    })
+    vi.mocked(fetchWorkspace).mockResolvedValue(current)
+    vi.mocked(eliminatePlayers).mockResolvedValue({
+      id: 1,
+      round_number: 1,
+      participant_ids: [5, 6, 7, 8],
+      confirmed_by: 1,
+      confirmed_at: date,
+    })
+    return current
+  }
+  it('预览准确四人名单，取消不写入并恢复按钮焦点，再确认后提交同批来源', async () => {
+    const current = prepare()
+    show()
+    const user = userEvent.setup()
+    const button = await screen.findByRole('button', { name: '预览淘汰末四人' })
+    await user.click(button)
+    const preview = screen.getByLabelText('待淘汰四人')
+    expect(preview.textContent).toContain('快照选手5')
+    expect(preview.textContent).toContain('快照选手8')
+    expect(within(preview).getAllByRole('listitem')).toHaveLength(4)
+    expect(eliminatePlayers).not.toHaveBeenCalled()
+    await user.keyboard('{Escape}')
+    await waitFor(() => expect(document.activeElement).toBe(button))
+    expect(eliminatePlayers).not.toHaveBeenCalled()
+    await user.click(button)
+    await user.click(screen.getByRole('button', { name: '确认淘汰这四人' }))
+    await waitFor(() => expect(eliminatePlayers).toHaveBeenCalledWith(5, current.elimination))
+  })
+  it('相同并列组跨到下一轮后，旧轮抽签面板回读仅显示历史', async () => {
+    const current = eliminationWorkspace()
+    const members = current.standings.map((row) => row.participant_id)
+    current.elimination = {
+      ...current.elimination!,
+      ready: false,
+      candidates: [],
+      unresolved_groups: [members],
+    }
+    const draw: Lottery = {
+      id: 91,
+      members,
+      order: members,
+      method: '第一轮已记录纸签',
+      description: '公开监督',
+      drawn_at: date,
+      created_by_id: 1,
+      created_at: date,
+      confirmed_by_id: null,
+      confirmed_at: null,
+      voided_by_id: null,
+      voided_at: null,
+      void_reason: '',
+      source_versions: current.source_versions,
+      participant_statuses: current.participant_statuses,
+      purpose: 'elimination',
+      round_number: 1,
+    }
+    current.lotteries = [draw]
+    prepare(current)
+    show()
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('button', { name: '记录淘汰边界公开抽签' }))
+    expect(screen.getByRole('button', { name: '二次确认抽签顺序' })).toBeTruthy()
+    const versions = [...current.source_versions, { table_id: 40, version: 1 }]
+    vi.mocked(fetchWorkspace).mockResolvedValue({
+      ...current,
+      source_versions: versions,
+      elimination: { ...current.elimination!, round_number: 2, source_versions: versions },
+    })
+    vi.mocked(fetchRounds).mockResolvedValue({
+      results: [
+        round,
+        {
+          ...round,
+          id: 7,
+          round_number: 2,
+          tables: [
+            { ...table, round_number: 2, result: { ...table.result!, status: 'confirmed' } },
+          ],
+        },
+      ],
+    })
+    vi.mocked(confirmLottery).mockRejectedValueOnce(
+      new ApiError(409, 'lottery_conflict', '来源轮次已变化'),
+    )
+    await user.click(screen.getByRole('button', { name: '二次确认抽签顺序' }))
+    await screen.findByRole('heading', { name: '此轮抽签仅供历史查看' })
+    expect(screen.queryByRole('button', { name: '保存公开抽签记录' })).toBeNull()
+    expect(screen.queryByRole('button', { name: '二次确认抽签顺序' })).toBeNull()
+    expect(screen.getByText(/第一轮已记录纸签/)).toBeTruthy()
+    expect(confirmLottery).toHaveBeenCalledTimes(1)
+    expect(recordLottery).not.toHaveBeenCalled()
+  })
+  it('可以跳过淘汰直接生成下一轮', async () => {
+    prepare()
+    show()
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('button', { name: '生成第 2 轮' }))
+    await user.click(screen.getByRole('button', { name: '预览并确认' }))
+    await user.click(screen.getByRole('button', { name: '确认生成轮次' }))
+    await waitFor(() => expect(generateRound).toHaveBeenCalledWith(5, 2, undefined))
+    expect(eliminatePlayers).not.toHaveBeenCalled()
+  })
+  it('淘汰边界抽签与最终名次抽签分开，已记录的边界顺序需二次确认', async () => {
+    const current = eliminationWorkspace()
+    const group = [5, 6, 7, 8]
+    current.elimination = {
+      ...current.elimination!,
+      ready: false,
+      candidates: [],
+      unresolved_groups: [group],
+    }
+    const draw: Lottery = {
+      id: 31,
+      members: group,
+      order: group,
+      method: '淘汰公开签条',
+      description: '全员监督',
+      drawn_at: date,
+      created_by_id: 1,
+      created_at: date,
+      confirmed_by_id: null,
+      confirmed_at: null,
+      voided_by_id: null,
+      voided_at: null,
+      void_reason: '',
+      source_versions: current.source_versions,
+      participant_statuses: current.participant_statuses,
+      purpose: 'elimination',
+      round_number: 1,
+    }
+    current.lotteries = [
+      draw,
+      { ...draw, id: 32, purpose: 'final', round_number: null, method: '最终名次签条' },
+    ]
+    prepare(current)
+    show()
+    const user = userEvent.setup()
+    expect(
+      (await screen.findByRole('button', { name: '预览淘汰末四人' })).hasAttribute('disabled'),
+    ).toBe(true)
+    await user.click(screen.getByRole('button', { name: '记录淘汰边界公开抽签' }))
+    expect(screen.getByText('淘汰公开签条')).toBeTruthy()
+    expect(screen.queryByText('最终名次签条')).toBeNull()
+    expect(eliminatePlayers).not.toHaveBeenCalled()
+    await user.click(screen.getByRole('button', { name: '二次确认抽签顺序' }))
+    await waitFor(() => expect(confirmLottery).toHaveBeenCalledWith(5, 31))
+    expect(recordLottery).not.toHaveBeenCalled()
+  })
+  it('过期淘汰只提交一次，自动刷新并隐藏已失效的确认名单', async () => {
+    prepare()
+    vi.mocked(eliminatePlayers).mockRejectedValueOnce(
+      new ApiError(409, 'stale_standings', '成绩或淘汰状态已变化'),
+    )
+    show()
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('button', { name: '预览淘汰末四人' }))
+    vi.mocked(fetchWorkspace).mockResolvedValue({ ...eliminationWorkspace(), elimination: null })
+    await user.click(screen.getByRole('button', { name: '确认淘汰这四人' }))
+    await screen.findByRole('alert')
+    await waitFor(() => expect(fetchWorkspace).toHaveBeenCalledTimes(2))
+    expect(screen.queryByRole('button', { name: '确认淘汰这四人' })).toBeNull()
+    expect(eliminatePlayers).toHaveBeenCalledTimes(1)
+  })
+  it('剩四人继续赛程，显示淘汰记录并在完赛时携带资格来源', async () => {
+    const current = eliminationWorkspace()
+    current.elimination = null
+    current.ready = true
+    current.all_results_confirmed = true
+    current.standings = current.standings.map((row) => ({
+      ...row,
+      eliminated_after_round: row.participant_id > 4 ? 1 : null,
+    }))
+    current.participant_statuses = current.standings.map((row) => ({
+      participant_id: row.participant_id,
+      eliminated_after_round: row.eliminated_after_round!,
+    }))
+    current.eliminations = [
+      {
+        id: 1,
+        round_number: 1,
+        participant_ids: [5, 6, 7, 8],
+        confirmed_by: 1,
+        confirmed_at: date,
+      },
+    ]
+    prepare(current)
+    vi.mocked(fetchTournament).mockResolvedValue({ ...t, participant_count: 8, round_count: 2 })
+    vi.mocked(fetchRounds).mockResolvedValue({
+      results: [
+        round,
+        { ...round, id: 7, round_number: 2, tables: [{ ...table, round_number: 2 }] },
+      ],
+    })
+    show()
+    const user = userEvent.setup()
+    await screen.findByText('淘汰记录')
+    expect(screen.queryByRole('button', { name: '预览淘汰末四人' })).toBeNull()
+    expect(screen.getByText(/8 位参赛选手 · 4 位仍在赛/)).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: '正式完赛' }))
+    await user.click(screen.getByRole('button', { name: '确认完赛并释放本场物理桌' }))
+    await waitFor(() =>
+      expect(completeTournament).toHaveBeenCalledWith(
+        5,
+        current.source_versions,
+        current.participant_statuses,
+      ),
+    )
+  })
+  it('不同赛事已关联的可用桌仍可选择，维护桌不可选择', async () => {
+    vi.mocked(fetchRounds).mockResolvedValue({ results: [] })
+    vi.mocked(fetchWorkspace).mockResolvedValue({ ...ws, mapping: [] })
+    show()
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('button', { name: '选择物理桌并生成首轮' }))
+    await user.click(screen.getByRole('combobox', { name: '逻辑桌 A 物理桌' }))
+    expect(screen.getByRole('option', { name: '007 · 已占用' })).toBeTruthy()
+    expect(screen.queryByRole('option', { name: '207 · 维护桌' })).toBeNull()
+    await user.click(screen.getByRole('option', { name: '007 · 已占用' }))
+    await user.click(screen.getByRole('button', { name: '预览并确认' }))
+    await user.click(screen.getByRole('button', { name: '确认生成轮次' }))
+    await waitFor(() => expect(generateRound).toHaveBeenCalledWith(5, 1, [1]))
   })
 })
 afterEach(cleanup)
@@ -427,15 +699,15 @@ describe('完整比赛工作台', () => {
     await u.click(screen.getByRole('button', { name: '确认生成轮次' }))
     await waitFor(() => expect(generateRound).toHaveBeenCalledWith(5, 2, undefined))
   })
-  it('故障换桌必须空闲目标和原因，历史可查', async () => {
+  it('故障换桌必须可用目标和原因，关联历史可查', async () => {
     show()
     const u = userEvent.setup()
-    await u.click(await screen.findByRole('button', { name: '占用历史' }))
+    await u.click(await screen.findByRole('button', { name: '关联历史' }))
     expect(await screen.findByText('原记录继承')).toBeTruthy()
     await u.keyboard('{Escape}')
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     await u.click(screen.getByRole('button', { name: '故障换桌' }))
-    await selectOption(u, '目标空闲物理桌', '107 · 空闲桌')
+    await selectOption(u, '目标可用物理桌', '107 · 空闲桌')
     await u.type(screen.getByLabelText('故障及替换原因'), '设备故障')
     await u.click(screen.getByRole('button', { name: '预览替换' }))
     await u.click(screen.getByRole('button', { name: '确认故障替换' }))
@@ -1035,7 +1307,7 @@ describe('完赛快照与两步确认（F5/F7/F9）', () => {
     await u.click(screen.getByRole('button', { name: '确认兼容复核' }))
     await waitFor(() => expect(reviewLegacy).toHaveBeenCalledWith(5, true, [], '原占用仍有效'))
   })
-  it('物理桌占用历史分开显示建立原因与释放原因', async () => {
+  it('物理桌关联历史分开显示建立原因与释放原因', async () => {
     vi.mocked(fetchWorkspace).mockResolvedValue({
       ...ws,
       mapping: [
@@ -1058,7 +1330,7 @@ describe('完赛快照与两步确认（F5/F7/F9）', () => {
     })
     show()
     const u = userEvent.setup()
-    await u.click(await screen.findByRole('button', { name: '占用历史' }))
+    await u.click(await screen.findByRole('button', { name: '关联历史' }))
     const [released, active] = screen.getAllByRole('article')
     expect(within(released).getByText('建立原因')).toBeTruthy()
     expect(within(released).getByText('故障替换')).toBeTruthy()

@@ -17,7 +17,7 @@ from rest_framework.exceptions import ValidationError
 
 from machines.locking import lock_machine_pool
 from .models import (Tournament, TournamentRound, RoundTable, RoundSeat, MachineAllocation,
-                     TournamentTable, TournamentMachineReservation as Reservation, TableResult, TableResultCorrection, LotteryRecord)
+                     TournamentTable, TournamentMachineReservation as Reservation, TableResult, TableResultCorrection, LotteryRecord, EliminationRecord)
 from .services import TournamentConflict, database_busy
 from .scoring import pack, unpack, score, rules
 from .pairing import LEGACY, RANDOM, RANKED, MANUAL, SWISS_REPEATS, SWISS_SCORES, repeated_pairs, swiss_groups
@@ -46,7 +46,8 @@ def locked(pk, *, writable=True):
 
 
 def occupied_ids():
-    return set(Reservation.objects.filter(status='active').values_list('machine_id', flat=True)) | set(MachineAllocation.objects.filter(status='active').values_list('machine_id', flat=True))
+    """Exclusivity of legacy round allocations only; event associations may share."""
+    return set(MachineAllocation.objects.filter(status='active').values_list('machine_id', flat=True))
 
 
 def structure(round):
@@ -62,6 +63,23 @@ def source_versions(t, *, results=None):
     if results is not None:
         return [{'table_id': row.table_id, 'version': row.version} for row in results]
     return list(TableResult.objects.filter(table__round__tournament=t, status='confirmed').order_by('table__round__round_number', 'table__table_number').values('table_id', 'version'))
+
+
+def participant_statuses(t, *, participants=None):
+    entries = list(t.participants.all()) if participants is None else participants
+    return [{'participant_id': p.pk, 'eliminated_after_round': p.eliminated_after_round} for p in entries]
+
+
+def same_participant_statuses(provided, current):
+    # Old clients/draws remain valid for events without any elimination.
+    if provided is None or provided == []:
+        return all(row['eliminated_after_round'] is None for row in current)
+    return provided == current
+
+
+def check_standings_source(t, versions, statuses, *, results=None, participants=None):
+    if versions != source_versions(t, results=results) or not same_participant_statuses(statuses, participant_statuses(t, participants=participants)):
+        conflict('成绩或淘汰状态已变化，请刷新后确认。', 'stale_standings')
 
 
 def bridge_legacy(t, user):
@@ -116,29 +134,29 @@ def mapping(t):
     return rows
 
 
-def check_mapping(t):
+def check_mapping(t, *, participant_count=None):
     rows = list(t.fixed_tables.all())
-    if t.resource_state != 'fixed' or len(rows) != t.participants.count() // 4:
+    if t.resource_state != 'fixed' or [row.ordinal for row in rows] != list(range(1, t.participants.count() // 4 + 1)):
         conflict('请先完成物理桌兼容复核。', 'resource_review_required')
-    for table in rows:
+    used = rows[:participant_count // 4] if participant_count is not None else rows
+    ids = list(Reservation.objects.filter(table__tournament=t, status='active').values_list('machine_id', flat=True))
+    if len(ids) != len(set(ids)):
+        conflict('同一赛事不能重复关联同一物理桌，请复核。', 'machine_occupied')
+    for table in used:
         active = table.reservations.filter(status='active').select_related('machine').first()
         if not active or active.machine.status != 'available':
             conflict('固定物理桌不可用，请故障替换后继续。', 'machine_unavailable')
-        # Unbridged legacy writes must not bypass exclusivity.
-        if MachineAllocation.objects.filter(machine=active.machine, status='active').exclude(pk=active.legacy_allocation_id).exists():
-            conflict('存在旧分配占用冲突，需复核。', 'machine_occupied')
-    return rows
+    return used
 
 
 def select_machines(t, machines, ids, user):
     if len(ids) != t.participants.count() // 4 or len(ids) != len(set(ids)):
         raise ValidationError({'machine_ids': ['选桌数量须为人数/4，且不得重复。']})
-    occupied = occupied_ids()
     for pk in ids:
         if pk not in machines:
             conflict('设备池已变化，请刷新。', 'machine_unavailable')
-        if machines[pk].status != 'available' or pk in occupied:
-            conflict('所选物理桌不可用或已被占用。', 'machine_occupied')
+        if machines[pk].status != 'available':
+            conflict('所选物理桌正在维护、停用或退役。', 'machine_unavailable')
     # IDs arrive in explicit preview A-D order; do not silently reorder.
     for ordinal, pk in enumerate(ids, 1):
         table, _ = TournamentTable.objects.get_or_create(tournament=t, ordinal=ordinal)
@@ -149,8 +167,8 @@ def select_machines(t, machines, ids, user):
 
 def create_round(t, user, number, participants, *, rng=None, pairing_info=None, signed_preview=False):
     rng = rng or random.SystemRandom()
-    fixed_tables = check_mapping(t)
-    generated = TournamentRound.objects.create(tournament=t, round_number=number, generated_by=user, generation_snapshot={'source_versions': source_versions(t), 'first_round_order': t.first_round_order, 'rules': rules(t), 'sorted_participants': [p.pk for p in participants]})
+    fixed_tables = check_mapping(t, participant_count=len(participants))
+    generated = TournamentRound.objects.create(tournament=t, round_number=number, generated_by=user, generation_snapshot={'source_versions': source_versions(t), 'participant_statuses': participant_statuses(t), 'first_round_order': t.first_round_order, 'rules': rules(t), 'sorted_participants': [p.pk for p in participants]})
     if pairing_info is not None:
         generated.generation_snapshot['pairing'] = pairing_info
         generated.save(update_fields=['generation_snapshot'])
@@ -177,8 +195,9 @@ def generate(tournament_id, user, number, *, machine_ids=None, rng=None, pairing
         expected = latest.round_number + 1 if latest else 1
         if number != expected or number > t.round_count:
             conflict('只能连续生成下一轮，且不得超过配置轮数。', 'round_not_next')
-        participants = list(t.participants.all())
-        if len(participants) not in (4, 8, 12, 16) or any(not p.display_name_snapshot for p in participants):
+        entries = list(t.participants.all())
+        participants = [p for p in entries if p.eliminated_after_round is None]
+        if len(participants) not in (4, 8, 12, 16) or any(not p.display_name_snapshot for p in entries):
             raise ValidationError({'participants': ['冻结名单不完整。']})
         groups, first_order = None, None
         if pairing_token is not None:
@@ -203,11 +222,11 @@ def generate(tournament_id, user, number, *, machine_ids=None, rng=None, pairing
             require_round_confirmed(latest)
             standings, _ = ranking(t)
             order = {pk: i for i, pk in enumerate(t.first_round_order)}
-            if set(order) != {p.pk for p in participants}:
+            if set(order) != {p.pk for p in entries} or len(t.first_round_order) != len(entries):
                 conflict('首轮随机序列不完整，需复核。', 'legacy_order_invalid')
             standings.sort(key=lambda x: (metric(x), -order[x['participant_id']]), reverse=True)
             by_id = {p.pk: p for p in participants}
-            participants = [by_id[x['participant_id']] for x in standings]
+            participants = [by_id[x['participant_id']] for x in standings if x['participant_id'] in by_id]
         if groups is not None:
             by_id = {p.pk: p for p in participants}
             participants = [by_id[pk] for group in groups for pk in group]
@@ -376,28 +395,39 @@ def metric(row):
     return (unpack(row['total']), row['first_count'], row['second_count'], *[unpack(r['score']) for r in reversed(row['rounds'])])
 
 
-def ranking(t, *, results=None):
+def placement_metric(row):
+    eliminated = row['eliminated_after_round']
+    # Finalists lead. A later elimination places above an earlier one, even if
+    # subsequent score corrections change the eliminated player's total.
+    return (eliminated is None, eliminated or 0, *metric(row))
+
+
+def ranking(t, *, results=None, participants=None, active_only=False, lottery_purpose='final', lottery_round=None):
     results = confirmed_result_rows(t) if results is None else results
-    entries = list(t.participants.all())
-    rows = {p.pk: {'participant_id': p.pk, 'display_name': p.display_name_snapshot, 'rounds': [], 'first_count': 0, 'second_count': 0, 'total': pack(0), 'confirmed_rounds': 0} for p in entries}
+    entries = list(t.participants.all()) if participants is None else participants
+    rows = {p.pk: {'participant_id': p.pk, 'display_name': p.display_name_snapshot, 'eliminated_after_round': p.eliminated_after_round,
+                   'rounds': [], 'first_count': 0, 'second_count': 0, 'total': pack(0), 'confirmed_rounds': 0} for p in entries}
     for result in results:
         for item in result.scores:
             row = rows[item['participant_id']]
-            row['rounds'].append({**item, 'round_number': result.table.round.round_number, 'table_id': result.table_id})
+            row['rounds'].append({**item, 'round_number': result.table.round.round_number, 'table_id': result.table_id, 'table_number': result.table.table_number})
             row['first_count'] += item['rank'] == 1
             row['second_count'] += item['rank'] == 2
             row['confirmed_rounds'] += 1
             row['total'] = pack(unpack(row['total']) + unpack(item['score']))
-    ordered = sorted(rows.values(), key=metric, reverse=True)
+    ordered = sorted((row for row in rows.values() if not active_only or row['eliminated_after_round'] is None), key=placement_metric, reverse=True)
     groups = []
     versions = source_versions(t, results=results)
+    statuses = participant_statuses(t, participants=entries)
+    lotteries = [row for row in t.lotteries.filter(confirmed_at__isnull=False, purpose=lottery_purpose,
+                 elimination_round=lottery_round).order_by('-id') if row.source_versions == versions and same_participant_statuses(row.participant_statuses, statuses)]
     position = 1
-    for _, values in groupby(ordered, metric):
+    for _, values in groupby(ordered, placement_metric):
         values = list(values)
         members = [r['participant_id'] for r in values]
         lottery = None
         if len(values) > 1:
-            lottery = next((x for x in t.lotteries.filter(confirmed_at__isnull=False).order_by('-id') if x.source_versions == versions and set(x.members) == set(members)), None)
+            lottery = next((x for x in lotteries if set(x.members) == set(members)), None)
             if lottery:
                 positions = {pk: i for i, pk in enumerate(lottery.order)}
                 values.sort(key=lambda x: positions[x['participant_id']])
@@ -408,6 +438,8 @@ def ranking(t, *, results=None):
             row['lottery_id'] = lottery.pk if lottery else None
         ordered[position-1:position-1+len(values)] = values
         position += len(values)
+    from .performance_stats import add_statistics
+    add_statistics(ordered)
     return ordered, groups
 
 
@@ -429,43 +461,161 @@ def ready_final(t, *, results=None):
 
 def preview(pk, *, tournament=None):
     t = tournament if tournament is not None else get_object_or_404(Tournament, pk=pk)
+    from .performance_stats import add_statistics
     if t.status == 'completed':
-        return {'status': 'completed', **t.final_snapshot}
+        snapshot = deepcopy(t.final_snapshot)
+        names = dict(t.participants.values_list('pk', 'display_name_snapshot'))
+        for row in snapshot.get('standings', []):
+            row.setdefault('display_name', names.get(row['participant_id']) or f"历史选手 #{row['participant_id']}")
+        # Display-only statistics for old snapshots; never rewrite their scores.
+        snapshot['statistics'] = add_statistics(snapshot.get('standings', []))
+        return {'status': 'completed', **snapshot}
     results = confirmed_result_rows(t)
-    rows, groups = ranking(t, results=results)
+    entries = list(t.participants.all())
+    rows, groups = ranking(t, results=results, participants=entries)
     ready = False
     try:
         ready_final(t, results=results)
         ready = t.resource_state in ('fixed', 'historical_only')
     except TournamentConflict:
         pass
-    return {'status': t.status, 'standings': rows, 'unresolved_groups': groups if ready else [], 'ready': ready and not groups, 'all_results_confirmed': ready, 'source_versions': source_versions(t, results=results), 'rules': rules(t)}
+    elimination = elimination_preview(t, results=results, participants=entries)
+    return {'status': t.status, 'standings': rows, 'statistics': add_statistics(rows),
+            'unresolved_groups': groups if ready else [], 'ready': ready and not groups, 'all_results_confirmed': ready,
+            'source_versions': source_versions(t, results=results), 'participant_statuses': participant_statuses(t, participants=entries),
+            'elimination': elimination, 'eliminations': elimination_history(t, participants=entries), 'rules': rules(t)}
+
+
+def elimination_round(t, *, results=None):
+    latest = t.rounds.order_by('-round_number').first()
+    if t.status != 'started' or latest is None or latest.round_number >= t.round_count:
+        conflict('淘汰须在每轮结束、下一轮生成前进行，并保留剩余赛程。', 'elimination_not_available')
+    if EliminationRecord.objects.filter(round=latest).exists():
+        conflict('本轮已确认淘汰四人，不能再次淘汰。', 'elimination_already_confirmed')
+    rounds = list(t.rounds.all())
+    if [row.round_number for row in rounds] != list(range(1, latest.round_number + 1)):
+        conflict('已有轮次不连续，请先复核历史轮次。', 'rounds_incomplete')
+    if results is None:
+        for round_ in rounds:
+            require_round_confirmed(round_)
+    else:
+        expected = set()
+        for round_ in rounds:
+            structure(round_)
+            expected.update(round_.tables.values_list('pk', flat=True))
+        if expected != {row.table_id for row in results}:
+            conflict('当前或此前轮次尚有未确认成绩，不能按不完整累计排名淘汰。', 'results_incomplete')
+    return latest
+
+
+def elimination_preview(t, *, results=None, participants=None, required=False):
+    results = confirmed_result_rows(t) if results is None else results
+    entries = list(t.participants.all()) if participants is None else participants
+    try:
+        latest = elimination_round(t, results=results)
+        active = [p for p in entries if p.eliminated_after_round is None]
+        if len(active) not in (8, 12, 16):
+            conflict('至少保留四人继续比赛；仅剩四人时不能淘汰。', 'elimination_minimum')
+    except TournamentConflict:
+        if required:
+            raise
+        return None
+    rows, groups = ranking(t, results=results, participants=entries, active_only=True, lottery_purpose='elimination', lottery_round=latest)
+    cutoff = len(rows) - 4
+    boundary_groups = [group for group in groups if {row['participant_id'] for row in rows[:cutoff]} & set(group)
+                       and {row['participant_id'] for row in rows[cutoff:]} & set(group)]
+    return {'round_number': latest.round_number, 'active_count': len(rows), 'remaining_count': cutoff,
+            'remaining_rounds': t.round_count - latest.round_number, 'ready': not boundary_groups,
+            'candidates': rows[cutoff:] if not boundary_groups else [], 'standings': rows, 'unresolved_groups': boundary_groups,
+            'source_versions': source_versions(t, results=results), 'participant_statuses': participant_statuses(t, participants=entries)}
+
+
+def elimination_history(t, *, participants=None):
+    statuses = {p.pk: p.eliminated_after_round for p in participants} if participants is not None else None
+    return [{'id': row.pk, 'round_number': row.round.round_number, 'participant_ids': row.participant_ids,
+             'source_versions': row.source_versions, 'participant_statuses': row.participant_statuses,
+             'standings_snapshot': row.standings_snapshot, 'lottery_ids': row.lottery_ids,
+             'confirmed_by': row.confirmed_by_id, 'confirmed_at': row.confirmed_at.isoformat()}
+            for row in EliminationRecord.objects.filter(round__tournament=t).select_related('round')
+            if statuses is None or all(statuses.get(pk) == row.round.round_number for pk in row.participant_ids)]
+
+
+def confirm_elimination(pk, user, *, round_number, source_versions, participant_statuses, participant_ids):
+    with locked(pk) as (t, _):
+        results = confirmed_result_rows(t)
+        entries = list(t.participants.all())
+        plan = elimination_preview(t, results=results, participants=entries, required=True)
+        if not isinstance(participant_statuses, list) or not participant_statuses:
+            raise ValidationError({'participant_statuses': ['淘汰确认必须提供全部参赛者的完整资格来源。']})
+        if participant_statuses != plan['participant_statuses']:
+            conflict('淘汰资格来源不完整或已变化，请刷新后重新预览。', 'stale_standings')
+        check_standings_source(t, source_versions, participant_statuses, results=results, participants=entries)
+        if plan['round_number'] != round_number:
+            conflict('当前轮次已变化，请重新预览淘汰名单。', 'stale_elimination')
+        if not plan['ready']:
+            conflict('淘汰边界完全并列，须先公开抽签并确认。', 'elimination_lottery_required')
+        expected = [row['participant_id'] for row in plan['candidates']]
+        if len(participant_ids) != 4 or len(set(participant_ids)) != 4 or participant_ids != expected:
+            raise ValidationError({'participant_ids': ['确认名单须准确匹配最新预览中的累计排名末四人。']})
+        round_ = t.rounds.get(round_number=round_number)
+        record = EliminationRecord.objects.create(round=round_, participant_ids=expected, source_versions=plan['source_versions'],
+                    participant_statuses=plan['participant_statuses'], standings_snapshot=plan['standings'],
+                    lottery_ids=sorted({row['lottery_id'] for row in plan['standings'] if row.get('lottery_id') is not None}), confirmed_by=user)
+        t.participants.filter(pk__in=expected, eliminated_after_round__isnull=True).update(eliminated_after_round=round_number)
+        # Keep logical tables and history, while freeing unused associations so
+        # their machines can also replace a faulty surviving table in this event.
+        for reservation in Reservation.objects.filter(table__tournament=t, table__ordinal__gt=plan['remaining_count'] // 4, status='active'):
+            release_reservation(reservation, user, f'第{round_number}轮淘汰后不再使用此逻辑桌')
+        return {'id': record.pk, 'round_number': round_number, 'participant_ids': expected, 'remaining_count': plan['remaining_count'],
+                'confirmed_by': user.pk, 'confirmed_at': record.confirmed_at.isoformat()}
 
 
 def record_lottery(pk, user, values):
     with locked(pk) as (t, _):
-        ready_final(t)
-        _, groups = ranking(t)
+        values = dict(values)
+        purpose = values.pop('purpose', 'final')
+        round_number = values.pop('round_number', None)
+        statuses = values.pop('participant_statuses', None)
+        if purpose == 'elimination':
+            plan = elimination_preview(t, required=True)
+            if plan['round_number'] != round_number:
+                conflict('只能处理当前轮的淘汰边界抽签。', 'stale_elimination')
+            groups = plan['unresolved_groups']
+            round_ = t.rounds.get(round_number=round_number)
+        elif purpose == 'final' and round_number is None:
+            ready_final(t)
+            _, groups = ranking(t)
+            round_ = None
+        else:
+            raise ValidationError({'purpose': ['抽签用途或轮次不合法。']})
         members = values['members']
         if len(members) != len(set(members)) or set(members) not in [set(g) for g in groups] or len(values['order']) != len(members) or set(values['order']) != set(members):
             raise ValidationError({'order': ['抽签须准确覆盖一个待决组，不能缺少或重复选手。']})
         versions = source_versions(t)
-        if values['source_versions'] != versions:
-            conflict('来源成绩已变化，请刷新最终排名。', 'stale_standings')
+        check_standings_source(t, values['source_versions'], statuses)
+        statuses = participant_statuses(t)
         # At most one open record per group and source version: re-recording until a preferred order appears is not allowed.
-        if any(set(x.members) == set(members) and x.source_versions == versions for x in t.lotteries.filter(confirmed_at__isnull=True, voided_at__isnull=True)):
+        if any(set(x.members) == set(members) and x.source_versions == versions and same_participant_statuses(x.participant_statuses, statuses)
+               for x in t.lotteries.filter(confirmed_at__isnull=True, voided_at__isnull=True, purpose=purpose, elimination_round=round_)):
             conflict('该并列组已有待确认的抽签记录，请先确认或作废后再录入。', 'lottery_pending')
-        return LotteryRecord.objects.create(tournament=t, created_by=user, rules_version=t.rules_version, **values)
+        return LotteryRecord.objects.create(tournament=t, created_by=user, rules_version=t.rules_version, purpose=purpose,
+                                            elimination_round=round_, participant_statuses=statuses, **values)
 
 
 def confirm_lottery(pk, lottery_id, user):
     with locked(pk) as (t, _):
-        ready_final(t)
         row = get_object_or_404(LotteryRecord, pk=lottery_id, tournament=t)
         if row.voided_at:
             conflict('抽签记录已作废。', 'lottery_voided')
-        _, groups = ranking(t)
-        if row.confirmed_at or row.source_versions != source_versions(t) or set(row.members) not in [set(g) for g in groups]:
+        if row.purpose == 'elimination':
+            plan = elimination_preview(t, required=True)
+            if row.elimination_round.round_number != plan['round_number']:
+                conflict('淘汰轮次已变化，原抽签仅供历史查询。', 'lottery_conflict')
+            groups = plan['unresolved_groups']
+        else:
+            ready_final(t)
+            _, groups = ranking(t)
+        if row.confirmed_at or row.source_versions != source_versions(t) or not same_participant_statuses(row.participant_statuses, participant_statuses(t)) or set(row.members) not in [set(g) for g in groups]:
             conflict('抽签已确认或来源已过期。', 'lottery_conflict')
         row.confirmed_by, row.confirmed_at = user, timezone.now()
         row.save(update_fields=['confirmed_by', 'confirmed_at'])
@@ -507,8 +657,10 @@ def replace_machine(pk, ordinal, user, machine_id, reason):
             conflict('此桌无有效预留，请走兼容复核。', 'resource_review_required')
         if current.machine_id == machine_id:
             conflict('目标物理桌未改变。', 'machine_unchanged')
-        if machine_id not in machines or machines[machine_id].status != 'available' or machine_id in occupied_ids():
-            conflict('目标物理桌不可用或已被占用。', 'machine_occupied')
+        if machine_id not in machines or machines[machine_id].status != 'available':
+            conflict('目标物理桌不可用。', 'machine_unavailable')
+        if Reservation.objects.filter(table__tournament=t, status='active', machine_id=machine_id).exists():
+            conflict('本赛事的其他逻辑桌已关联此设备。', 'machine_occupied')
         release_reservation(current, user, reason)
         Reservation.objects.create(table=table, machine=machines[machine_id], machine_no_snapshot=machines[machine_id].machine_no, created_by=user, source='fault_replacement_v1', reason=reason)
 
@@ -535,8 +687,10 @@ def review_legacy(pk, user, *, historical_only, machine_ids, reason):
                 current = table.reservations.filter(status='active').first()
                 if current and current.machine_id == machine_id and machine_id in machines and machines[machine_id].status == 'available':
                     continue
-                if machine_id not in machines or machines[machine_id].status != 'available' or machine_id in occupied_ids():
-                    conflict('复核目标已被占用或不可用，不会抢回旧设备。', 'machine_occupied')
+                if machine_id not in machines or machines[machine_id].status != 'available':
+                    conflict('复核目标不可用。', 'machine_unavailable')
+                if Reservation.objects.filter(table__tournament=t, status='active', machine_id=machine_id).exclude(table=table).exists():
+                    conflict('本赛事的其他逻辑桌已关联此设备。', 'machine_occupied')
                 if current:
                     release_reservation(current, user, reason)
                 Reservation.objects.create(table=table, machine=machines[machine_id], machine_no_snapshot=machines[machine_id].machine_no, created_by=user, source='legacy_review_v1', reason=reason)
@@ -545,21 +699,26 @@ def review_legacy(pk, user, *, historical_only, machine_ids, reason):
         t.save()
 
 
-def finish(pk, user, versions):
+def finish(pk, user, versions, statuses=None):
     with locked(pk) as (t, _):
-        ready_final(t)
+        results = confirmed_result_rows(t)
+        entries = list(t.participants.all())
+        ready_final(t, results=results)
         if t.resource_state not in ('fixed', 'historical_only'):
             conflict('兼容复核尚未完成。', 'resource_review_required')
-        if versions != source_versions(t):
-            conflict('结果版本已变化，请刷新后确认。', 'stale_standings')
-        rows, groups = ranking(t)
+        check_standings_source(t, versions, statuses, results=results, participants=entries)
+        rows, groups = ranking(t, results=results, participants=entries)
         if groups:
             conflict('仍有完全并列组须公开抽签并二次确认。', 'lottery_required')
         if not rows or rows[0]['rank'] != 1 or sum(r['rank'] == 1 for r in rows) != 1:
             conflict('未确定唯一冠军。', 'champion_unresolved')
         t.status, t.completed_by, t.completed_at = 'completed', user, timezone.now()
         t.champion_id = rows[0]['participant_id']
-        t.final_snapshot = {'standings': rows, 'champion_id': t.champion_id, 'rules': rules(t), 'source_versions': versions, 'lottery_ids': sorted({row['lottery_id'] for row in rows if row.get('lottery_id') is not None}), 'completed_at': t.completed_at.isoformat(), 'completed_by': user.pk}
+        from .performance_stats import add_statistics
+        t.final_snapshot = {'standings': rows, 'statistics': add_statistics(rows), 'champion_id': t.champion_id, 'rules': rules(t),
+                            'source_versions': versions, 'participant_statuses': participant_statuses(t, participants=entries),
+                            'eliminations': elimination_history(t, participants=entries), 'lottery_ids': sorted({row['lottery_id'] for row in rows if row.get('lottery_id') is not None}),
+                            'completed_at': t.completed_at.isoformat(), 'completed_by': user.pk}
         t.save()
         for row in Reservation.objects.filter(table__tournament=t, status='active'):
             release_reservation(row, user, '正式完赛自动释放')

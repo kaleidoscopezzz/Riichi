@@ -20,7 +20,7 @@ def meetings_for(tournament, number):
 
 
 def preview(tournament_id, user, number):
-    from .competition_services import confirmed_result_rows, source_versions, ranking, metric, require_round_confirmed, conflict
+    from .competition_services import confirmed_result_rows, source_versions, participant_statuses, ranking, metric, require_round_confirmed, conflict
     t = get_object_or_404(Tournament, pk=tournament_id)
     if t.status != 'started':
         conflict('请先启动赛事，再预览本轮分桌。', 'tournament_not_started')
@@ -29,12 +29,13 @@ def preview(tournament_id, user, number):
     latest = t.rounds.order_by('-round_number').first()
     if number != (latest.round_number + 1 if latest else 1) or number > t.round_count:
         conflict('只能预览尚未生成的下一轮。', 'round_not_next')
-    participants = list(t.participants.all())
+    entries = list(t.participants.all())
+    participants = [p for p in entries if p.eliminated_after_round is None]
     ids = [p.pk for p in participants]
     if len(ids) not in (4, 8, 12, 16) or any(not p.display_name_snapshot for p in participants):
         raise ValidationError({'participants': ['冻结名单不完整。']})
     results = confirmed_result_rows(t)
-    standings, _ = ranking(t, results=results)
+    standings, _ = ranking(t, results=results, participants=entries, active_only=True)
     scores = {row['participant_id']: unpack(row['total']) for row in standings}
     if number == 1:
         random.SystemRandom().shuffle(ids)
@@ -42,7 +43,7 @@ def preview(tournament_id, user, number):
     else:
         require_round_confirmed(latest)
         first_order = t.first_round_order
-        if set(first_order) != set(ids) or len(first_order) != len(ids):
+        if set(first_order) != {p.pk for p in entries} or len(first_order) != len(entries):
             conflict('首轮随机序列不完整，需复核。', 'legacy_order_invalid')
         order = {pk: index for index, pk in enumerate(first_order)}
         standings.sort(key=lambda row: (metric(row), -order[row['participant_id']]), reverse=True)
@@ -55,7 +56,7 @@ def preview(tournament_id, user, number):
         groups = swiss_groups(ids, scores, meetings, repeats_first=t.pairing_strategy == SWISS_REPEATS)
     bonuses = t.ranked_table_bonuses[:len(groups)] if number > 1 and t.pairing_strategy == RANKED else ['0'] * len(groups)
     payload = {'tournament_id': t.pk, 'user_id': user.pk, 'number': number, 'revision': t.revision,
-               'source_versions': source_versions(t, results=results), 'strategy': t.pairing_strategy,
+               'source_versions': source_versions(t, results=results), 'participant_statuses': participant_statuses(t, participants=entries), 'strategy': t.pairing_strategy,
                'participant_ids': sorted(p.pk for p in participants), 'first_order': first_order,
                'groups': groups, 'rules': rules(t)}
     return {'round_number': number, 'strategy': t.pairing_strategy, 'strategy_label': dict(CHOICES)[t.pairing_strategy],
@@ -66,7 +67,7 @@ def preview(tournament_id, user, number):
 
 
 def load(t, user, number, token, manual_groups):
-    from .competition_services import source_versions, conflict
+    from .competition_services import source_versions, participant_statuses, conflict
     try:
         payload = signing.loads(token, salt=SALT, max_age=MAX_AGE)
     except signing.SignatureExpired:
@@ -77,7 +78,10 @@ def load(t, user, number, token, manual_groups):
         raise ValidationError({'pairing_token': ['分桌预览不属于本赛事、本轮或当前管理员。']})
     if payload.get('revision') != t.revision-1 or payload.get('source_versions') != source_versions(t) or payload.get('rules') != rules(t):
         conflict('赛事或成绩已变化，请重新预览分桌。', 'stale_pairing')
-    expected = set(t.participants.values_list('pk', flat=True))
+    entries = list(t.participants.all())
+    if payload.get('participant_statuses') != participant_statuses(t, participants=entries):
+        conflict('淘汰状态已变化，请重新预览分桌。', 'stale_pairing')
+    expected = {p.pk for p in entries if p.eliminated_after_round is None}
     if set(payload.get('participant_ids', [])) != expected:
         conflict('冻结名单已变化，请重新预览。', 'stale_pairing')
     if t.pairing_strategy == MANUAL:
@@ -93,6 +97,6 @@ def load(t, user, number, token, manual_groups):
     except ModelValidationError as error:
         raise ValidationError({'participant_groups': error.messages}) from None
     first_order = payload.get('first_order', [])
-    if len(first_order) != len(expected) or set(first_order) != expected:
+    if len(first_order) != len(entries) or set(first_order) != {p.pk for p in entries}:
         raise ValidationError({'pairing_token': ['首轮随机序列无效。']})
     return groups, first_order

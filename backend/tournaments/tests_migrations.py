@@ -192,3 +192,15 @@ class LegacyMigrationTests(TransactionTestCase):
         self.assertTrue(result['legacy_rule_snapshots_unchanged'])
         self.assertTrue(result['legacy_zero_bonus'])
         self.assertTrue(result['idempotent_rerun'])
+
+    def test_event_flow_upgrade_preserves_swiss_rules_results_corrections_and_snapshots(self):
+        from verification.event_flow_migration_check import BEFORE_EVENT_FLOW, rehearse_event_flow_migration
+        self.migrate(BEFORE_EVENT_FLOW)
+        result = rehearse_event_flow_migration(self.db)
+        self.assertEqual(result['result'], 'PASS')
+        self.assertTrue(result['original_columns_unchanged'])
+        self.assertTrue(result['elimination_initially_empty'])
+        self.assertTrue(result['existing_swiss_strategy_unchanged'])
+        self.assertTrue(result['historical_lotteries_final'])
+        self.assertTrue(result['shared_reservation_constraint'])
+        self.assertTrue(result['per_table_unique_preserved'])

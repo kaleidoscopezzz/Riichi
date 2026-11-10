@@ -112,7 +112,7 @@ class PairingWorkflowTests(Fixtures, TestCase):
         self.assertFalse(t.rounds.exists())
 
     def test_correction_invalidates_pairing_preview_without_changing_old_round(self):
-        t = self.tournament(8, 2, pairing_strategy=SWISS_REPEATS)
+        t = self.existing_swiss(8, 2, strategy=SWISS_REPEATS)
         first = self.first(t)
         for table in first.tables.all(): self.confirm(table)
         plan = pairing_preview(t.pk, self.admin, 2)
@@ -169,14 +169,14 @@ class PairingWorkflowTests(Fixtures, TestCase):
         self.assertFalse(t.rounds.exists())
 
     def test_only_new_event_draft_selects_strategy_and_started_config_is_frozen(self):
-        t = self.tournament(pairing_strategy=SWISS_SCORES)
+        t = self.existing_swiss(strategy=SWISS_SCORES)
         with self.assertRaises(TournamentConflict): mutate_tournament(t.pk, values={'pairing_strategy': RANDOM})
         legacy = Tournament.objects.create(name='旧规则QA', round_count=1, created_by=self.admin, pairing_strategy=LEGACY, table_bonus_policy='none')
         with self.assertRaises(ValidationError): mutate_tournament(legacy.pk, values={'ranked_table_bonuses': ['1', '0', '0', '0']})
         legacy.refresh_from_db(); self.assertEqual(legacy.ranked_table_bonuses, ['0'] * 4)
 
     def test_swiss_preview_and_generate_are_admin_csrf_protected(self):
-        t = self.tournament(8, pairing_strategy=SWISS_SCORES)
+        t = self.existing_swiss(8, strategy=SWISS_SCORES)
         url = f'/api/v1/tournaments/{t.pk}/rounds/preview/'
         client = Client(enforce_csrf_checks=True); client.force_login(self.admin)
         self.assertEqual(client.post(url, {'round_number': 1}, content_type='application/json').status_code, 403)

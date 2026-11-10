@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 D:/Riichi/Riichi/frontend
+
+
+ Test Files  2 passed (2)
+      Tests  80 passed (80)
+   Start at  13:43:11
+   Duration  35.04s (transform 1.30s, setup 91ms, import 3.32s, tests 49.78s, environment 3.36s)
+

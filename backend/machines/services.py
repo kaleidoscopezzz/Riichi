@@ -24,6 +24,14 @@ def database_busy(exc):
 def create_machine(values):
     try:
         with transaction.atomic():
+            lock_machine_pool()
+            values = dict(values)
+            if 'machine_no' not in values:
+                used = set(MahjongMachine.objects.exclude(status='retired').values_list('machine_no', flat=True))
+                number = next((f'{value:03}' for value in range(1, 1000) if f'{value:03}' not in used), None)
+                if number is None:
+                    raise MachineConflict('001～999的现役设备编号已用完，请先核对设备档案。', 'machine_number_exhausted')
+                values['machine_no'] = number
             return MahjongMachine.objects.create(**values)
     except IntegrityError:
         raise MachineConflict("现役设备编号已存在，请使用其他编号。", "duplicate_machine_no") from None
@@ -40,8 +48,8 @@ def change_machine(machine_id, values=None, *, retire=False):
                 raise MachineConflict("设备已经退役，不能重复退役。" if retire else "已退役设备仅供查看，不能编辑或重新启用。", "already_retired" if retire else "retired_readonly")
             changes = {"status": "retired", "capacity_slot": None} if retire else dict(values)
             if changes.get("status", machine.status) != "available":
-                from tournaments.models import MachineAllocation, TournamentMachineReservation
-                if MachineAllocation.objects.filter(machine=machine, status="active").exists() or TournamentMachineReservation.objects.filter(machine=machine, status="active").exists():
+                from tournaments.models import MachineAllocation
+                if MachineAllocation.objects.filter(machine=machine, status="active").exists():
                     raise MachineConflict("设备正被逻辑桌占用，请先确认释放后再维护、停用或退役。", "machine_in_use")
             changes["updated_at"] = timezone.now()
             # SQLite does not implement SELECT FOR UPDATE. The conditional write

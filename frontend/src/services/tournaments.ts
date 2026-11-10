@@ -6,6 +6,7 @@ export type Participant = {
   display_name: string
   is_active: boolean
   display_name_snapshot: string
+  eliminated_after_round?: number | null
 }
 export type PairingStrategy =
   | 'legacy_v1'
@@ -18,9 +19,14 @@ export const pairingOptions = [
   { value: 'ranked_v1', label: '高高碰' },
   { value: 'random_v1', label: '完全随机' },
   { value: 'manual_v1', label: '手动拖拽分桌' },
-  { value: 'swiss_repeats_first_v1', label: '瑞士轮 · 避重优先' },
-  { value: 'swiss_scores_first_v1', label: '瑞士轮 · 积分接近优先' },
 ] as const
+export const pairingLabel = (strategy?: PairingStrategy) =>
+  pairingOptions.find((option) => option.value === strategy)?.label ??
+  (strategy === 'swiss_repeats_first_v1'
+    ? '瑞士轮 · 避重优先（既有赛事）'
+    : strategy === 'swiss_scores_first_v1'
+      ? '瑞士轮 · 积分接近优先（既有赛事）'
+      : '历史自动分桌')
 export type Tournament = {
   id: number
   name: string

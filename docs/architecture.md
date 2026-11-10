@@ -51,15 +51,16 @@ API不发布端口，仅在该受控拓扑启用`TRUST_PROXY_HEADERS`。Django�
 | --- | --- |
 | MahjongMachine | 原ID/编号/状态/历史保留；capacity_slot为nullable只读legacy列，旧值及唯一索引保留，新设备NULL；现役三位编号唯一、状态/名称CHECK仍有效 |
 | Tournament | draft/started/completed，数字规则/Uma字符串、两个策略ID/rules_version/rules_source；revision、首轮序列/来源、资源兼容状态/审计、冠军FK、完成管理员/时间及final_snapshot |
-| TournamentParticipant | 关联PlayerProfile；赛事内player唯一、启动时昵称快照，完赛仍用快照 |
+| TournamentParticipant | 关联PlayerProfile；赛事内player唯一、启动时昵称快照；nullable eliminated_after_round标记参赛资格，1～5轮范围CHECK，历史关系保留 |
 | TournamentTable | 全赛事稳定逻辑桌ordinal 1～4/A～D；赛事内ordinal唯一，范围CHECK |
-| TournamentMachineReservation | active/released、稳定machineId、编号快照、操作者/时间/原因、可空OneToOne legacy_allocation；active机器和逻辑桌分别条件唯一、释放审计CHECK |
+| TournamentMachineReservation | active/released、稳定machineId、编号快照、操作者/时间/原因、可空OneToOne legacy_allocation；active逻辑桌条件唯一、释放审计CHECK，跨赛事机器可共享，赛事内不重复由服务校验 |
 | TournamentRound | 1～6且赛事轮号唯一；generation_snapshot保存规则、来源成绩版本、排序输入、首轮顺序引用 |
 | RoundTable | 保留原ID/table_number，新增可空TournamentTable FK和生成时machine_snapshot；故障替换不改旧快照 |
 | RoundSeat | 原Round/Table/Participant FK、桌内四风唯一、轮内选手唯一；全员及跨FK归属由服务验证 |
 | MachineAllocation | 原轮次级表和全部FK/历史保留，原active条件唯一及release审计CHECK保留；新轮不复制active旧分配 |
 | TableResult | 每桌OneToOne；draft/confirmed、version、points JSON（participant ID→有符号整数/空值）、scores、规则快照、录入/确认管理员及时间；确认状态CHECK |
-| LotteryRecord | 赛事、来源成绩版本、组员、完整顺序、方式/过程/实际抽签时间、记录/确认管理员与时间、规则版本 |
+| LotteryRecord | 赛事、来源成绩版本与资格、purpose/淘汰轮次、组员、完整顺序、方式/过程/实际抽签时间、记录/确认管理员与时间；用途/轮次CHECK |
+| EliminationRecord | 每轮OneToOne、四个稳定participant ID、原来源成绩/资格、确认时排名快照、抽签引用、确认人/时间，所有FK PROTECT |
 
 成绩请求只引用本桌既有participant ID，不接受换座、权威积分或冠军字段。草稿允许缺项/空值；确认及更正必须四人整数、总和4×开局且版本匹配。原始点数范围为±(2^53−1)，保证JSON到浏览器均为精确整数；超范围明确400，不截断。赛事进行中已确认成绩通过显式更正接口更新并留档，完赛后只读。默认未存成绩version=0，首次成功写入为1，之后成功写入递增。
 
@@ -73,15 +74,15 @@ Tournament新增nullable `oka_override`（最多64字符的非负十进制字符
 
 累计来自当前已确认结果；metric按总分、第一次数、第二次数、逆序单场积分比较，更正后查询自动采用新分数。后续分桌才追加首轮持久化顺序，组内重新随机四风，已生成轮次保留原generation_snapshot。最终完全同分各组必须公开抽签、保存后另行确认；不能以ID/首轮顺序暗定名次。抽签仅在完整source_versions及并列组匹配时用于排名，过期记录保留；完赛final_snapshot仅引用排名实际使用的lottery_id，并冻结全体结果、唯一冠军、规则和来源版本，读取不重算历史。
 
-工作台单次读取将已确认TableResult一次加载为同一批对象，排行榜、当前抽签适用性、完成标志及source_versions均由该批结果派生，不在计算排行后另读新版本。并发更正发生在读取途中时，显示内容及其旧版本仍一致；随后完赛的事务检查会拒绝过期版本，避免管理员批准旧榜单却保存另一份排名。该读取不写库、不取得赛事写锁；生成/更正/完赛仍共享原有写锁。
+工作台单次读取将已确认TableResult与TournamentParticipant分别加载为同批对象；排行榜、统计、当前抽签适用性、淘汰预览、source_versions及participant_statuses均由这些对象派生，不在计算排行后另读新版本或资格。并发更正/淘汰发生在读取途中时，显示内容及来源仍一致，晚到淘汰审计不叠加到旧资格榜单。随后写事务拒绝过期来源，避免管理员批准旧榜单却保存另一份排名。该读取不写库、不取得赛事写锁；生成/更正/淘汰/完赛仍共享原有写锁。
 
-## 事务与资源互斥
+## 事务与共享桌关联
 
-所有新写入统一使用**物理池稳定PK→赛事revision写锁→子记录**。SQLite先no-op UPDATE取得写事务；PostgreSQL按PK select_for_update。成绩也用同一顺序，避免确认/生成/完赛反序死锁。保留唯一/CHECK兜底，跨表归属、四人完整性和新旧占用互斥属于服务事务检查，不冒称普通CHECK能跨FK保证。
+所有新写入统一使用**物理池稳定PK→赛事revision写锁→子记录**。SQLite先no-op UPDATE取得写事务；PostgreSQL先事务advisory锁再按PK select_for_update。成绩也用同一顺序，避免确认/生成/完赛反序死锁。保留唯一/CHECK兜底，跨表归属、四人完整性和单赛事不重复选机属于服务事务检查，不冒称普通CHECK能跨FK保证。
 
-`occupied_ids`取Reservation active与MachineAllocation active并集，设备维护/停用/退役也检查两者；只使用已锁池中的机器。新首轮必须提交恰好人数/4个不重复machine_ids，按管理员预览顺序映射A～D，预留/序列/轮桌座原子提交。后续不再选桌、释放或复制active旧分配。
+新Reservation表示赛事与设备关联，选桌不检查其他赛事的关联或旧active分配，只使用已锁池中的真实available机器。新首轮必须提交恰好初始人数/4个不重复machine_ids，按管理员预览顺序映射A～D，关联/序列/轮桌座原子提交。后续不再选桌、释放或复制active旧分配。`occupied_ids`仅供旧轮次分配兼容路径使用，保留MachineAllocation原active机器唯一约束；新关联不阻止设备维护/停用/退役，旧真实active Allocation保护仍保留。生成下一轮重检实际使用桌的状态，需换桌时明确拒绝。
 
-故障替换要求空闲可用目标和原因，结束旧预留、建立新预留；有legacy引用时只在真实替换/完赛写旧释放审计。旧单轮释放/调整接口发现赛事固定桌位即409拒绝，不能绕过预留约束。所有旧历史GET接口继续可读；ID空间不混用。
+故障替换要求可用且未被本赛事其他逻辑桌重复关联的目标及原因，结束本场旧关联、建立新关联；其他赛事的关联不受影响。有legacy引用时只在真实替换/完赛写本场旧释放审计。旧单轮释放/调整接口发现赛事固定桌位即409拒绝，不能绕过预留约束。资源GET返回每个设备的完整reservations数组及status派生assignable，旧singular reservation字段仅作兼容。所有旧历史GET接口继续可读；ID空间不混用。
 
 下一轮须连续、上一轮每桌全部确认且全员完整，重复/跳轮/草稿返回409；保存生成输入后原子写轮次/座次。完赛重新检查所有配置轮次、全部已确认成绩、来源版本、抽签及唯一冠军；同一事务保存completed/快照并仅释放本场预留及需结束的本场旧active。失败整体回滚；网络失败或409不会自动重放写请求。
 
@@ -92,9 +93,9 @@ Tournament新增nullable `oka_override`（最多64字符的非负十进制字符
 3. 新增tournaments/0003扩展字段及实体，保留原始轮桌座/分配表。0004回填`legacy_default_backfill:0004`规则来源及迁移时间，不修改任何旧列（包含updated_at）、数字配置、名单或座次。
 4. F0-04已启动无首轮保持unselected，按新选桌流程接续。F0-05按旧桌号及东南西北恢复first_round_order，order_source=legacy_table_wind_v1，不重抽也不用记录ID。
 5. 原active全部有效时建立稳定A～D及OneToOne legacy Reservation桥接，resource_state=fixed，直接继承。桥接的created_at表示升级接入时间，source/legacy FK及原分配时间明确可追溯，不伪造历史手动选桌。
-6. 部分/全部released、机器异常或结构不完整标review_required，不恢复released、不自动抢回旧桌；仍有效的active同时桥接以保护资源池。管理员显式说明并补选空闲映射；全部配置轮次已存在且无需实体对局可确认historical_only，补历史成绩后正常完赛，不临时抢占物理桌。
-7. 源码升级期间必须停止旧进程写入；数据库不能以跨表普通CHECK阻止旧二进制直接写表。当前所有对外资源写入统一检查新旧占用，保留旧接口保护，未桥接active也参与互斥。
-8. 带数据QA比较所有旧列、数量、稳定ID/关系/座次/历史，验证有效继承、partial/released复核及新旧互斥。原始日志及迁移失败/修复证据见交付报告。0004不可逆，避免倒退到无桥接保护；回退须停写并按部署备份方案处理，不fake/删库。
+6. 部分/全部released、机器异常或结构不完整标review_required，不恢复released、不自动抢回旧桌；仍有效的active保留可追溯桥接。管理员显式说明并补选可用映射；全部配置轮次已存在且无需实体对局可确认historical_only，补历史成绩后正常完赛，不临时关联物理桌。
+7. 源码升级期间必须停止旧进程写入；数据库不能以跨表普通CHECK阻止旧二进制直接写表。旧MachineAllocation保留自身约束，新关联按最新共享策略，旧接口对固定桌保护保持。
+8. 带数据QA比较所有旧列、数量、稳定ID/关系/座次/历史，验证有效继承、partial/released复核及当前关联规则。原始日志及迁移失败/修复证据见交付报告。0004不可逆，回退须停写并按部署备份方案处理，不fake/删库。
 
 2026-11-06 Oka配置扩展新增`tournaments/0007_configurable_oka`：增加nullable字段、仅调整新对象的规则版本/来源默认值，并增加自定义Oka非负格式及版本2的同表CHECK。没有数据回填，不修改任何既有版本、规则来源、时间戳、配置或结果/完赛快照；0001～0006保持原文。隔离迁移演练比较全部旧列和关系，并覆盖草稿、进行中、已完赛及20/19.996/0/−20的旧推导结果，实测范围见[本次验证](project/configurable-oka-verification.md)。实际业务库/生产库升级仍须先备份、独立恢复核对，再按迁移计划操作。
 
@@ -102,7 +103,7 @@ Tournament新增nullable `oka_override`（最多64字符的非负十进制字符
 
 ## 新赛事分桌预设与桌附加基础分
 
-分桌标识为`random_v1`、`ranked_v1`、`manual_v1`、`swiss_repeats_first_v1`、`swiss_scores_first_v1`。新建默认高高碰，创建/草稿选择后启动冻结。`legacy_v1`仅赋给原有赛事，配套`table_bonus_policy=none`及各桌零值，旧原点数/规则版本/来源/结果/座次/完赛快照不变。
+新建可选标识为`random_v1`、`ranked_v1`、`manual_v1`，默认高高碰，创建/草稿选择后启动冻结。既有`swiss_repeats_first_v1`、`swiss_scores_first_v1`继续执行，创建/其他草稿切换被服务端拒绝；既有瑞士草稿可保持原值，前端用明确历史标签。`legacy_v1`仅赋给原有赛事，配套`table_bonus_policy=none`及各桌零值，旧原点数/规则版本/来源/结果/座次/完赛快照不变。
 
 `pairing.py`瑞士分组用4人组合及子集DP，锚定最低剩余种子位置以消除桌位排列重复；以公共分母缩放Fraction积分后比较整数成本。两项成本为组内历史相遇次数总和、组内6对积分绝对差总和，按优先级词典序最小化；相同成本用种子位置序列稳定决定。不同重遇对数只是另一个展示统计，不能替代算法主成本。4人不可避重会明确显示，16人搜索有运行回归。
 
@@ -113,6 +114,24 @@ PairingBoard用PointerEvents手柄交换，桌位人数始终4人；触屏在She
 `ranked_table_bonuses`为A～D四项非负精确十进制字符串，独立计分策略标识`add_table_base_bonus_v1`。首轮和非高高碰桌均0；高高碰后续轮桌的`base_bonus`及来源在生成时固定。基础积分增加该值，同桌四人均增加，原Uma/Oka算法版本1/2不重新解释，原始总点数要求不变。每桌规则快照保存该附加分，试算/确认/更正/累计/冠军使用同一值；已生成分组和附加分不随前轮更正改写。
 
 新增0009仅扩展字段/约束，旧行赋legacy/none/0并核对原字段投影，新对象默认值与旧行值区分；不伪造旧管理员选择，不修改0001～0008。008历史演练现在固定在008目标，009有单独带数据演练。[实际验证](project/pairing-strategies-verification.md)区分本机QA与生产/CI未验证范围。
+
+## 可选淘汰、资格来源与统计
+
+`EliminationRecord`通过OneToOne绑定已有轮次，每轮一次；`TournamentParticipant.eliminated_after_round`仅影响后续资格，初始关系、User、昵称及首轮序列保持。结构校验在轮r接受NULL或淘汰轮次≥r的参赛者，所以旧轮继续完整合法，新轮使用active子集。固定桌A～D不删除，实际生成仅使用A～active人数/4；多余桌的关联在淘汰事务内留痕结束，设备可供本赛事故障替换，多余桌状态不参与新轮门禁。任一释放失败也回滚淘汰审计及四人资格。
+
+`elimination_preview`读取同批已确认成绩与资格，要求当前及全部此前轮次成绩完整，比较原完整metric，只对跨越末四人边界的完全并列组要求公开抽签。`confirm_elimination`在原锁内重验当前轮、全部成绩、剩余赛程/至少四人、同批来源及四人名单，原子记录审计和四人资格；新淘汰来源不得为空且须完整匹配服务端状态，审计写服务端同批canonical来源，不套用旧完赛来源兼容。下一轮已生成即拒绝。`placement_metric`在原积分metric前增加资格阶段，仍在赛者在前、淘汰较晚者在前，各阶段原比较规则保留；更正不自动恢复资格。
+
+LotteryRecord新增`purpose`与可空`elimination_round`，CHECK约束二者组合；跨赛事归属仍由服务验证。淘汰用途只服务当前轮边界，最终用途只服务全部轮次结束的同阶段并列；二者分别匹配完整成绩与资格来源，保持待确认唯一、作废审计及确认后不可作废。分桌签名也增加完整participant_statuses，首轮完整序列仍保留，groups只覆盖当前active成员。
+
+`performance_stats.py`从确认scores或既有完赛快照的rounds派生显示统计，使用Fraction计算四位回避率，全体并列领先者返回ID数组。无逐轮数据的旧最简快照不补造统计；读取只深拷贝并添加展示字段，不保存或重算权威积分。前端用BigInt格式化两位小数/百分比，逐轮基础、顺位奖励与积分分开展示，精确值可展开。
+
+0010只新增淘汰记录、资格及抽签作用域列/约束，移除新Reservation的全局机器唯一索引，逻辑桌唯一和释放审计保持；旧行资格NULL、抽签用途final，不虚构淘汰或改旧策略。0001～0009原迁移不变，0009历史演练固定在0009；本轮带数据备份/独立恢复与原字段投影核对见[赛事流程验证](project/event-flow-verification.md)。真实业务库本轮未迁移。
+
+## 新增麻将机自动编号
+
+新增设备表单只填写名称、位置、状态及备注，编号由服务端分配，编辑时只读。`machine_no`为现有三位业务编号，`id`仍为稳定身份，两者不改类型或历史值，不新增模型/迁移。创建API省略machine_no时从001～999选择最小未被非退役设备占用的编号；旧接口显式编号及归一化仍兼容。沿用原退役号可复用规则，复用时为全新设备ID，旧分配/昵称等历史引用不改。编号用完返回明确409，不覆盖任何设备。
+
+create_machine也加入原有物理池锁顺序；SQLite空池先无操作DML获得写预留，PostgreSQL在池PK行锁前取得数据库内事务级advisory锁，解决空表无法由行锁串行化的自动分号竞争。所有创建/状态/分配路径保持同一锁顺序，提交或回滚释放锁，不依赖Redis或全局服务。实际验证见[自动编号报告](project/machine-auto-number-verification.md)。
 
 ## 历史边界与验证限制
 

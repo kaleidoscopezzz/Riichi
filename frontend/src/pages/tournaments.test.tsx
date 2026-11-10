@@ -122,23 +122,44 @@ function showApp(path: string, admin = false, anonymous = false) {
 }
 
 describe('赛事工作台', () => {
-  it('创建时选择两种瑞士优先级，启动前可保存固定策略', async () => {
+  it('新建赛事只提供高高碰、完全随机和手动分桌', async () => {
     render(<TournamentsPage />)
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: '创建赛事' }))
-    await user.type(screen.getByLabelText('赛事名称'), '瑞士轮新赛事')
-    await selectOption(user, '分桌策略', '瑞士轮 · 避重优先')
-    expect(screen.getByText(/先减少重复对手/)).toBeTruthy()
-    await selectOption(user, '分桌策略', '瑞士轮 · 积分接近优先')
-    expect(screen.getByText(/先让积分尽量接近/)).toBeTruthy()
+    await user.type(screen.getByLabelText('赛事名称'), '手动新赛事')
+    await user.click(screen.getByRole('combobox', { name: '分桌策略' }))
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      '高高碰',
+      '完全随机',
+      '手动拖拽分桌',
+    ])
+    await user.click(screen.getByRole('option', { name: '手动拖拽分桌' }))
     await user.click(screen.getByRole('button', { name: '保存草稿' }))
     await waitFor(() =>
       expect(saveTournament).toHaveBeenCalledWith(
         expect.objectContaining({
-          pairing_strategy: 'swiss_scores_first_v1',
+          pairing_strategy: 'manual_v1',
           ranked_table_bonuses: ['0', '0', '0', '0'],
         }),
         undefined,
+      ),
+    )
+  })
+  it('既有瑞士轮草稿保留真实策略标签和冻结配置', async () => {
+    const existing: Tournament = { ...row, pairing_strategy: 'swiss_scores_first_v1' }
+    vi.mocked(fetchTournaments).mockResolvedValue(page([existing]))
+    vi.mocked(fetchTournament).mockResolvedValue(existing)
+    render(<TournamentsPage />)
+    const user = await openDetail()
+    await user.click(screen.getByRole('button', { name: '编辑草稿' }))
+    expect(screen.getByRole('combobox', { name: '分桌策略' }).textContent).toContain(
+      '瑞士轮 · 积分接近优先（既有赛事）',
+    )
+    await user.click(screen.getByRole('button', { name: '保存草稿' }))
+    await waitFor(() =>
+      expect(saveTournament).toHaveBeenCalledWith(
+        expect.objectContaining({ pairing_strategy: 'swiss_scores_first_v1' }),
+        row.id,
       ),
     )
   })
@@ -468,6 +489,33 @@ describe('赛事工作台', () => {
 })
 
 describe('草稿乐观并发与参赛者契约（F9）', () => {
+  it('既有瑞士草稿被改成高高碰后，回读最新草稿移除原瑞士选项', async () => {
+    const original: Tournament = { ...row, pairing_strategy: 'swiss_repeats_first_v1' }
+    vi.mocked(fetchTournaments).mockResolvedValue(page([original]))
+    vi.mocked(fetchTournament).mockResolvedValue(original)
+    render(<TournamentsPage />)
+    const user = await openDetail()
+    await user.click(screen.getByRole('button', { name: '编辑草稿' }))
+    vi.mocked(saveTournament).mockRejectedValueOnce(
+      new ApiError(409, 'stale_tournament', '草稿已被其他管理员修改'),
+    )
+    await user.click(screen.getByRole('button', { name: '保存草稿' }))
+    vi.mocked(fetchTournament).mockResolvedValueOnce({
+      ...row,
+      revision: 2,
+      pairing_strategy: 'ranked_v1',
+    })
+    await user.click(await screen.findByRole('button', { name: '重新加载最新草稿' }))
+    await screen.findByText(/已载入最新草稿/)
+    await user.click(screen.getByRole('combobox', { name: '分桌策略' }))
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      '高高碰',
+      '完全随机',
+      '手动拖拽分桌',
+    ])
+    expect(screen.queryByRole('option', { name: /瑞士轮/ })).toBeNull()
+    expect(saveTournament).toHaveBeenCalledTimes(1)
+  })
   it('保存草稿带上 revision；409 stale_tournament 提示后端消息并可载入最新草稿', async () => {
     render(<TournamentsPage />)
     const user = await openDetail()

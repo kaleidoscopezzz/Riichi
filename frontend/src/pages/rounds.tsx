@@ -85,6 +85,7 @@ export function RoundsPage() {
   const completed = t?.status === 'completed'
   // A completed tournament's final snapshot carries no unresolved groups at all.
   const unresolved = ws?.unresolved_groups ?? []
+  const activeCount = ws?.standings.filter((row) => !row.eliminated_after_round).length ?? 0
   // Background re-reads (e.g. right after a lottery write) keep the loaded page
   // mounted, so an open panel and its focus-return target survive the refresh.
   const loaded = !!t && !!ws && t.id === Number(id)
@@ -114,7 +115,10 @@ export function RoundsPage() {
         ws && (
           <>
             <div className="competition-progress">
-              <span>{t.participant_count} 位选手</span>
+              <span>
+                {t.participant_count} 位参赛选手
+                {activeCount < t.participant_count ? ` · ${activeCount} 位仍在赛` : ''}
+              </span>
               <span>
                 {rounds.length} / {t.round_count} 轮
               </span>
@@ -170,7 +174,7 @@ export function RoundsPage() {
                             variant="ghost"
                             onClick={() => open({ mode: 'history', fixed: f })}
                           >
-                            占用历史
+                            关联历史
                           </Button>
                           {!completed && f.machine_id && (
                             <Button
@@ -182,6 +186,7 @@ export function RoundsPage() {
                             </Button>
                           )}
                         </div>
+                        {!completed && f.ordinal > activeCount / 4 && <span>后续轮次不再使用</span>}
                       </div>
                     ))}
                   </section>
@@ -248,7 +253,10 @@ export function RoundsPage() {
                                   <span>{table.result?.points[s.participant_id] ?? '—'}</span>
                                   {score && (
                                     <span title={exactScore(score.score)}>
-                                      {displayScore(score.score)} 分{score.tied ? ' · 并列' : ''}
+                                      {displayScore(score.score)} 分 ·{' '}
+                                      {score.rank === 1
+                                        ? `${score.tied ? '并列' : ''}当桌最高分`
+                                        : `${score.tied ? '并列' : ''}第 ${score.rank} 名`}
                                     </span>
                                   )}
                                 </div>
@@ -303,23 +311,89 @@ export function RoundsPage() {
                       ))}
                     </div>
                     {!completed && latest.round_number < t.round_count && (
-                      <div className="next-round">
-                        <p>
-                          {confirmed
-                            ? '本轮全部成绩已确认，下一轮将按累计表现重排并重新随机四风。'
-                            : '须本轮全部桌次成绩确认后，才能生成下一轮。'}
-                        </p>
-                        <Button
-                          disabled={!confirmed || ws.resource_state !== 'fixed'}
-                          onClick={() => open({ mode: 'generate' })}
-                        >
-                          生成第 {latest.round_number + 1} 轮
-                        </Button>
-                      </div>
+                      <>
+                        {ws.elimination && (
+                          <section className="elimination-choice" aria-label="本轮淘汰选择">
+                            <h4>本轮结束 · 是否淘汰一桌</h4>
+                            <p>
+                              当前 {ws.elimination.active_count}{' '}
+                              人。可保留全员进入下一轮，或淘汰累计排名末四人，剩{' '}
+                              {ws.elimination.remaining_count} 人继续剩余赛程。
+                            </p>
+                            {ws.elimination.unresolved_groups.map((members) => (
+                              <div className="lottery-group" key={members.join('-')}>
+                                <span>
+                                  淘汰边界并列：
+                                  {members
+                                    .map(
+                                      (pk) =>
+                                        ws.standings.find((row) => row.participant_id === pk)
+                                          ?.display_name,
+                                    )
+                                    .join('、')}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  onClick={() =>
+                                    open({
+                                      mode: 'lottery',
+                                      members,
+                                      purpose: 'elimination',
+                                      round_number: ws.elimination!.round_number,
+                                    })
+                                  }
+                                >
+                                  记录淘汰边界公开抽签
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              variant="outline"
+                              disabled={!ws.elimination.ready}
+                              onClick={() => open({ mode: 'eliminate' })}
+                            >
+                              预览淘汰末四人
+                            </Button>
+                          </section>
+                        )}
+                        <div className="next-round">
+                          <p>
+                            {confirmed
+                              ? activeCount === 4
+                                ? '剩余四人继续完成全部赛程，下一轮重新随机四风。'
+                                : '本轮全部成绩已确认。直接生成下一轮将保留所有仍在赛选手，并按选定策略分桌。'
+                              : '须本轮全部桌次成绩确认后，才能生成下一轮。'}
+                          </p>
+                          <Button
+                            disabled={!confirmed || ws.resource_state !== 'fixed'}
+                            onClick={() => open({ mode: 'generate' })}
+                          >
+                            生成第 {latest.round_number + 1} 轮
+                          </Button>
+                        </div>
+                      </>
                     )}
                   </section>
                 )}
-                <Standings rows={ws.standings} completed={completed} />
+                <Standings rows={ws.standings} completed={completed} statistics={ws.statistics} />
+                {!!ws.eliminations?.length && (
+                  <section className="settings-panel elimination-history">
+                    <h3>淘汰记录</h3>
+                    {ws.eliminations.map((record) => (
+                      <p key={record.id}>
+                        第 {record.round_number} 轮后：
+                        {record.participant_ids
+                          .map(
+                            (pk) =>
+                              ws.standings.find((row) => row.participant_id === pk)?.display_name,
+                          )
+                          .join('、')}{' '}
+                        · 管理员 #{record.confirmed_by} ·{' '}
+                        {new Date(record.confirmed_at).toLocaleString('zh-CN')}
+                      </p>
+                    ))}
+                  </section>
+                )}
                 {!completed && latest?.round_number === t.round_count && (
                   <section className="settings-panel final-actions">
                     <h3>最终排名与完赛</h3>
@@ -341,7 +415,10 @@ export function RoundsPage() {
                             )
                             .join('、')}
                           {ws.lotteries.some((l) =>
-                            isPendingLottery(l, members, ws.source_versions),
+                            isPendingLottery(l, members, ws.source_versions, {
+                              purpose: 'final',
+                              participant_statuses: ws.participant_statuses,
+                            }),
                           ) && ' · 已有待二次确认的抽签记录'}
                         </span>
                         <Button

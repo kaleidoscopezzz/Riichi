@@ -55,7 +55,8 @@ def rehearse_pairing_migration(connection, *, before_upgrade=None):
     if baseline['result'] != 'PASS': raise AssertionError('Original QA fixture invalid')
     if before_upgrade: before_upgrade(baseline)
     executor = MigrationExecutor(connection)
-    targets = executor.loader.graph.leaf_nodes()
+    # Keep the historical 0009 rehearsal scoped to 0009 after later upgrades exist.
+    targets = [node for node in executor.loader.graph.leaf_nodes() if node[0] != 'tournaments'] + [('tournaments', '0009_pairing_strategies')]
     executor.migrate(targets)
     projection = build_manifest(connection, baseline)
     if projection['result'] != 'PASS': raise AssertionError('0009 changed original fields or identities')

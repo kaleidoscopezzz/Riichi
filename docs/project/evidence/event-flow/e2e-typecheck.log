@@ -1,0 +1,2 @@
+node node_modules/typescript/bin/tsc --noEmit -p tsconfig.e2e.json
+exit_code=0

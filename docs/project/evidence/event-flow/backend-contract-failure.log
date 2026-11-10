@@ -1,0 +1,21 @@
+Creating test database for alias 'default'...
+
+.................................................................F..........................................................................................................................................................
+======================================================================
+FAIL: test_participants_never_expose_internal_username (tournaments.tests.TournamentTests.test_participants_never_expose_internal_username)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\Riichi\backend\tournaments\tests.py", line 190, in test_participants_never_expose_internal_username
+    self.assertEqual(set(data["participants"][0]), {"id", "player_id", "display_name", "is_active", "display_name_snapshot"})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+'eliminated_after_round'
+
+----------------------------------------------------------------------
+Ran 220 tests in 57.736s
+
+FAILED (failures=1)
+Destroying test database for alias 'default'...
+
+Found 220 test(s).
+System check identified no issues (0 silenced).

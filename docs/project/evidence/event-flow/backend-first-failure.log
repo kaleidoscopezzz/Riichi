@@ -1,0 +1,95 @@
+Creating test database for alias 'default'...
+
+........F......F..FF...........................E...E..E..............
+======================================================================
+ERROR: test_correction_invalidates_pairing_preview_without_changing_old_round (tournaments.tests_pairing.PairingWorkflowTests.test_correction_invalidates_pairing_preview_without_changing_old_round)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\Riichi\backend\tournaments\tests_pairing.py", line 115, in test_correction_invalidates_pairing_preview_without_changing_old_round
+    t = self.tournament(8, 2, pairing_strategy=SWISS_REPEATS)
+  File "D:\Riichi\Riichi\backend\tournaments\tests_competition.py", line 31, in tournament
+    t = create_tournament(self.admin, {'name': '真实领域服务测试', 'round_count': rounds, 'participant_ids': [u.player_profile.pk for u in self.users[:n]], **kw})
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Riichi\Riichi\backend\tournaments\services.py", line 76, in create_tournament
+    configure_rules(tournament, values)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "D:\Riichi\Riichi\backend\tournaments\services.py", line 52, in configure_rules
+    raise ValidationError({'pairing_strategy': ['新赛事仅支持手动、完全随机或高高碰；既有瑞士轮赛事可保留原策略。']})
+rest_framework.exceptions.ValidationError: {'pairing_strategy': [ErrorDetail(string='新赛事仅支持手动、完全随机或高高碰；既有瑞士轮赛事可保留原策略。', code='invalid')]}
+
+======================================================================
+ERROR: test_only_new_event_draft_selects_strategy_and_started_config_is_frozen (tournaments.tests_pairing.PairingWorkflowTests.test_only_new_event_draft_selects_strategy_and_started_config_is_frozen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\Riichi\backend\tournaments\tests_pairing.py", line 172, in test_only_new_event_draft_selects_strategy_and_started_config_is_frozen
+    t = self.tournament(pairing_strategy=SWISS_SCORES)
+  File "D:\Riichi\Riichi\backend\tournaments\tests_competition.py", line 31, in tournament
+    t = create_tournament(self.admin, {'name': '真实领域服务测试', 'round_count': rounds, 'participant_ids': [u.player_profile.pk for u in self.users[:n]], **kw})
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Riichi\Riichi\backend\tournaments\services.py", line 76, in create_tournament
+    configure_rules(tournament, values)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "D:\Riichi\Riichi\backend\tournaments\services.py", line 52, in configure_rules
+    raise ValidationError({'pairing_strategy': ['新赛事仅支持手动、完全随机或高高碰；既有瑞士轮赛事可保留原策略。']})
+rest_framework.exceptions.ValidationError: {'pairing_strategy': [ErrorDetail(string='新赛事仅支持手动、完全随机或高高碰；既有瑞士轮赛事可保留原策略。', code='invalid')]}
+
+======================================================================
+ERROR: test_swiss_preview_and_generate_are_admin_csrf_protected (tournaments.tests_pairing.PairingWorkflowTests.test_swiss_preview_and_generate_are_admin_csrf_protected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\Riichi\backend\tournaments\tests_pairing.py", line 179, in test_swiss_preview_and_generate_are_admin_csrf_protected
+    t = self.tournament(8, pairing_strategy=SWISS_SCORES)
+  File "D:\Riichi\Riichi\backend\tournaments\tests_competition.py", line 31, in tournament
+    t = create_tournament(self.admin, {'name': '真实领域服务测试', 'round_count': rounds, 'participant_ids': [u.player_profile.pk for u in self.users[:n]], **kw})
+        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Riichi\Riichi\backend\tournaments\services.py", line 76, in create_tournament
+    configure_rules(tournament, values)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "D:\Riichi\Riichi\backend\tournaments\services.py", line 52, in configure_rules
+    raise ValidationError({'pairing_strategy': ['新赛事仅支持手动、完全随机或高高碰；既有瑞士轮赛事可保留原策略。']})
+rest_framework.exceptions.ValidationError: {'pairing_strategy': [ErrorDetail(string='新赛事仅支持手动、完全随机或高高碰；既有瑞士轮赛事可保留原策略。', code='invalid')]}
+
+======================================================================
+FAIL: test_bridge_malformed_first_round_written_after_migration (tournaments.tests_competition.CompetitionTests.test_bridge_malformed_first_round_written_after_migration)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\Riichi\backend\tournaments\tests_competition.py", line 354, in test_bridge_malformed_first_round_written_after_migration
+    with self.assertRaises(TournamentConflict) as error:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: TournamentConflict not raised
+
+======================================================================
+FAIL: test_fixed_resource_mutual_exclusion_and_old_release_guard (tournaments.tests_competition.CompetitionTests.test_fixed_resource_mutual_exclusion_and_old_release_guard)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\Riichi\backend\tournaments\tests_competition.py", line 209, in test_fixed_resource_mutual_exclusion_and_old_release_guard
+    with self.assertRaises(TournamentConflict): self.first(self.tournament())
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: TournamentConflict not raised
+
+======================================================================
+FAIL: test_legacy_new_resource_pool_cannot_double_occupy (tournaments.tests_competition.CompetitionTests.test_legacy_new_resource_pool_cannot_double_occupy)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\Riichi\backend\tournaments\tests_competition.py", line 171, in test_legacy_new_resource_pool_cannot_double_occupy
+    with self.assertRaises(TournamentConflict):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: TournamentConflict not raised
+
+======================================================================
+FAIL: test_legacy_released_review_no_reclaim_and_historical_finish (tournaments.tests_competition.CompetitionTests.test_legacy_released_review_no_reclaim_and_historical_finish)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Riichi\Riichi\backend\tournaments\tests_competition.py", line 236, in test_legacy_released_review_no_reclaim_and_historical_finish
+    with self.assertRaises(TournamentConflict): review_legacy(t.pk,self.admin,historical_only=False,machine_ids=[self.machines[0].pk],reason='不可抢占')
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: TournamentConflict not raised
+
+----------------------------------------------------------------------
+Ran 69 tests in 8.500s
+
+FAILED (failures=4, errors=3)
+Destroying test database for alias 'default'...
+
+Found 69 test(s).
+System check identified no issues (0 silenced).

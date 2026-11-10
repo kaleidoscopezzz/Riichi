@@ -1,6 +1,7 @@
 """Legacy allocation history and structure validation. New writes use competition_services."""
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, OperationalError, transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
@@ -17,7 +18,9 @@ def conflict(message, code):
 
 def validate_round_structure(round):
     """Cross-table and exact-count checks, intentionally not claimed as SQL CHECKs."""
-    participants = set(round.tournament.participants.values_list("pk", flat=True))
+    participants = set(round.tournament.participants.filter(
+        Q(eliminated_after_round__isnull=True) | Q(eliminated_after_round__gte=round.round_number)
+    ).values_list("pk", flat=True))
     tables = list(round.tables.all())
     seats = list(round.seats.select_related("table", "participant"))
     if round.tournament.status not in ("started", "completed") or not 1 <= round.round_number <= round.tournament.round_count:

@@ -4,7 +4,7 @@ from rest_framework import serializers
 from common.api import StrictFieldsMixin
 from .models import Tournament
 from .rules import canonical_oka, canonical_uma
-from .pairing import NEW_CHOICES, canonical_table_bonuses
+from .pairing import NEW_CHOICES, SUPPORTED_CHOICES, canonical_table_bonuses
 
 
 class ExactInteger(serializers.IntegerField):
@@ -72,6 +72,8 @@ class TournamentCreateSerializer(TournamentWriteSerializer):
 
 
 class TournamentUpdateSerializer(TournamentCreateSerializer):
+    # The service permits a withdrawn strategy only when preserving an existing one.
+    pairing_strategy = serializers.ChoiceField(choices=SUPPORTED_CHOICES, required=False)
     revision = ExactInteger(min_value=0, max_value=2147483647, required=False)
 
 
@@ -101,5 +103,6 @@ class TournamentSerializer(serializers.ModelSerializer):
         return [{"id": entry.id, "player_id": entry.player_id,
                  "display_name": entry.display_name_snapshot if obj.status != "draft" else entry.player.nickname,
                  "is_active": entry.player.user.is_active,
+                 "eliminated_after_round": entry.eliminated_after_round,
                  "display_name_snapshot": entry.display_name_snapshot}
                 for entry in obj.participants.all()]

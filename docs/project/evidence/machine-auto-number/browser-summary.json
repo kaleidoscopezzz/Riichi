@@ -1,0 +1,16 @@
+{
+  "result": "PASS",
+  "browser": "157.0.4341.42",
+  "manual_number_input": false,
+  "post_omits_machine_no": true,
+  "created_numbers": [
+    "001",
+    "002"
+  ],
+  "created_ids": [
+    5,
+    6
+  ],
+  "edit_number_readonly": true,
+  "mobile_width": 390
+}

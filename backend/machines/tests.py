@@ -32,6 +32,33 @@ class MachineApiTests(TestCase):
         self.assertNotIn("capacity_slot", machine)
         self.assertEqual(self.client.get(f'/api/v1/machines/{machine["id"]}/').json()["data"], machine)
 
+    def test_missing_number_is_allocated_automatically_and_skips_all_active_states(self):
+        first = self.write(data={'name': '自动设备一'})
+        self.assertEqual(first.status_code, 201)
+        self.assertEqual(first.json()['data']['machine_no'], '001')
+        self.create('003', status='disabled')
+        self.create('004', status='maintenance')
+        second = self.write(data={'name': '自动设备二'})
+        third = self.write(data={'name': '自动设备三'})
+        self.assertEqual((second.json()['data']['machine_no'], third.json()['data']['machine_no']), ('002', '005'))
+        self.assertNotEqual(first.json()['data']['id'], second.json()['data']['id'])
+
+    def test_automatic_number_reuse_keeps_retired_identity_and_history(self):
+        old = self.create('001').json()['data']
+        self.assertEqual(self.write(f'{old["id"]}/retire/').status_code, 200)
+        new = self.write(data={'name': '自动新设备'}).json()['data']
+        self.assertEqual(new['machine_no'], '001')
+        self.assertNotEqual(new['id'], old['id'])
+        historical = MahjongMachine.objects.get(pk=old['id'])
+        self.assertEqual((historical.machine_no, historical.name, historical.status), ('001', old['name'], 'retired'))
+
+    def test_exhausted_number_space_fails_without_overwriting_any_machine(self):
+        MahjongMachine.objects.bulk_create([MahjongMachine(machine_no=f'{number:03}', name=f'编号耗尽QA{number}') for number in range(1, 1000)])
+        before = list(MahjongMachine.objects.values_list('id', 'machine_no', 'name', 'updated_at'))
+        response = self.write(data={'name': '不得覆盖'})
+        self.assertEqual((response.status_code, response.json()['error']['code']), (409, 'machine_number_exhausted'))
+        self.assertEqual(list(MahjongMachine.objects.values_list('id', 'machine_no', 'name', 'updated_at')), before)
+
     def test_permission_matrix(self):
         machine = self.create().json()["data"]
         for who in [None, self.user]:
@@ -155,6 +182,26 @@ class MachineConstraintTests(TestCase):
 
 
 class ConcurrentMachineTests(TransactionTestCase):
+    def test_auto_numbering_empty_pool_never_issues_duplicates(self):
+        barrier = Barrier(8)
+        def worker(index):
+            close_old_connections()
+            try:
+                barrier.wait(timeout=15)
+                create_machine({'name': f'自动并发QA{index}'})
+                return 'created'
+            except MachineConflict as error:
+                return error.default_code
+            finally:
+                close_old_connections()
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            results = list(executor.map(worker, range(8)))
+        self.assertTrue(set(results) <= {'created', 'machine_busy'}, results)
+        numbers = list(MahjongMachine.objects.values_list('machine_no', flat=True))
+        self.assertEqual(len(numbers), results.count('created'))
+        self.assertGreater(len(numbers), 0)
+        self.assertEqual(numbers, [f'{number:03}' for number in range(1, len(numbers)+1)])
+
     def test_concurrent_creation_preserves_number_uniqueness(self):
         barrier = Barrier(8)
 

@@ -52,6 +52,7 @@ export type MachineResource = {
   name: string
   status: 'available' | 'maintenance' | 'disabled' | 'retired'
   assignable: boolean
+  reservations?: { tournament_id: number; tournament_name: string; ordinal: number }[]
   active_allocation: {
     id: number
     table_id: number

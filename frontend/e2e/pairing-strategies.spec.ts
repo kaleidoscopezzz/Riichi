@@ -5,6 +5,7 @@ const credentials = JSON.parse(readFileSync(process.env.RIICHI_QA_CREDENTIALS!, 
   username: string
   password: string
   prefix: string
+  existing_swiss_ids: Record<string, number>
 }
 const panel = (page: Page) => page.getByRole('dialog')
 async function read(page: Page, path: string) {
@@ -26,6 +27,16 @@ async function login(page: Page) {
   await expect(page).toHaveURL(/\/tournaments$/)
 }
 async function create(page: Page, label: string, size: number, rounds: number) {
+  if (label.startsWith('瑞士轮')) {
+    const strategy = label.endsWith('避重优先') ? 'swiss_repeats_first_v1' : 'swiss_scores_first_v1'
+    const id = credentials.existing_swiss_ids[strategy]
+    expect(id).toBeTruthy()
+    const existing = await read(page, `/tournaments/${id}/`)
+    expect(existing.pairing_strategy).toBe(strategy)
+    expect(existing.participant_count).toBe(size)
+    await page.goto(`/tournaments/${id}/rounds`)
+    return id
+  }
   await page.goto('/tournaments')
   await page.getByRole('button', { name: '创建赛事', exact: true }).click()
   const title = `${credentials.prefix} ${label} ${Date.now()}`
@@ -146,7 +157,7 @@ async function finish(page: Page, id: number) {
   expect((await read(page, `/tournaments/${id}/`)).status).toBe('completed')
 }
 
-test('all pairing presets, exact high-table bonuses and manual mouse/keyboard swaps', async ({
+test('new presets and existing Swiss history, exact high-table bonuses and manual mouse/keyboard swaps', async ({
   page,
 }, info) => {
   await login(page)

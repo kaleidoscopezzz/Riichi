@@ -1,0 +1,8 @@
+{
+  "result": "PASS",
+  "candidate_files_scanned": 19,
+  "qa_password_found": false,
+  "private_key_found": false,
+  "player_pages_unchanged": true,
+  "models_migrations_locks_unchanged": true
+}
